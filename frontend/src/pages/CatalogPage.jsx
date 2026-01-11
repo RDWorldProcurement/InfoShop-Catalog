@@ -478,7 +478,7 @@ const CatalogPage = () => {
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Submit Free Text RFQ</DialogTitle>
-            <DialogDescription>Describe what you need and we'll find suppliers</DialogDescription>
+            <DialogDescription>Describe what you need and we will find suppliers</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
@@ -509,7 +509,7 @@ const CatalogPage = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Request Instant Quotation</DialogTitle>
-            <DialogDescription>We'll get quotes from 100+ Infosys partners</DialogDescription>
+            <DialogDescription>We will get quotes from 100+ Infosys partners</DialogDescription>
           </DialogHeader>
           {selectedProduct && (
             <div className="mt-4 space-y-4">
