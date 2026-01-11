@@ -1100,6 +1100,7 @@ async def search_services(
             "pricing_model": service["unit_of_measure"],
             "supplier_name": service["supplier_name"] if has_supplier else None,
             "supplier_logo": service.get("supplier_logo"),
+            "supplier_color": service.get("supplier_color", "#007CC3"),
             "service_includes": service.get("service_includes", []),
             "availability": service.get("availability", {}),
             "rating": service.get("rating", 4.5),
