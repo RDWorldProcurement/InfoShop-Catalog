@@ -16,9 +16,62 @@ import { toast } from "sonner";
 import {
   Search, Package, Settings, Coins, Clock, Truck, FileText, RefreshCw,
   Upload, History, ShoppingCart, CheckCircle, AlertCircle, XCircle, Zap,
-  ArrowRight, LogOut, Menu, User, ChevronDown, Star, ExternalLink, Info
+  ArrowRight, LogOut, Menu, User, ChevronDown, Star, ExternalLink, Info,
+  Cog, Lightbulb, Wrench, Hammer, Shield, Disc, Droplet, Sparkles,
+  Thermometer, Gauge, Flask, Cpu, Box, Layers, Activity, Flame, Bot,
+  Scissors, Archive, Laptop, Monitor, Wifi, Server, Keyboard, Filter, Printer,
+  Scale, GitCompare, X, Check, Minus
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
+
+// Category Icon Mapping
+const CATEGORY_ICONS = {
+  "Bearings & Power Transmission": Cog,
+  "Electrical & Lighting": Lightbulb,
+  "Fasteners & Hardware": Wrench,
+  "Hand Tools": Hammer,
+  "Power Tools": Zap,
+  "Safety & PPE": Shield,
+  "Abrasives": Disc,
+  "Adhesives & Sealants": Droplet,
+  "Cleaning & Janitorial": Sparkles,
+  "HVAC & Refrigeration": Thermometer,
+  "Hydraulics & Pneumatics": Gauge,
+  "Laboratory Supplies": Flask,
+  "Lubrication": Droplet,
+  "Material Handling": Package,
+  "Motors & Drives": Cpu,
+  "Packaging & Shipping": Box,
+  "Pipe, Valves & Fittings": Gauge,
+  "Plumbing": Droplet,
+  "Pumps": Activity,
+  "Raw Materials": Layers,
+  "Test & Measurement": Activity,
+  "Welding": Flame,
+  "Industrial Automation": Bot,
+  "Cutting Tools": Scissors,
+  "Storage & Organization": Archive,
+  "IT Equipment - Laptops": Laptop,
+  "IT Equipment - Monitors": Monitor,
+  "IT Equipment - Networking": Wifi,
+  "IT Equipment - Servers": Server,
+  "IT Equipment - Peripherals": Keyboard,
+  "Filtration": Filter,
+  "Industrial Coding": Printer,
+  // Service categories
+  "IT Services": Laptop,
+  "Facilities Management": Settings,
+  "HR Services": User,
+  "Finance & Accounting": Coins,
+  "Customer Support": User,
+  "Logistics": Truck,
+  "Marketing": Sparkles,
+  "Cybersecurity Services": Shield,
+};
+
+const getCategoryIcon = (categoryName) => {
+  return CATEGORY_ICONS[categoryName] || Package;
+};
 
 const CatalogPage = () => {
   const navigate = useNavigate();
@@ -52,12 +105,39 @@ const CatalogPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [inventoryData, setInventoryData] = useState(null);
   
+  // Product Comparison
+  const [compareList, setCompareList] = useState([]);
+  const [compareModalOpen, setCompareModalOpen] = useState(false);
+  
   // RFQ Form
   const [rfqForm, setRfqForm] = useState({
     product_description: "", quantity: 1, brand_name: "", oem_part_number: "",
     needed_by: "", delivery_location: "", supplier_name: "", supplier_email: "",
     request_type: "actual", is_product: true
   });
+
+  // Add to compare list
+  const addToCompare = (product) => {
+    if (compareList.length >= 4) {
+      toast.error("Maximum 4 products can be compared");
+      return;
+    }
+    if (compareList.find(p => p.id === product.id)) {
+      toast.info("Product already in compare list");
+      return;
+    }
+    setCompareList([...compareList, product]);
+    toast.success(`${product.name.substring(0, 30)}... added to compare`);
+  };
+
+  const removeFromCompare = (productId) => {
+    setCompareList(compareList.filter(p => p.id !== productId));
+  };
+
+  const clearCompareList = () => {
+    setCompareList([]);
+    setCompareModalOpen(false);
+  };
 
   useEffect(() => {
     fetchCategories();
