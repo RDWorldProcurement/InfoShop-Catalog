@@ -1306,14 +1306,14 @@ class QuotationResponse(BaseModel):
     action: str  # "accept", "cancel"
     cancel_reason: Optional[str] = None
 
-# InfoCoin Rewards
+# InfoCoin Rewards with CDN images
 INFOCOIN_REWARDS = [
-    {"id": "1", "name": "Premium Branded Jacket", "description": "High-quality insulated jacket with Infosys branding", "coins_required": 5000, "image_url": "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400", "category": "Apparel"},
-    {"id": "2", "name": "Executive Leather Portfolio", "description": "Genuine leather portfolio with notepad and card holder", "coins_required": 3000, "image_url": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=400", "category": "Accessories"},
-    {"id": "3", "name": "Branded Cap", "description": "Premium cotton cap with embroidered logo", "coins_required": 1000, "image_url": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400", "category": "Apparel"},
-    {"id": "4", "name": "Stainless Steel Coffee Mug", "description": "Double-walled insulated mug with lid", "coins_required": 800, "image_url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400", "category": "Drinkware"},
-    {"id": "5", "name": "Executive Pen Set", "description": "Premium ballpoint and rollerball pen set in gift box", "coins_required": 1500, "image_url": "https://images.unsplash.com/photo-1585336261022-680e295ce3fe?w=400", "category": "Stationery"},
-    {"id": "6", "name": "Wireless Power Bank", "description": "10000mAh wireless charging power bank", "coins_required": 2500, "image_url": "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400", "category": "Electronics"},
+    {"id": "1", "name": "Premium Executive Jacket", "description": "High-quality insulated navy blue jacket with Infosys branding", "coins_required": 5000, "image_url": REWARD_IMAGE_URLS.get("Executive Jacket"), "category": "Apparel"},
+    {"id": "2", "name": "Premium Leather Backpack", "description": "Professional leather laptop backpack for business travel", "coins_required": 4500, "image_url": REWARD_IMAGE_URLS.get("Leather Backpack"), "category": "Accessories"},
+    {"id": "3", "name": "Wireless Bluetooth Earbuds", "description": "Premium wireless earbuds with noise cancellation in charging case", "coins_required": 3500, "image_url": REWARD_IMAGE_URLS.get("Wireless Earbuds"), "category": "Electronics"},
+    {"id": "4", "name": "Stainless Steel Insulated Tumbler", "description": "Double-walled insulated tumbler, keeps drinks hot/cold for 12 hours", "coins_required": 800, "image_url": REWARD_IMAGE_URLS.get("Insulated Tumbler"), "category": "Drinkware"},
+    {"id": "5", "name": "Executive Desk Organizer Set", "description": "Premium desk organizer with pen holder, card holder, and notepad holder", "coins_required": 1500, "image_url": REWARD_IMAGE_URLS.get("Desk Organizer Set"), "category": "Office"},
+    {"id": "6", "name": "Smartwatch Fitness Tracker", "description": "Modern smartwatch with fitness tracking, heart rate monitor, and notifications", "coins_required": 6000, "image_url": REWARD_IMAGE_URLS.get("Smartwatch"), "category": "Electronics"},
 ]
 
 # Helper Functions
