@@ -1,53 +1,147 @@
-import { useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// Pages
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage";
+import CatalogPage from "./pages/CatalogPage";
+import OrderHistoryPage from "./pages/OrderHistoryPage";
+import RepeatOrdersPage from "./pages/RepeatOrdersPage";
+import BulkUploadPage from "./pages/BulkUploadPage";
+import InfoCoinsPage from "./pages/InfoCoinsPage";
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
+// Components
+import ChatBot from "./components/ChatBot";
+import { Toaster } from "./components/ui/sonner";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+export const API = `${BACKEND_URL}/api`;
+
+// Auth Context
+const AuthContext = createContext(null);
+
+export const useAuth = () => useContext(AuthContext);
+
+const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("omnisupply_token");
+    const storedUser = localStorage.getItem("omnisupply_user");
+    if (token && storedUser) {
+      setUser(JSON.parse(storedUser));
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    }
+    setLoading(false);
+  }, []);
+
+  const login = async (email, password, country) => {
+    const response = await axios.post(`${API}/auth/login`, { email, password, country });
+    const userData = response.data;
+    localStorage.setItem("omnisupply_token", userData.token);
+    localStorage.setItem("omnisupply_user", JSON.stringify(userData));
+    axios.defaults.headers.common["Authorization"] = `Bearer ${userData.token}`;
+    setUser(userData);
+    return userData;
+  };
+
+  const logout = () => {
+    localStorage.removeItem("omnisupply_token");
+    localStorage.removeItem("omnisupply_user");
+    delete axios.defaults.headers.common["Authorization"];
+    setUser(null);
+  };
+
+  const updateCoins = (newBalance) => {
+    if (user) {
+      const updatedUser = { ...user, info_coins: newBalance };
+      setUser(updatedUser);
+      localStorage.setItem("omnisupply_user", JSON.stringify(updatedUser));
     }
   };
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
+    <AuthContext.Provider value={{ user, login, logout, loading, updateCoins }}>
+      {children}
+    </AuthContext.Provider>
   );
+};
+
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#007CC3] border-t-transparent"></div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
 };
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <div className="App min-h-screen bg-slate-50">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/catalog"
+              element={
+                <ProtectedRoute>
+                  <CatalogPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <OrderHistoryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/repeat-orders"
+              element={
+                <ProtectedRoute>
+                  <RepeatOrdersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bulk-upload"
+              element={
+                <ProtectedRoute>
+                  <BulkUploadPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/rewards"
+              element={
+                <ProtectedRoute>
+                  <InfoCoinsPage />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+          <ChatBot />
+          <Toaster position="top-right" richColors />
+        </div>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
