@@ -164,6 +164,26 @@ PRODUCT_IMAGE_URLS = {
 # Default fallback image
 DEFAULT_PRODUCT_IMAGE = "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7ac37795d30541fe96a379b8ebc9a669a9f5534a1c47d157f2dcfce68eda8fde.png"
 
+# Service images hosted on Emergent CDN (guaranteed to work)
+SERVICE_IMAGE_URLS = {
+    "Network Installation Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/afdd726c02cc7d9e8690e91dc7c1b0a13c962c96325cef7d1eece4d48001fb82.png",
+    "IT Equipment Installation & Setup": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/cff7a5158c43f81799d59a99494279b2c5f255b2610fe406a1ffe6934277c4a7.png",
+    "Cybersecurity Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/88995698058a90986297157d130fa19ac15656bbe7ac2296b1949cbb9993e380.png",
+    "IT Managed Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/f848c4af2e1f5caac71aa56dc1f1b9285fb801ad8e1ee77ad4185116211e3627.png",
+    "Corporate & Business Support Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/49c83afc1a588e3c2810a205953d952ac31ad730ca2f9871863edeeea2072a83.png",
+    "Digital Marketing & Creative Agency Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/516a358136877fc314216c27facefe3422f8dfa69a45e5553584d72a437e9fce.png",
+    "Facilities Management & Workplace Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/23544d6096e596b6e3954fec76d55a7fa874df0072512cd79110a2a41cce3b44.png",
+    "HSE, Quality & Compliance Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/fe8d00e1aa563322f54f4f711f9ca62d6e19e4e650e77212f58c422838058d38.png",
+    "IT & Workplace Technology Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/cff7a5158c43f81799d59a99494279b2c5f255b2610fe406a1ffe6934277c4a7.png",
+    "Logistics, Warehouse & Supply Chain Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/4ccc2dd9b16b78fb703249f4d7c2bc9d3f841939480ecd0ca75cf4f628a370cc.png",
+    "Temp Labor across Technical Skilled Capabilities": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/ec1d202cfaeb46233ae208411d641185f676c426d6219f30dc8a7f6d57ccaa7b.png",
+    "Server Installation": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/a1c30bd322a62ea6d441b12da74c66ca96707140958e1737c0d9a286f041a795.png",
+    "WiFi Setup": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/88c4a88606ac13bb8e539641523213064945b830124a9c902aa9147532aa3c49.png",
+}
+
+# Default fallback service image
+DEFAULT_SERVICE_IMAGE = "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/49c83afc1a588e3c2810a205953d952ac31ad730ca2f9871863edeeea2072a83.png"
+
 # Service Categories with UNSPSC codes
 SERVICE_CATEGORIES = [
     {"name": "Corporate & Business Support Services", "unspsc": "80100000", "icon": "briefcase"},
