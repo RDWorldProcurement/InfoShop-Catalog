@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth, API } from "../App";
+import { useLanguage } from "../i18n/LanguageContext";
 import axios from "axios";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -22,6 +23,7 @@ import Sidebar from "../components/Sidebar";
 const CatalogPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("products");
   const [loading, setLoading] = useState(false);
