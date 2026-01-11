@@ -301,7 +301,7 @@ const CatalogPage = () => {
               </TabsList>
 
               <div className="flex items-center gap-3">
-                <span className="text-sm text-slate-500 hidden sm:inline">Can't find a product or service?</span>
+                <span className="text-sm text-slate-500 hidden sm:inline">Can&apos;t find a product or service?</span>
                 <Button className="bg-[#FF9900] hover:bg-[#FF6B00] text-white font-semibold shadow-md" onClick={() => setRfqModalOpen(true)} data-testid="submit-rfq-btn">
                   <FileText className="w-4 h-4 mr-2" />
                   {t.catalog.submitRfq}
