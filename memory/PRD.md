@@ -3,63 +3,58 @@
 ## Original Problem Statement
 Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys Limited customers, offering 30M+ Industrial MRO Products, OEM Spare Parts, and 100K+ Professional Services with Infosys Preferred Pricing.
 
-## What's Been Implemented (January 11, 2026)
+## What's Been Implemented
+
+### ✅ Phase 8 - UI Polish & New Vendor Products (January 11, 2026 - COMPLETED)
+- **Login Page Enhancements**:
+  - Prominent Infosys BPM logo in glassy card (bg-white/10 backdrop-blur-sm)
+  - Admin Portal Access section with credentials (admin@omnisupply.io / admin123)
+- **Catalog Page UI Fixes**:
+  - "Add to Cart" button: Full-width, Amazon orange (#FF9900), stacked layout
+  - "Check Stock" button: Below Add to Cart as outlined button
+  - "Submit RFQ" button: Amazon orange with "Can't find a product or service?" helper text
+- **New Vendor Products (12 total)**:
+  - **Donaldson (4 products)**: PowerCore Air Filter, Hydraulic Filter Assembly, Torit Dust Collector, Fuel Filter Kit
+  - **Avantor (4 products)**: J.T.Baker Reagent Chemicals Kit, VWR Borosilicate Glassware Set, Laboratory PPE Safety Kit, Chromatography Column Kit
+  - **Markem-Imaje (4 products)**: 9450 Continuous Inkjet Printer, SmartLase C350 Laser Coder, 2200 Print & Apply Labeler, 5800 High-Resolution Inkjet
+- **New Categories**: Filtration (UNSPSC: 40161500), Industrial Coding (UNSPSC: 44100000)
+- **New Brands**: Donaldson (#003B73), Avantor (#6D2077), Markem-Imaje (#E4002B)
+- **All images hosted on Emergent CDN** (static.prod-images.emergentagent.com)
 
 ### ✅ Phase 7 - Emergent LLM Deep Language Translation (COMPLETED)
 - **Real-time Translation**: Product/service names, descriptions, and specifications translated via Emergent LLM (GPT-4o-mini)
 - **Supported Languages**: English, French, German, Italian, Dutch
-- **Translation Caching**: Translations cached in MongoDB `db.translations` collection (400+ entries)
+- **Translation Caching**: Translations cached in MongoDB `translations_cache` collection
 - **Frontend Integration**: Language selector in sidebar triggers API calls with `lang` parameter
-- **Translation Fields**:
-  - Product: name, short_description, full_description, category, specifications
-  - Service: name, short_description, full_description, category, unit_of_measure, service_includes
-- **Product-Image Matching**: All product descriptions now include specifications that match the images
 
 ### ✅ Phase 6 - Admin Portal & Updated Stats (COMPLETED)
-- **Updated Stats**: 78 Categories, 511+ Global Brands (previously 30+)
+- **Updated Stats**: 78 Categories, 511+ Global Brands
 - **Admin Portal** (`/admin`): Complete vendor catalog management system
-  - Admin login (demo: admin / admin123)
+  - Admin login (admin@omnisupply.io / admin123 OR admin / admin123)
   - 8 Delivery Partners: Grainger, Motion Industries, Fastenal, BDI, MSC Industrial, McMaster-Carr, Zoro, Uline
   - CSV/Excel file upload for Products and Services
   - Catalog summary by delivery partner
-  - Sample CSV template downloads
-- **Product-Matched Images**: All product images now match their descriptions (SKF Bearing, 3M Helmet, Bosch Drill, etc.)
-- **InfoCoin Rewards Images**: 6 rewards with Emergent CDN images:
-  - Premium Executive Jacket (5000 coins)
-  - Premium Leather Backpack (4500 coins)
-  - Wireless Bluetooth Earbuds (3500 coins)
-  - Stainless Steel Insulated Tumbler (800 coins)
-  - Executive Desk Organizer Set (1500 coins)
-  - Smartwatch Fitness Tracker (6000 coins)
-- **Digital Marketing Services**: Added 6 new services:
-  - Social Media Marketing Management (Hootsuite Enterprise)
-  - Enterprise SEO Optimization Services (Moz Enterprise)
-  - B2B Content Marketing Services (Contently Enterprise)
-  - Email Marketing Automation Services (Mailchimp Enterprise)
-  - PPC & Paid Advertising Management (WordStream Agency)
-  - Brand Identity Design Services (Pentagram Design)
+- **InfoCoin Rewards Images**: 6 rewards with Emergent CDN images
 
 ### ✅ Phase 5 - Expanded Catalog & Order Management (COMPLETED)
-- **Extended Product Catalog**: Added 15+ new products across multiple categories
-- **Extended Services Catalog**: Added 8+ new services
+- **Extended Product Catalog**: 40+ IT products, MRO products, and new vendor products
+- **Extended Services Catalog**: 15+ services across multiple categories
 - **5 Order Statuses**: Pending, Confirmed, Processing, Shipped, Delivered
 - **Order Status Timeline UI**: 5-step visual progress tracker
-
-### ✅ All Images Hosted on Emergent CDN
-All product and service images are hosted on Emergent's CDN (`static.prod-images.emergentagent.com`) - **guaranteed to work with no external dependencies**.
 
 ## Technology Stack
 - **Backend**: FastAPI, MongoDB, JWT, Emergent LLM (GPT-4o-mini for translations)
 - **Frontend**: React, Tailwind CSS, Shadcn UI
 - **Images**: Emergent CDN (static.prod-images.emergentagent.com)
-- **Branding**: Infosys BPM colors (#007CC3, #FF6B00)
+- **Branding**: Infosys BPM colors (#007CC3, #FF6B00, #FF9900)
 - **i18n**: Real-time LLM translation with MongoDB caching
 
 ## Test Credentials
-- **User**: demo@infosys.com / password (select country: USA, France, Germany, Italy, Netherlands)
-- **Admin**: admin / admin123
+- **Demo User**: demo@infosys.com / demo123 (select country: USA, France, Germany, Italy, Netherlands)
+- **Admin User**: admin@omnisupply.io / admin123 OR admin / admin123
 
 ## Test Reports
+- `/app/test_reports/iteration_8.json` - 10 tests passed (100%) - UI polish & new vendor products
 - `/app/test_reports/iteration_7.json` - 12 tests passed (100%) - Translation feature
 - `/app/test_reports/iteration_6.json` - 17 tests passed (100%) - Admin Portal
 - `/app/test_reports/iteration_5.json` - 45 tests passed (100%) - Expanded catalog
@@ -74,60 +69,28 @@ All product and service images are hosted on Emergent's CDN (`static.prod-images
 ### P2 (Medium Priority)
 - [ ] Add category icons to catalog navigation
 - [ ] Enhance InfoConnect chatbot with LLM capabilities
-- [ ] Real vendor API integration for catalog sync
+- [ ] Real vendor API integration for catalog sync (Grainger API)
 
 ### P3 (Low Priority)
 - [ ] Advanced search filters (price range, availability)
 - [ ] Product comparison feature
 - [ ] Wishlist functionality
-- Welding, Cutting Tools
-- Test & Measurement
-- Material Handling, Storage & Organization
-- Cleaning & Janitorial, Lubrication
-- IT Equipment (Laptops, Monitors, Networking, Servers)
-
-### Service Images (18+ categories with CDN images)
-- Network Installation Services
-- IT Equipment Installation & Setup
-- Cybersecurity Services, IT Managed Services
-- Data Center Services
-- Equipment Maintenance
-- Training Services, Quality Control
-- Supply Chain, Commercial Cleaning
-
-## Technology Stack
-- **Backend**: FastAPI, MongoDB, JWT
-- **Frontend**: React, Tailwind CSS, Shadcn UI
-- **Images**: Emergent CDN (static.prod-images.emergentagent.com)
-- **Branding**: Infosys BPM colors (#007CC3, #FF6B00)
-- **i18n**: React Context with 5 languages (EN, FR, DE, IT, NL)
-
-## Test Credentials
-- **Email**: demo@infosys.com
-- **Password**: password
-- **Country**: USA (USD), France (EUR), Germany (EUR), etc.
-
-## Test Reports
-- `/app/test_reports/iteration_5.json` - 45 tests passed (100%)
-- All product/service pagination tests passed (3+ pages)
-- All 5 order status tests passed
-
-## Prioritized Backlog
-
-### P1 (High Priority)
-- [ ] Schedule Repeat Orders backend logic
-- [ ] Bulk Submission Excel upload processing
-- [ ] InfoCoins redemption with actual gift catalog
-
-### P2 (Medium Priority)
-- [ ] Product detail modal with full specifications
-- [ ] Order tracking with timeline/status updates
-- [ ] Email notifications for RFQs/quotations
-
-### P3 (Low Priority)
-- [ ] Advanced search with multiple filters
-- [ ] Export reports (PDF/Excel)
 - [ ] Dashboard with analytics
 
 ## MOCKED Features
 - **PunchOut Transfer**: Simulates transfer to ERP systems (Coupa, SAP Ariba, etc.)
+- **Schedule Repeat Orders**: UI placeholder exists, backend not connected
+- **Bulk Submission**: UI placeholder exists, Excel parsing not implemented
+- **InfoConnect Chatbot**: UI placeholder, not connected to LLM
+
+## Key API Endpoints
+- `POST /api/auth/login` - User authentication
+- `POST /api/admin/login` - Admin authentication
+- `GET /api/products/search?q=&category=&brand=&lang=` - Product search with translation
+- `GET /api/services/search?q=&category=&lang=` - Service search with translation
+- `GET /api/products/categories` - Category list (32 categories)
+- `GET /api/products/brands` - Brand list (33 brands)
+- `POST /api/cart/add` - Add item to cart
+- `GET /api/orders` - Order history
+- `POST /api/rfq/submit` - Submit RFQ
+- `POST /api/admin/upload-catalog` - Upload vendor catalog (admin)
