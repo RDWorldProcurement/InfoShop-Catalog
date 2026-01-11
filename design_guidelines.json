@@ -1,0 +1,148 @@
+{
+  "identity": {
+    "name": "OMNISupply.io",
+    "persona": "E1: The Anti-AI Designer",
+    "tone": "Enterprise, Precision, Global, Trustworthy",
+    "archetype": "Swiss & High-Contrast (The 'Control Room' Variant)"
+  },
+  "typography": {
+    "headings": {
+      "family": "Manrope, sans-serif",
+      "weights": ["600", "700", "800"],
+      "usage": "Use for all section headers, modal titles, and metric values. Tight tracking (-0.02em)."
+    },
+    "body": {
+      "family": "Public Sans, sans-serif",
+      "weights": ["400", "500"],
+      "usage": "Use for all paragraphs, data tables, and form inputs. Excellent legibility for dense data."
+    },
+    "mono": {
+      "family": "JetBrains Mono, monospace",
+      "usage": "Use for SKUs, Order IDs, and technical specifications."
+    }
+  },
+  "colors": {
+    "primary": {
+      "DEFAULT": "#007CC3",
+      "foreground": "#FFFFFF",
+      "hover": "#00629B",
+      "active": "#004C79"
+    },
+    "secondary": {
+      "DEFAULT": "#F1F5F9",
+      "foreground": "#0F172A",
+      "hover": "#E2E8F0"
+    },
+    "accent": {
+      "DEFAULT": "#FF6B00",
+      "foreground": "#FFFFFF",
+      "description": "Signal Orange - Use ONLY for primary CTAs (Add to Cart, Request Quote)"
+    },
+    "background": {
+      "DEFAULT": "#F8F9FA",
+      "paper": "#FFFFFF",
+      "subtle": "#F1F5F9"
+    },
+    "text": {
+      "primary": "#0F172A",
+      "secondary": "#475569",
+      "muted": "#94A3B8"
+    },
+    "status": {
+      "success": "#10B981",
+      "warning": "#F59E0B",
+      "error": "#EF4444",
+      "info": "#3B82F6"
+    }
+  },
+  "layout_strategies": {
+    "landing_page": {
+      "grid_type": "Tetris Grid",
+      "description": "Asymmetric grid for features. Mix 2x2 squares with 1x2 tall cards.",
+      "spacing": "gap-8 md:gap-12",
+      "container": "max-w-7xl mx-auto px-6"
+    },
+    "catalog_page": {
+      "grid_type": "Control Room Grid",
+      "description": "Dense data display. Sidebar filters (w-64) + Main Grid (flex-1).",
+      "card_style": "Flat, 1px border, no shadow until hover.",
+      "spacing": "gap-4"
+    },
+    "dashboard": {
+      "grid_type": "Bento Grid",
+      "description": "Widget-based layout for Order History and Analytics.",
+      "spacing": "gap-6"
+    }
+  },
+  "component_styles": {
+    "buttons": {
+      "primary": "bg-[#007CC3] hover:bg-[#00629B] text-white rounded-md px-6 py-2.5 font-semibold shadow-sm transition-all active:scale-95",
+      "accent": "bg-[#FF6B00] hover:bg-[#E65000] text-white rounded-md px-6 py-2.5 font-bold shadow-md hover:shadow-lg transition-all",
+      "outline": "border-2 border-slate-200 hover:border-[#007CC3] hover:text-[#007CC3] bg-transparent text-slate-700 rounded-md px-6 py-2.5 font-medium transition-colors"
+    },
+    "cards": {
+      "product": "bg-white border border-slate-200 rounded-lg overflow-hidden hover:shadow-xl hover:border-[#007CC3]/30 transition-all duration-300 group",
+      "feature": "bg-white border border-slate-100 rounded-xl p-8 hover:bg-slate-50 transition-colors relative overflow-hidden"
+    },
+    "inputs": {
+      "default": "h-11 bg-white border-slate-200 focus:border-[#007CC3] focus:ring-2 focus:ring-[#007CC3]/20 rounded-md transition-all"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-xl bg-white/80 border-b border-white/20 shadow-sm",
+    "tracing_beam": "Use for 'Preferred Pricing' cards. Animated gradient border.",
+    "textures": "Use subtle 'noise' texture on the Landing Page hero background to reduce digital flatness."
+  },
+  "images": {
+    "hero": {
+      "url": "https://images.unsplash.com/photo-1761195696590-3490ea770aa1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzd8MHwxfHNlYXJjaHwxfHxpbmR1c3RyaWFsJTIwd2FyZWhvdXNlJTIwd2FyZWhvdXNlJTIwYXV0b21hdGlvbnxlbnwwfHx8fDE3NjgxMTI0Njd8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Future of Supply Chain Automation"
+    },
+    "products": [
+      {
+        "category": "Safety",
+        "url": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwyfHxpbmR1c3RyaWFsJTIwc2FmZXR5JTIwaGVsbWV0JTIwaGFyZCUyMGhhdCUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NjgxMTI0Njl8MA&ixlib=rb-4.1.0&q=85",
+        "name": "Industrial Hard Hat"
+      },
+      {
+        "category": "Mechanical",
+        "url": "https://images.unsplash.com/photo-1625592831117-b6ef5fe3bdd3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHwyfHxpbmR1c3RyaWFsJTIwYmFsbCUyMGJlYXJpbmclMjBtZXRhbCUyMHdoaXRlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NjgxMTI0NzF8MA&ixlib=rb-4.1.0&q=85",
+        "name": "Precision Ball Bearing"
+      },
+      {
+        "category": "Tools",
+        "url": "https://images.unsplash.com/photo-1612430146325-87a163519863?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwxfHxjb3JkbGVzcyUyMHBvd2VyJTIwZHJpbGwlMjB0b29sJTIwd2hpdGUlMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc2ODExMjQ3Mnww&ixlib=rb-4.1.0&q=85",
+        "name": "Cordless Power Drill"
+      },
+      {
+        "category": "PPE",
+        "url": "https://images.unsplash.com/photo-1616524617587-2ddb5ccf87cc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHxpbmR1c3RyaWFsJTIwc2FmZXR5JTIwZ2xvdmVzJTIwd2hpdGUlMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc2ODExMjQ3M3ww&ixlib=rb-4.1.0&q=85",
+        "name": "Safety Gloves"
+      }
+    ],
+    "brands": {
+      "skf": "https://images.unsplash.com/photo-1663216539819-893331af11ca?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzR8MHwxfHNlYXJjaHwxfHxTS0YlMjBsb2dvJTIwYnJhbmR8ZW58MHx8fHwxNzY4MTEyNTAwfDA&ixlib=rb-4.1.0&q=85",
+      "3m": "https://images.unsplash.com/photo-1669217541257-f46f1d24712a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzd8MHwxfHNlYXJjaHwxfHwzTSUyMGxvZ28lMjBicmFuZHxlbnwwfHx8fDE3NjgxMTI1MDJ8MA&ixlib=rb-4.1.0&q=85",
+      "coupa": "https://images.unsplash.com/photo-1761624159464-686d31623aa7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHxDb3VwYSUyMHNvZnR3YXJlJTIwbG9nb3xlbnwwfHx8fDE3NjgxMTI1MDR8MA&ixlib=rb-4.1.0&q=85",
+      "ariba": "https://images.unsplash.com/photo-1570566920413-fd6410fec24c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwzfHxTQVAlMjBBcmliYSUyMGxvZ298ZW58MHx8fHwxNzY4MTEyNTA1fDA&ixlib=rb-4.1.0&q=85"
+    }
+  },
+  "instructions_to_main_agent": [
+    "1. INSTALL FONTS: Add 'Manrope' and 'Public Sans' via Google Fonts in index.html or CSS.",
+    "2. THEME SETUP: Configure tailwind.config.js with the colors provided above. Use CSS variables for flexibility.",
+    "3. LANDING PAGE: Build a 'Tetris Grid' layout. Do not use standard 3-column rows. Make the 'Preferred Pricing' card span 2 rows.",
+    "4. CATALOG: Implement the 'Control Room' density. Use small text (text-sm) for the product list to fit more data. Add a 'Quick View' modal.",
+    "5. CHATBOT: The InfoConnect Chatbot must be a floating widget (bottom-right) with a toggle. Use the 'Glassmorphism' style for its container.",
+    "6. DATA-TESTID: Every button, input, and link MUST have a data-testid attribute (e.g., data-testid='login-submit').",
+    "7. NO GRADIENTS: Do not use gradients for backgrounds. Use solid colors or subtle noise textures.",
+    "8. SHADCN: Use Shadcn components for all complex interactions (Select, Dialog, Popover, Calendar). Customize their border-radius to 'rounded-md'.",
+    "9. LOGOS: If brand images are too abstract, use text-based placeholders with the 'Manrope' font (font-weight: 800)."
+  ],
+  "universal_guidelines": [
+    "Avoid 'AI Slop' - no generic centered layouts.",
+    "Use 2-3x more spacing than typical designs (p-8 instead of p-4).",
+    "Micro-animations on every interaction (hover, click, focus).",
+    "Never use pure black (#000000). Use Slate-900 (#0F172A).",
+    "Ensure all text meets APCA contrast standards."
+  ]
+}
