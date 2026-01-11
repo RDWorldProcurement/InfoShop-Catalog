@@ -765,10 +765,26 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
   );
 };
 
-// Service Card Component
+// Service Card Component with enhanced display
 const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ, t }) => {
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Generate star rating display
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating || 4.5);
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />);
+      } else {
+        stars.push(<Star key={i} className="w-3 h-3 text-gray-300" />);
+      }
+    }
+    return stars;
+  };
+
   return (
-    <Card className={`hover:shadow-xl transition-all ${service.is_sponsored ? 'ring-2 ring-amber-200' : ''}`} data-testid={`service-card-${service.id}`}>
+    <Card className={`hover:shadow-xl transition-all relative ${service.is_sponsored ? 'ring-2 ring-amber-200' : ''}`} data-testid={`service-card-${service.id}`}>
       {service.is_sponsored && (
         <div className="absolute top-3 right-3 z-10">
           <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">
@@ -779,39 +795,113 @@ const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ, t 
       )}
       
       <CardContent className="p-5">
-        <Badge variant="outline" className="mb-3 text-xs">{service.category}</Badge>
-        <h3 className="font-semibold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>{service.name}</h3>
+        {/* Category & Supplier Logo */}
+        <div className="flex items-center justify-between mb-3">
+          <Badge variant="outline" className="text-xs">{service.category}</Badge>
+          {service.supplier_logo && (
+            <img 
+              src={service.supplier_logo} 
+              alt={service.supplier_name} 
+              className="h-6 w-auto object-contain" 
+              onError={(e) => e.target.style.display = 'none'} 
+            />
+          )}
+        </div>
+        
+        {/* Service Name */}
+        <h3 className="font-semibold text-slate-900 mb-2 line-clamp-2 hover:text-[#007CC3] cursor-pointer" style={{ fontFamily: 'Manrope' }}>
+          {service.name}
+        </h3>
+        
+        {/* Rating */}
+        {service.rating && (
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center">{renderStars(service.rating)}</div>
+            <span className="text-xs text-[#007CC3] hover:underline cursor-pointer">
+              {service.reviews_count?.toLocaleString() || '0'} reviews
+            </span>
+          </div>
+        )}
+        
+        {/* Short Description */}
+        {service.short_description && (
+          <p className="text-xs text-slate-600 mb-3 line-clamp-2">{service.short_description}</p>
+        )}
         
         {/* UNSPSC Code */}
         <div className="mb-3">
-          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded font-mono">UNSPSC: {service.unspsc_code}</span>
+          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">UNSPSC: {service.unspsc_code}</span>
           <p className="text-xs text-slate-400 mt-1">{service.unspsc_name}</p>
         </div>
 
+        {/* Service Includes (if available) */}
+        {service.service_includes && service.service_includes.length > 0 && (
+          <div className="mb-3">
+            <button 
+              onClick={() => setShowDetails(!showDetails)} 
+              className="text-xs text-[#007CC3] flex items-center gap-1 hover:underline"
+            >
+              <CheckCircle className="w-3 h-3" />
+              {showDetails ? 'Hide' : 'View'} Service Details
+              <ChevronDown className={`w-3 h-3 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
+            </button>
+            {showDetails && (
+              <div className="mt-2 p-2 bg-green-50 rounded-lg text-xs space-y-1 max-h-32 overflow-y-auto">
+                {service.service_includes.map((item, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <CheckCircle className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-slate-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {service.result_type === "with_supplier" ? (
           <>
-            <div className="flex items-center justify-between mb-4">
+            {/* Pricing Section */}
+            <div className="flex items-end justify-between mb-3 p-3 bg-slate-50 rounded-lg">
               <div>
-                <span className="text-xs text-slate-500">Pricing:</span>
+                <span className="text-xs text-slate-500 block">Pricing Model:</span>
                 <p className="font-medium text-slate-700">{service.pricing_model}</p>
               </div>
               {service.price && (
-                <span className="text-xl font-bold text-[#007CC3]">{service.currency_symbol}{service.price?.toFixed(2)}</span>
+                <div className="text-right">
+                  <span className="text-2xl font-bold text-[#007CC3]" style={{ fontFamily: 'Manrope' }}>
+                    {service.currency_symbol}{service.price?.toFixed(2)}
+                  </span>
+                  <span className="text-xs text-slate-500 block">/{service.pricing_model}</span>
+                </div>
               )}
             </div>
+            
+            {/* Supplier Info */}
             {service.supplier_name && (
-              <p className="text-xs text-slate-500 mb-3">
-                <CheckCircle className="w-3 h-3 inline mr-1 text-green-500" />
-                {t?.common?.supplier || "Partner"}: {service.supplier_name}
-              </p>
+              <div className="flex items-center gap-2 mb-3 p-2 bg-green-50 rounded">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-xs text-green-700">
+                  Verified {t?.common?.supplier || "Partner"}: <strong>{service.supplier_name}</strong>
+                </span>
+              </div>
             )}
-            <Button className="w-full bg-[#007CC3] hover:bg-[#00629B]" onClick={onAddToCart} data-testid="add-service-btn">
+            
+            {/* Availability */}
+            {service.availability && (
+              <div className="text-xs text-slate-500 mb-3">
+                <Clock className="w-3 h-3 inline mr-1" />
+                Lead time: {service.availability.lead_time_days} days • Available in {service.availability.regions?.join(', ')}
+              </div>
+            )}
+            
+            <Button className="w-full bg-[#FF9900] hover:bg-[#FF6B00] text-white font-medium" onClick={onAddToCart} data-testid="add-service-btn">
               <ShoppingCart className="w-4 h-4 mr-2" />
               {t?.catalog?.addToCart || "Add to Cart"}
             </Button>
           </>
         ) : service.result_type === "quotation_required" ? (
-          <div className="text-center py-2">
+          <div className="text-center py-3">
+            <AlertCircle className="w-8 h-8 text-[#FF6B00] mx-auto mb-2" />
             <p className="text-sm text-slate-600 mb-3">{t?.catalog?.noPartner || "No supplier mapped"}</p>
             <Button onClick={onRequestQuotation} className="w-full bg-[#FF6B00] hover:bg-[#E65000]" data-testid="service-quotation-btn">
               <Zap className="w-4 h-4 mr-2" />
@@ -819,8 +909,9 @@ const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ, t 
             </Button>
           </div>
         ) : (
-          <div className="text-center py-2">
-            <p className="text-sm text-slate-600 mb-3">Service not available</p>
+          <div className="text-center py-3">
+            <FileText className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+            <p className="text-sm text-slate-600 mb-3">Service not available in catalog</p>
             <Button onClick={onSubmitRFQ} variant="outline" className="w-full" data-testid="service-rfq-btn">
               <FileText className="w-4 h-4 mr-2" />
               {t?.catalog?.submitRfq || "Submit RFQ"}
