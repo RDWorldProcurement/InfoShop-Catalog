@@ -2949,6 +2949,7 @@ class CatalogUploadResponse(BaseModel):
 # Admin authentication - simple for demo
 ADMIN_CREDENTIALS = {
     "admin": "admin123",
+    "admin@omnisupply.io": "admin123",
     "infosys_admin": "InfosysBPM2024!"
 }
 
