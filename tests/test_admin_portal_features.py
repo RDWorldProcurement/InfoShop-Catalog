@@ -216,29 +216,29 @@ class TestAdminUploadedCatalogs:
 class TestHealthAndBasicEndpoints:
     """Basic health and connectivity tests"""
     
-    def test_api_health(self):
-        """Verify API is accessible"""
-        response = requests.get(f"{BASE_URL}/api/")
-        assert response.status_code == 200, f"API health check failed: {response.text}"
-        print("✓ API is healthy and accessible")
+    def test_stats_endpoint_accessible(self):
+        """Verify stats API is accessible"""
+        response = requests.get(f"{BASE_URL}/api/stats")
+        assert response.status_code == 200, f"Stats endpoint failed: {response.text}"
+        print("✓ Stats API is accessible")
     
-    def test_categories_endpoint(self):
-        """Verify categories endpoint works"""
-        response = requests.get(f"{BASE_URL}/api/categories")
-        assert response.status_code == 200, f"Categories endpoint failed: {response.text}"
+    def test_products_categories_endpoint(self):
+        """Verify products categories endpoint works"""
+        response = requests.get(f"{BASE_URL}/api/products/categories")
+        assert response.status_code == 200, f"Products categories endpoint failed: {response.text}"
         
         data = response.json()
         assert "categories" in data, "Missing 'categories' key"
-        print(f"✓ Categories endpoint returns {len(data['categories'])} categories")
+        print(f"✓ Products categories endpoint returns {len(data['categories'])} categories")
     
-    def test_brands_endpoint(self):
-        """Verify brands endpoint works"""
-        response = requests.get(f"{BASE_URL}/api/brands")
-        assert response.status_code == 200, f"Brands endpoint failed: {response.text}"
+    def test_products_brands_endpoint(self):
+        """Verify products brands endpoint works"""
+        response = requests.get(f"{BASE_URL}/api/products/brands")
+        assert response.status_code == 200, f"Products brands endpoint failed: {response.text}"
         
         data = response.json()
         assert "brands" in data, "Missing 'brands' key"
-        print(f"✓ Brands endpoint returns {len(data['brands'])} brands")
+        print(f"✓ Products brands endpoint returns {len(data['brands'])} brands")
 
 
 if __name__ == "__main__":
