@@ -678,7 +678,7 @@ const CatalogPage = () => {
 };
 
 // Product Card Component with Amazon-like display
-const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotation, t }) => {
+const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotation, onCompare, isInCompare, t }) => {
   const [showSpecs, setShowSpecs] = useState(false);
   const [showAlternates, setShowAlternates] = useState(false);
 
@@ -700,7 +700,7 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
   };
 
   return (
-    <Card className={`overflow-hidden hover:shadow-xl transition-all group relative ${product.is_sponsored ? 'ring-2 ring-amber-200' : ''}`} data-testid={`product-card-${product.id}`}>
+    <Card className={`overflow-hidden hover:shadow-xl transition-all group relative ${product.is_sponsored ? 'ring-2 ring-amber-200' : ''} ${isInCompare ? 'ring-2 ring-purple-400' : ''}`} data-testid={`product-card-${product.id}`}>
       {/* Sponsored Badge */}
       {product.is_sponsored && (
         <div className="absolute top-3 right-3 z-10">
@@ -710,6 +710,20 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
           </Badge>
         </div>
       )}
+
+      {/* Compare Button */}
+      <button
+        onClick={onCompare}
+        className={`absolute top-3 left-3 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+          isInCompare 
+            ? 'bg-purple-600 text-white shadow-lg' 
+            : 'bg-white/90 text-slate-500 hover:bg-purple-100 hover:text-purple-600 shadow'
+        }`}
+        data-testid={`compare-toggle-${product.id}`}
+        title={isInCompare ? "Remove from compare" : "Add to compare"}
+      >
+        <GitCompare className="w-4 h-4" />
+      </button>
       
       {/* Product Image */}
       <div className="relative bg-white p-4">
@@ -720,7 +734,7 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
           onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80"; }} 
         />
         {product.result_type === "quotation_required" && (
-          <Badge className="absolute top-2 left-2 bg-[#FF6B00]">{t?.catalog?.getQuote || "Quote Required"}</Badge>
+          <Badge className="absolute top-2 left-12 bg-[#FF6B00]">{t?.catalog?.getQuote || "Quote Required"}</Badge>
         )}
         {product.availability?.in_stock && (
           <Badge className="absolute bottom-2 left-2 bg-green-600 text-white text-xs">
