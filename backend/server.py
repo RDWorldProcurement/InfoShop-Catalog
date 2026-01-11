@@ -467,6 +467,7 @@ IT_SERVICES_CATALOG = [
         "supplier_color": "#007CC3",
         "pricing_model": "Per Hour",
         "base_price": 125.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/afdd726c02cc7d9e8690e91dc7c1b0a13c962c96325cef7d1eece4d48001fb82.png",
         "short_description": "Professional network cabling, switch configuration, and testing",
         "full_description": "Complete enterprise network installation including structured cabling (Cat6/Cat6a), switch rack mounting and configuration, fiber optic termination, cable management, and comprehensive testing with documentation.",
         "service_includes": [
@@ -493,6 +494,7 @@ IT_SERVICES_CATALOG = [
         "supplier_color": "#049FD9",
         "pricing_model": "Per Access Point",
         "base_price": 350.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/88c4a88606ac13bb8e539641523213064945b830124a9c902aa9147532aa3c49.png",
         "short_description": "Wi-Fi 6E access point deployment with site survey",
         "full_description": "Enterprise-grade wireless network deployment including predictive site survey, access point mounting, controller configuration, SSID setup, security policies, and performance optimization.",
         "service_includes": [
