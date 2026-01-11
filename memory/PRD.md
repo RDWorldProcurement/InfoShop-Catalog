@@ -93,9 +93,9 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
 - [ ] InfoCoins redemption with shipping address form
 
 ### P2 (Medium Priority)
-- [ ] Add category icons to catalog navigation
 - [ ] Enhance InfoConnect chatbot with LLM capabilities
 - [ ] Real vendor API integration for catalog sync (Grainger API)
+- [ ] Advanced search filters (price range slider)
 
 ### P3 (Low Priority)
 - [ ] Advanced search filters (price range, availability)
