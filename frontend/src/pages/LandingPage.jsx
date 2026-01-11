@@ -500,6 +500,182 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Demo Walkthrough Modal */}
+      <Dialog open={demoModalOpen} onOpenChange={setDemoModalOpen}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white">
+          <div className="relative">
+            {/* Close Button */}
+            <button 
+              onClick={() => setDemoModalOpen(false)}
+              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors"
+              data-testid="close-demo-modal"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Slide Content */}
+            <div className="min-h-[500px]">
+              {DEMO_SLIDES.map((slide, idx) => (
+                <div 
+                  key={slide.id}
+                  className={`${currentSlide === idx ? 'block' : 'hidden'}`}
+                >
+                  {/* Slide Header */}
+                  <div className={`${slide.color} p-8 text-white`}>
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                        <slide.icon className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <p className="text-white/80 text-sm font-medium">{slide.subtitle}</p>
+                        <h3 className="text-2xl font-bold" style={{ fontFamily: 'Manrope' }}>{slide.title}</h3>
+                      </div>
+                    </div>
+                    <p className="text-white/90">{slide.description}</p>
+                  </div>
+
+                  {/* Slide Body */}
+                  <div className="p-8">
+                    {/* Features List */}
+                    {slide.features && (
+                      <div className="space-y-3">
+                        {slide.features.map((feature, fIdx) => (
+                          <div key={fIdx} className="flex items-center gap-3">
+                            <div className={`w-6 h-6 rounded-full ${slide.color} flex items-center justify-center`}>
+                              <CheckCircle className="w-4 h-4 text-white" />
+                            </div>
+                            <span className="text-slate-700">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Steps */}
+                    {slide.steps && (
+                      <div className="space-y-4">
+                        {slide.steps.map((step) => (
+                          <div key={step.step} className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl">
+                            <div className={`w-10 h-10 ${slide.color} rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}>
+                              {step.step}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-slate-900">{step.title}</h4>
+                              <p className="text-slate-500 text-sm">{step.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Ordering Options */}
+                    {slide.options && (
+                      <div className="grid grid-cols-2 gap-4">
+                        {slide.options.map((option, oIdx) => (
+                          <div key={oIdx} className="p-4 border border-slate-200 rounded-xl hover:border-orange-300 hover:bg-orange-50/50 transition-colors">
+                            <div className={`w-10 h-10 ${slide.color} rounded-lg flex items-center justify-center text-white mb-3`}>
+                              <option.icon className="w-5 h-5" />
+                            </div>
+                            <h4 className="font-semibold text-slate-900 mb-1">{option.title}</h4>
+                            <p className="text-slate-500 text-sm">{option.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Rewards */}
+                    {slide.rewards && (
+                      <div className="grid grid-cols-2 gap-4">
+                        {slide.rewards.map((reward, rIdx) => (
+                          <div key={rIdx} className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Award className="w-5 h-5 text-amber-600" />
+                              <span className="font-semibold text-slate-900">{reward.name}</span>
+                            </div>
+                            <p className="text-slate-500 text-sm">{reward.example}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Integrations */}
+                    {slide.integrations && (
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {slide.integrations.map((int, iIdx) => (
+                            <Badge key={iIdx} variant="secondary" className="bg-indigo-100 text-indigo-700 px-3 py-1">
+                              {int}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          {slide.benefits.map((benefit, bIdx) => (
+                            <div key={bIdx} className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-indigo-500" />
+                              <span className="text-slate-700 text-sm">{benefit}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation Footer */}
+            <div className="border-t border-slate-200 p-4 flex items-center justify-between bg-slate-50">
+              {/* Slide Indicators */}
+              <div className="flex items-center gap-2">
+                {DEMO_SLIDES.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`w-2.5 h-2.5 rounded-full transition-all ${
+                      currentSlide === idx ? 'bg-[#007CC3] w-6' : 'bg-slate-300 hover:bg-slate-400'
+                    }`}
+                    data-testid={`demo-slide-indicator-${idx}`}
+                  />
+                ))}
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
+                  disabled={currentSlide === 0}
+                  className="gap-1"
+                  data-testid="demo-prev-btn"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Previous
+                </Button>
+                
+                {currentSlide < DEMO_SLIDES.length - 1 ? (
+                  <Button
+                    size="sm"
+                    onClick={() => setCurrentSlide(currentSlide + 1)}
+                    className="bg-[#007CC3] hover:bg-[#00629B] gap-1"
+                    data-testid="demo-next-btn"
+                  >
+                    Next <ChevronRight className="w-4 h-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => { setDemoModalOpen(false); navigate('/login'); }}
+                    className="bg-[#FF9900] hover:bg-[#FF6B00] gap-1"
+                    data-testid="demo-get-started-btn"
+                  >
+                    Get Started <ArrowRight className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
