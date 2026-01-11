@@ -1173,6 +1173,7 @@ async def search_services(
             "supplier_name": service["supplier_name"] if has_supplier else None,
             "supplier_logo": service.get("supplier_logo"),
             "supplier_color": service.get("supplier_color", "#007CC3"),
+            "image_url": service.get("image_url", DEFAULT_SERVICE_IMAGE),
             "service_includes": service.get("service_includes", []),
             "availability": service.get("availability", {}),
             "rating": service.get("rating", 4.5),
