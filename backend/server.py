@@ -2060,12 +2060,33 @@ async def search_services(
             "is_sponsored": is_sponsored
         })
     
+    # Apply LLM translation if not English
+    if lang != "en" and results:
+        translated_results = []
+        for result in results[:limit]:  # Limit translation to avoid timeout
+            try:
+                translated = await translate_service(result, lang)
+                translated_results.append(translated)
+            except Exception as e:
+                logger.error(f"Translation failed for service: {e}")
+                translated_results.append(result)
+        results = translated_results
+    
+    # Translate categories if not English
+    translated_categories = [{"name": c["name"], "unspsc": c["unspsc"], "icon": c["icon"]} for c in SERVICE_CATEGORIES]
+    if lang != "en":
+        for cat in translated_categories[:15]:  # Limit to avoid timeout
+            try:
+                cat["name"] = await translate_text(cat["name"], lang, "category")
+            except:
+                pass
+    
     return {
         "results": results,
         "total": 100000,
         "page": page,
         "limit": limit,
-        "categories": [{"name": c["name"], "unspsc": c["unspsc"], "icon": c["icon"]} for c in SERVICE_CATEGORIES]
+        "categories": translated_categories
     }
 
 @api_router.get("/services/categories")
