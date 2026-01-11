@@ -4,6 +4,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { useLanguage } from "../i18n/LanguageContext";
 import axios from "axios";
 import { API } from "../App";
@@ -11,8 +12,98 @@ import {
   Package, Settings, ShieldCheck, Truck, Zap, Globe, ChevronRight,
   Building2, BarChart3, Users, CheckCircle, ArrowRight, Layers,
   Wrench, Cpu, Cog, Droplet, Lightbulb, Shield, Briefcase,
-  Palette, Monitor, Box, Factory, Languages, Play, Search, ShoppingCart, ExternalLink
+  Palette, Monitor, Box, Factory, Languages, Play, Search, ShoppingCart, ExternalLink,
+  X, ChevronLeft, LogIn, Award, RefreshCw, Upload, FileText, Coins
 } from "lucide-react";
+
+// Demo Walkthrough Slides
+const DEMO_SLIDES = [
+  {
+    id: 1,
+    title: "Welcome to OMNISupply.io",
+    subtitle: "Your Enterprise Procurement Partner",
+    description: "Access 30M+ Industrial Products & 100K+ Services with Infosys Preferred Pricing. Streamline your procurement process with our AI-powered B2B platform.",
+    icon: Package,
+    color: "bg-[#007CC3]",
+    features: [
+      "30M+ MRO Products from 511+ Global Brands",
+      "100K+ Professional Services",
+      "Multi-currency & Multi-language Support",
+      "Real-time Inventory & Pricing"
+    ]
+  },
+  {
+    id: 2,
+    title: "Getting Started",
+    subtitle: "Simple 3-Step Process",
+    description: "Start procuring in minutes with our streamlined onboarding process.",
+    icon: LogIn,
+    color: "bg-green-500",
+    steps: [
+      { step: 1, title: "Sign In", desc: "Use your enterprise credentials or demo account" },
+      { step: 2, title: "Browse Catalog", desc: "Search products & services with smart filters" },
+      { step: 3, title: "Place Orders", desc: "Add to cart or submit RFQ for custom quotes" }
+    ]
+  },
+  {
+    id: 3,
+    title: "Smart eCatalog",
+    subtitle: "Find What You Need Instantly",
+    description: "Our intelligent catalog helps you find the right products and services with powerful search, category filters, and brand preferences.",
+    icon: Search,
+    color: "bg-purple-500",
+    features: [
+      "UNSPSC Category Classification",
+      "Brand & Supplier Comparison",
+      "Real-time Stock Availability",
+      "Instant Price Quotes",
+      "Deep Language Translation (5 Languages)"
+    ]
+  },
+  {
+    id: 4,
+    title: "Flexible Ordering",
+    subtitle: "Multiple Ways to Order",
+    description: "Choose the ordering method that works best for your business needs.",
+    icon: ShoppingCart,
+    color: "bg-orange-500",
+    options: [
+      { icon: ShoppingCart, title: "Direct Purchase", desc: "Add to cart & checkout instantly" },
+      { icon: FileText, title: "Submit RFQ", desc: "Request quotes for custom requirements" },
+      { icon: RefreshCw, title: "Repeat Orders", desc: "Schedule recurring orders automatically" },
+      { icon: Upload, title: "Bulk Upload", desc: "Upload Excel for bulk ordering" }
+    ]
+  },
+  {
+    id: 5,
+    title: "InfoCoins Rewards",
+    subtitle: "Earn While You Procure",
+    description: "Every purchase earns you InfoCoins that can be redeemed for exciting rewards - electronics, gift cards, travel vouchers, and more!",
+    icon: Coins,
+    color: "bg-amber-500",
+    rewards: [
+      { name: "Electronics", example: "Tablets, Smartwatches" },
+      { name: "Gift Cards", example: "Amazon, Starbucks" },
+      { name: "Travel", example: "Flight & Hotel Vouchers" },
+      { name: "Premium Items", example: "Luxury Accessories" }
+    ]
+  },
+  {
+    id: 6,
+    title: "Enterprise Integration",
+    subtitle: "Seamless ERP Connectivity",
+    description: "Integrate directly with your existing procurement systems for a unified workflow.",
+    icon: Zap,
+    color: "bg-indigo-500",
+    integrations: ["Coupa", "SAP Ariba", "SAP ERP", "Ivalua", "Oracle"],
+    benefits: [
+      "PunchOut Catalog Support",
+      "Automated PO Generation",
+      "Invoice Reconciliation",
+      "Spend Analytics"
+    ]
+  }
+];
 
 // Product images hosted on Emergent CDN (guaranteed to work)
 const PRODUCT_IMAGES = {
