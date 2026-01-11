@@ -37,10 +37,9 @@ const Sidebar = ({ activePage }) => {
         {/* Logo Section */}
         <div className="mb-8">
           <img 
-            src="https://www.infosysbpm.com/content/dam/infosys-bpm/en/logo/infosysbpm-logo.svg" 
+            src="https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png" 
             alt="Infosys BPM"
             className="h-7 mb-4"
-            onError={(e) => { e.target.style.display = "none"; }}
           />
           <div 
             className="flex items-center gap-3 cursor-pointer"

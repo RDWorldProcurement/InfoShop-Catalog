@@ -81,12 +81,9 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <img 
-              src="https://www.infosysbpm.com/content/dam/infosys-bpm/en/logo/infosysbpm-logo.svg" 
+              src="https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png" 
               alt="Infosys BPM"
               className="h-8"
-              onError={(e) => {
-                e.target.style.display = "none";
-              }}
             />
             <div className="h-6 w-px bg-slate-300"></div>
             <div className="flex items-center gap-2">
@@ -380,10 +377,9 @@ const LandingPage = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-4">
               <img 
-                src="https://www.infosysbpm.com/content/dam/infosys-bpm/en/logo/infosysbpm-logo.svg" 
+                src="https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png" 
                 alt="Infosys BPM"
                 className="h-6 brightness-200"
-                onError={(e) => { e.target.style.display = "none"; }}
               />
               <div className="h-4 w-px bg-slate-700"></div>
               <div className="flex items-center gap-2">
