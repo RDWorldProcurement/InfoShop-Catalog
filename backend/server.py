@@ -457,6 +457,328 @@ IT_PRODUCTS_CATALOG = [
         "availability": {"in_stock": True, "quantity": 45, "warehouse": "US-Central"},
         "rating": 4.9,
         "reviews_count": 167
+    },
+    # Additional Products - Motors & Drives
+    {
+        "id": "MOT-001",
+        "name": "ABB Industrial AC Motor 7.5HP",
+        "brand": "ABB",
+        "category": "Motors & Drives",
+        "sku": "ABB-ACM-75HP",
+        "unspsc_code": "26101500",
+        "base_price": 1850.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/48eb714ed81a4debd0fcbb8614e5e4412263c16c00d900b645c44f969c378c75.png",
+        "short_description": "7.5HP 3-Phase AC Induction Motor, TEFC, 1800RPM",
+        "full_description": "ABB Industrial AC Motor delivers reliable performance for demanding industrial applications. Features Totally Enclosed Fan Cooled (TEFC) design, Class F insulation, and robust construction.",
+        "specifications": {
+            "Power": "7.5 HP (5.5 kW)",
+            "Voltage": "460V 3-Phase",
+            "Speed": "1800 RPM",
+            "Frame": "213T",
+            "Enclosure": "TEFC",
+            "Efficiency": "IE3 Premium",
+            "Service Factor": "1.15"
+        },
+        "availability": {"in_stock": True, "quantity": 28, "warehouse": "US-East"},
+        "rating": 4.7,
+        "reviews_count": 156
+    },
+    {
+        "id": "MOT-002",
+        "name": "Siemens VFD Variable Frequency Drive 15HP",
+        "brand": "Siemens",
+        "category": "Motors & Drives",
+        "sku": "SIE-VFD-15HP",
+        "unspsc_code": "26101600",
+        "base_price": 2450.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/48eb714ed81a4debd0fcbb8614e5e4412263c16c00d900b645c44f969c378c75.png",
+        "short_description": "15HP Variable Frequency Drive with Integrated PLC",
+        "full_description": "Siemens SINAMICS G120 VFD for precise motor control. Features built-in safety functions, Modbus communication, and energy-saving algorithms.",
+        "specifications": {
+            "Power Rating": "15 HP",
+            "Input Voltage": "480V 3-Phase",
+            "Output Frequency": "0-400 Hz",
+            "Control Mode": "V/f, Sensorless Vector",
+            "Communication": "Modbus RTU, Profinet",
+            "Protection": "IP20",
+            "Ambient Temp": "-10°C to +50°C"
+        },
+        "availability": {"in_stock": True, "quantity": 42, "warehouse": "US-Central"},
+        "rating": 4.8,
+        "reviews_count": 234
+    },
+    # Hydraulics & Pneumatics
+    {
+        "id": "HYD-001",
+        "name": "Parker Hydraulic Gear Pump 20GPM",
+        "brand": "Parker",
+        "category": "Hydraulics & Pneumatics",
+        "sku": "PAR-HGP-20",
+        "unspsc_code": "40141600",
+        "base_price": 875.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/67b16a05b97dae42c11c9c72f6e05b8af5d7aec7f63f9dfbd8e237a3fd5fc463.png",
+        "short_description": "High-pressure hydraulic gear pump, 20GPM at 3000PSI",
+        "full_description": "Parker PGP Series hydraulic gear pump designed for mobile and industrial applications. Features case-hardened gears and high volumetric efficiency.",
+        "specifications": {
+            "Flow Rate": "20 GPM",
+            "Max Pressure": "3000 PSI",
+            "Displacement": "3.6 cu in/rev",
+            "Shaft": "SAE B 2-Bolt",
+            "Port Size": "SAE 16",
+            "Speed Range": "500-3600 RPM",
+            "Fluid": "Mineral-based hydraulic oil"
+        },
+        "availability": {"in_stock": True, "quantity": 65, "warehouse": "US-West"},
+        "rating": 4.6,
+        "reviews_count": 189
+    },
+    {
+        "id": "PNE-001",
+        "name": "Festo Pneumatic Cylinder 100mm Bore",
+        "brand": "Festo",
+        "category": "Hydraulics & Pneumatics",
+        "sku": "FES-CYL-100",
+        "unspsc_code": "40141700",
+        "base_price": 425.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/f33db98cd05c6baa652b94111e2425bcdc4313c5335f9673a214cb91bf2d2284.png",
+        "short_description": "Double-acting pneumatic cylinder, ISO 15552 standard",
+        "full_description": "Festo DSBC Series pneumatic cylinder with adjustable cushioning. Built to ISO 15552 standard for easy interchangeability.",
+        "specifications": {
+            "Bore": "100mm",
+            "Stroke": "200mm",
+            "Operating Pressure": "1-10 bar",
+            "Piston Rod": "25mm Chrome-plated",
+            "Cushioning": "PPV Adjustable",
+            "Mounting": "ISO 15552",
+            "Temperature Range": "-20°C to +80°C"
+        },
+        "availability": {"in_stock": True, "quantity": 112, "warehouse": "EU-West"},
+        "rating": 4.9,
+        "reviews_count": 321
+    },
+    # Welding Equipment
+    {
+        "id": "WLD-001",
+        "name": "Lincoln Electric MIG Welder 250A",
+        "brand": "Lincoln Electric",
+        "category": "Welding",
+        "sku": "LIN-MIG-250",
+        "unspsc_code": "23270000",
+        "base_price": 2150.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/2e6b43c65ae6a6b6a4fa924c3f3f88f897cad2a707104ffdc57d165e3b1d04e8.png",
+        "short_description": "Industrial MIG welder with synergic control, 250A output",
+        "full_description": "Lincoln Electric Power MIG 256 delivers reliable performance for production welding. Features Diamond Core Technology for superior arc performance.",
+        "specifications": {
+            "Amperage Range": "30-250A",
+            "Input Power": "230V Single Phase",
+            "Wire Feed Speed": "50-700 IPM",
+            "Duty Cycle": "40% at 250A",
+            "Wire Size": "0.023-0.045\"",
+            "Spool Size": "10-15 lb",
+            "Weight": "145 lbs"
+        },
+        "availability": {"in_stock": True, "quantity": 23, "warehouse": "US-Central"},
+        "rating": 4.8,
+        "reviews_count": 445
+    },
+    # Test & Measurement
+    {
+        "id": "TST-001",
+        "name": "Fluke 289 True-RMS Industrial Multimeter",
+        "brand": "Fluke",
+        "category": "Test & Measurement",
+        "sku": "FLK-289",
+        "unspsc_code": "41110000",
+        "base_price": 595.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/411bcb13dee27615e9b815fde695cdc27e5f05eee4347121309be34bbdb8c3e0.png",
+        "short_description": "Industrial logging multimeter with TrendCapture",
+        "full_description": "Fluke 289 True-RMS Industrial Logging Multimeter with TrendCapture for recording signal fluctuations over time. CAT IV 600V safety rated.",
+        "specifications": {
+            "DC Accuracy": "0.025%",
+            "True RMS": "AC+DC",
+            "Max Voltage": "1000V DC, 1000V AC",
+            "Max Current": "10A (20A 30-sec)",
+            "Resistance": "500MΩ",
+            "Memory": "250 saved readings",
+            "Safety Rating": "CAT III 1000V, CAT IV 600V"
+        },
+        "availability": {"in_stock": True, "quantity": 87, "warehouse": "US-East"},
+        "rating": 4.9,
+        "reviews_count": 678
+    },
+    # Safety Equipment
+    {
+        "id": "SAF-001",
+        "name": "3M Powered Air Purifying Respirator System",
+        "brand": "3M",
+        "category": "Safety & PPE",
+        "sku": "3M-PAPR-SYS",
+        "unspsc_code": "46180000",
+        "base_price": 1250.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/61099fb65121a227a0c6e32140edac60830b2fd0c6269420c02ee34b2e9933a2.png",
+        "short_description": "Complete PAPR system with headgear and battery",
+        "full_description": "3M Versaflo TR-600 Powered Air Purifying Respirator System provides respiratory protection with comfortable airflow in hazardous environments.",
+        "specifications": {
+            "Airflow": "6.7 CFM",
+            "Battery Life": "8+ hours",
+            "Filter Type": "P100/OV/AG",
+            "APF": "1000",
+            "Weight": "2.2 lbs (belt unit)",
+            "Charging Time": "4 hours",
+            "Certifications": "NIOSH Approved"
+        },
+        "availability": {"in_stock": True, "quantity": 34, "warehouse": "US-West"},
+        "rating": 4.7,
+        "reviews_count": 234
+    },
+    {
+        "id": "SAF-002",
+        "name": "Honeywell Safety Harness Full Body",
+        "brand": "Honeywell",
+        "category": "Safety & PPE",
+        "sku": "HON-FBH-PRO",
+        "unspsc_code": "46180000",
+        "base_price": 345.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/9f7011dbf936aa67ab41af039d39e363f5a435c0efbfbed8a069e7684f74ad25.png",
+        "short_description": "Full body fall protection harness with quick-connect buckles",
+        "full_description": "Honeywell Miller Revolution Harness features DualTech webbing for maximum comfort and durability. Quick-connect chest and leg buckles for easy donning.",
+        "specifications": {
+            "Type": "Full Body",
+            "D-Rings": "5-Point (back, shoulders, front)",
+            "Weight Capacity": "400 lbs",
+            "Webbing": "DualTech Polyester",
+            "Buckles": "Quick-Connect",
+            "Size Range": "S-XL",
+            "Compliance": "OSHA 1926.502, ANSI Z359.11"
+        },
+        "availability": {"in_stock": True, "quantity": 156, "warehouse": "US-Central"},
+        "rating": 4.8,
+        "reviews_count": 412
+    },
+    # Material Handling
+    {
+        "id": "MAT-001",
+        "name": "Crown Electric Pallet Jack 4500lb",
+        "brand": "Crown",
+        "category": "Material Handling",
+        "sku": "CRW-EPJ-4500",
+        "unspsc_code": "24100000",
+        "base_price": 3950.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/d3b288a3bc2eae93ca8304dff24b6a6c2fa3e071ff498bff6f994dc86e336ddf.png",
+        "short_description": "Electric pallet jack with 4500lb capacity",
+        "full_description": "Crown WP 3000 Series electric pallet jack provides effortless load handling. Features regenerative braking and AC traction motor.",
+        "specifications": {
+            "Capacity": "4500 lbs",
+            "Fork Length": "48\"",
+            "Fork Width": "27\"",
+            "Lift Height": "7.9\"",
+            "Travel Speed": "4.1 mph",
+            "Battery": "24V Lead-Acid",
+            "Runtime": "8 hours continuous"
+        },
+        "availability": {"in_stock": True, "quantity": 12, "warehouse": "US-East"},
+        "rating": 4.6,
+        "reviews_count": 189
+    },
+    # Cutting Tools
+    {
+        "id": "CUT-001",
+        "name": "Kennametal Carbide End Mill Set",
+        "brand": "Kennametal",
+        "category": "Cutting Tools",
+        "sku": "KEN-CEM-SET",
+        "unspsc_code": "27110000",
+        "base_price": 485.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/5f3ec0cc9e4246d05af7b1609a78a8d3c2c76abbebba2fcb9823ffac8851309d.png",
+        "short_description": "10-piece solid carbide end mill set, various sizes",
+        "full_description": "Kennametal Harvi I TE solid carbide end mills for high-performance milling. Features advanced coating for extended tool life.",
+        "specifications": {
+            "Material": "Solid Carbide",
+            "Coating": "TiAlN",
+            "Flutes": "4",
+            "Sizes": "1/8\" to 1/2\"",
+            "Cut Length": "3x Diameter",
+            "Shank": "Standard",
+            "Helix Angle": "30°"
+        },
+        "availability": {"in_stock": True, "quantity": 78, "warehouse": "US-Central"},
+        "rating": 4.8,
+        "reviews_count": 345
+    },
+    # Storage & Organization
+    {
+        "id": "STO-001",
+        "name": "Lista Industrial Storage Cabinet",
+        "brand": "Lista",
+        "category": "Storage & Organization",
+        "sku": "LST-CAB-IND",
+        "unspsc_code": "56100000",
+        "base_price": 1875.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/ad801ca5185620afbcc264b33f0c59dacf2085f9b98895eb624068ec3ebad64d.png",
+        "short_description": "Heavy-duty modular drawer cabinet, 10 drawers",
+        "full_description": "Lista industrial storage cabinet with 100% drawer extension and 440lb drawer capacity. Ideal for tool storage and parts organization.",
+        "specifications": {
+            "Drawers": "10",
+            "Drawer Capacity": "440 lbs each",
+            "Dimensions": "30\"W x 28\"D x 59\"H",
+            "Material": "14-gauge Steel",
+            "Extension": "100%",
+            "Lock": "Central Locking",
+            "Color": "Industrial Gray"
+        },
+        "availability": {"in_stock": True, "quantity": 19, "warehouse": "US-West"},
+        "rating": 4.7,
+        "reviews_count": 234
+    },
+    # Cleaning & Janitorial
+    {
+        "id": "CLN-001",
+        "name": "Tennant T300 Floor Scrubber",
+        "brand": "Tennant",
+        "category": "Cleaning & Janitorial",
+        "sku": "TEN-T300",
+        "unspsc_code": "47130000",
+        "base_price": 4250.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/899b4b3e6aceed339189fb8d0b0fa309930af38864a707139f102cc7b47c1bfd.png",
+        "short_description": "Walk-behind floor scrubber, 20\" cleaning path",
+        "full_description": "Tennant T300 walk-behind scrubber delivers consistent cleaning performance. Features ec-H2O NanoClean technology for chemical-free cleaning.",
+        "specifications": {
+            "Cleaning Path": "20 inches",
+            "Solution Tank": "11 gallons",
+            "Recovery Tank": "12 gallons",
+            "Run Time": "Up to 3 hours",
+            "Productivity": "Up to 18,400 sq ft/hr",
+            "Power": "Battery (24V)",
+            "Weight": "287 lbs"
+        },
+        "availability": {"in_stock": True, "quantity": 8, "warehouse": "US-Central"},
+        "rating": 4.5,
+        "reviews_count": 167
+    },
+    # Lubrication
+    {
+        "id": "LUB-001",
+        "name": "Mobil Industrial Lubricant Kit",
+        "brand": "Mobil",
+        "category": "Lubrication",
+        "sku": "MOB-IND-KIT",
+        "unspsc_code": "15120000",
+        "base_price": 385.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/e12637ed7080f9cc6f0ab4378314a9bf6991b40c91ff9c4c31ea98fd25d1aa62.png",
+        "short_description": "Complete industrial lubrication kit with various grades",
+        "full_description": "Mobil Industrial Lubricant Kit includes synthetic and mineral-based lubricants for diverse industrial applications. Premium quality for extended equipment life.",
+        "specifications": {
+            "Includes": "5 products",
+            "Types": "Gear Oil, Hydraulic, Grease, Way Oil, Spindle",
+            "Grades": "ISO 32-220",
+            "Container Sizes": "1 Quart each",
+            "Base Stock": "Synthetic/Mineral",
+            "Temperature Range": "-40°F to +300°F",
+            "Applications": "General Industrial"
+        },
+        "availability": {"in_stock": True, "quantity": 145, "warehouse": "US-East"},
+        "rating": 4.6,
+        "reviews_count": 289
     }
 ]
 
