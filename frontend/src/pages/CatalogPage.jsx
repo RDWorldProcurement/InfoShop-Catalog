@@ -681,6 +681,207 @@ const CatalogPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Product Comparison Modal */}
+      <Dialog open={compareModalOpen} onOpenChange={setCompareModalOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto p-0">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <GitCompare className="w-6 h-6 text-purple-600" />
+              Compare Products ({compareList.length})
+            </DialogTitle>
+            <DialogDescription>
+              Compare specifications, prices, and features side by side
+            </DialogDescription>
+          </DialogHeader>
+          
+          {compareList.length === 0 ? (
+            <div className="p-8 text-center">
+              <GitCompare className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <p className="text-slate-500">No products selected for comparison</p>
+              <p className="text-sm text-slate-400 mt-1">Click the compare icon on products to add them</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="p-4 text-left bg-slate-50 w-40 text-sm font-semibold text-slate-600 sticky left-0">Feature</th>
+                    {compareList.map((product) => (
+                      <th key={product.id} className="p-4 min-w-[200px] border-l">
+                        <div className="relative">
+                          <button
+                            onClick={() => removeFromCompare(product.id)}
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 hover:bg-red-200 text-red-600 rounded-full flex items-center justify-center"
+                            data-testid={`remove-compare-${product.id}`}
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          <img 
+                            src={product.image_url} 
+                            alt={product.name} 
+                            className="w-24 h-24 object-contain mx-auto mb-2"
+                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400&q=80"; }}
+                          />
+                          <p className="text-sm font-semibold text-slate-900 line-clamp-2">{product.name}</p>
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Brand */}
+                  <tr className="border-b hover:bg-slate-50">
+                    <td className="p-4 font-medium text-slate-600 bg-slate-50 sticky left-0 text-sm">Brand</td>
+                    {compareList.map((product) => (
+                      <td key={product.id} className="p-4 border-l text-center">
+                        <Badge style={{ backgroundColor: product.brand_color || '#007CC3' }} className="text-white">
+                          {product.brand}
+                        </Badge>
+                      </td>
+                    ))}
+                  </tr>
+                  {/* Price */}
+                  <tr className="border-b hover:bg-slate-50">
+                    <td className="p-4 font-medium text-slate-600 bg-slate-50 sticky left-0 text-sm">Price</td>
+                    {compareList.map((product) => (
+                      <td key={product.id} className="p-4 border-l text-center">
+                        {product.price ? (
+                          <span className="text-xl font-bold text-slate-900">
+                            {product.currency_symbol}{product.price.toFixed(2)}
+                          </span>
+                        ) : (
+                          <span className="text-[#FF6B00] font-medium">Quote Required</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                  {/* Rating */}
+                  <tr className="border-b hover:bg-slate-50">
+                    <td className="p-4 font-medium text-slate-600 bg-slate-50 sticky left-0 text-sm">Rating</td>
+                    {compareList.map((product) => (
+                      <td key={product.id} className="p-4 border-l text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                          <span className="font-semibold">{product.rating?.toFixed(1)}</span>
+                          <span className="text-xs text-slate-400">({product.reviews_count})</span>
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                  {/* Availability */}
+                  <tr className="border-b hover:bg-slate-50">
+                    <td className="p-4 font-medium text-slate-600 bg-slate-50 sticky left-0 text-sm">Availability</td>
+                    {compareList.map((product) => (
+                      <td key={product.id} className="p-4 border-l text-center">
+                        {product.availability?.in_stock ? (
+                          <span className="text-green-600 flex items-center justify-center gap-1">
+                            <Check className="w-4 h-4" /> In Stock ({product.availability.quantity})
+                          </span>
+                        ) : (
+                          <span className="text-red-500 flex items-center justify-center gap-1">
+                            <X className="w-4 h-4" /> Out of Stock
+                          </span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                  {/* Lead Time */}
+                  <tr className="border-b hover:bg-slate-50">
+                    <td className="p-4 font-medium text-slate-600 bg-slate-50 sticky left-0 text-sm">Lead Time</td>
+                    {compareList.map((product) => (
+                      <td key={product.id} className="p-4 border-l text-center">
+                        {product.lead_time_days ? (
+                          <span className="flex items-center justify-center gap-1">
+                            <Truck className="w-4 h-4 text-slate-400" />
+                            {product.lead_time_days} days
+                          </span>
+                        ) : (
+                          <Minus className="w-4 h-4 text-slate-300 mx-auto" />
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                  {/* Category */}
+                  <tr className="border-b hover:bg-slate-50">
+                    <td className="p-4 font-medium text-slate-600 bg-slate-50 sticky left-0 text-sm">Category</td>
+                    {compareList.map((product) => (
+                      <td key={product.id} className="p-4 border-l text-center text-sm text-slate-600">
+                        {product.category}
+                      </td>
+                    ))}
+                  </tr>
+                  {/* UNSPSC */}
+                  <tr className="border-b hover:bg-slate-50">
+                    <td className="p-4 font-medium text-slate-600 bg-slate-50 sticky left-0 text-sm">UNSPSC Code</td>
+                    {compareList.map((product) => (
+                      <td key={product.id} className="p-4 border-l text-center">
+                        <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded">{product.unspsc_code}</span>
+                      </td>
+                    ))}
+                  </tr>
+                  {/* SKU */}
+                  <tr className="border-b hover:bg-slate-50">
+                    <td className="p-4 font-medium text-slate-600 bg-slate-50 sticky left-0 text-sm">SKU</td>
+                    {compareList.map((product) => (
+                      <td key={product.id} className="p-4 border-l text-center">
+                        <span className="font-mono text-xs">{product.sku}</span>
+                      </td>
+                    ))}
+                  </tr>
+                  {/* Specifications - Dynamic rows */}
+                  {(() => {
+                    const allSpecs = new Set();
+                    compareList.forEach(p => {
+                      if (p.specifications) {
+                        Object.keys(p.specifications).forEach(k => allSpecs.add(k));
+                      }
+                    });
+                    return Array.from(allSpecs).slice(0, 8).map((specKey) => (
+                      <tr key={specKey} className="border-b hover:bg-slate-50">
+                        <td className="p-4 font-medium text-slate-600 bg-slate-50 sticky left-0 text-sm">{specKey}</td>
+                        {compareList.map((product) => (
+                          <td key={product.id} className="p-4 border-l text-center text-sm">
+                            {product.specifications?.[specKey] || (
+                              <Minus className="w-4 h-4 text-slate-300 mx-auto" />
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ));
+                  })()}
+                  {/* Add to Cart Row */}
+                  <tr className="bg-slate-50">
+                    <td className="p-4 font-medium text-slate-600 sticky left-0 text-sm">Action</td>
+                    {compareList.map((product) => (
+                      <td key={product.id} className="p-4 border-l text-center">
+                        <Button
+                          size="sm"
+                          className="bg-[#FF9900] hover:bg-[#FF6B00] text-white"
+                          onClick={() => { addToCart(product); toast.success("Added to cart"); }}
+                          data-testid={`compare-add-cart-${product.id}`}
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-1" />
+                          Add to Cart
+                        </Button>
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+          
+          <DialogFooter className="p-4 border-t bg-slate-50">
+            <Button variant="outline" onClick={clearCompareList}>
+              Clear All
+            </Button>
+            <Button onClick={() => setCompareModalOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
