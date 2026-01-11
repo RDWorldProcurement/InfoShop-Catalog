@@ -379,14 +379,14 @@ const CatalogPage = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ShoppingCart className="w-5 h-5" />
-              Shopping Cart ({cart.length} items)
+              {t.cart.title} ({cart.length} {t.common.items})
             </DialogTitle>
           </DialogHeader>
           
           {cart.length === 0 ? (
             <div className="text-center py-8">
               <ShoppingCart className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500">Your cart is empty</p>
+              <p className="text-slate-500">{t.cart.empty}</p>
             </div>
           ) : (
             <>
@@ -407,13 +407,13 @@ const CatalogPage = () => {
               
               <div className="border-t pt-4 mt-4">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="font-medium">Total:</span>
+                  <span className="font-medium">{t.cart.total}:</span>
                   <span className="text-xl font-bold text-[#007CC3]">{user?.currency?.symbol}{cartTotal.toFixed(2)}</span>
                 </div>
                 
                 <Button className="w-full bg-[#FF6B00] hover:bg-[#E65000]" onClick={() => { setCartOpen(false); setPunchoutModalOpen(true); }} data-testid="transfer-cart-btn">
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  Transfer Cart via PunchOut
+                  {t.cart.transferCart}
                 </Button>
               </div>
             </>
@@ -425,8 +425,8 @@ const CatalogPage = () => {
       <Dialog open={punchoutModalOpen} onOpenChange={(open) => { setPunchoutModalOpen(open); if (!open) setTransferSuccess(false); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Transfer Cart to ERP System</DialogTitle>
-            <DialogDescription>Select your procurement system for PunchOut transfer</DialogDescription>
+            <DialogTitle>{t.cart.transferCart}</DialogTitle>
+            <DialogDescription>{t.cart.selectSystem}</DialogDescription>
           </DialogHeader>
           
           {transferSuccess ? (
@@ -434,9 +434,9 @@ const CatalogPage = () => {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Transfer Successful!</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">{t.cart.transferSuccess}</h3>
               <p className="text-slate-500 mb-2">Your cart has been transferred to {selectedPunchoutSystem?.name}</p>
-              <Badge className="bg-amber-100 text-amber-700">Status: Pending Customer PO</Badge>
+              <Badge className="bg-amber-100 text-amber-700">Status: {t.cart.pendingPO}</Badge>
             </div>
           ) : (
             <>
