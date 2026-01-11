@@ -285,16 +285,18 @@ const LandingPage = () => {
       <section className="py-12 bg-white border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-6">
           <p className="text-center text-slate-500 mb-8">{t.landing.trustedBrands}</p>
-          <div className="flex flex-wrap justify-center items-center gap-8">
+          <div className="flex flex-wrap justify-center items-center gap-4">
             {BRANDS.map((brand, idx) => (
               <div key={idx} className="group" data-testid={`brand-logo-${idx}`}>
-                <div className="w-28 h-14 bg-white rounded border border-slate-200 flex items-center justify-center p-3 group-hover:border-[#007CC3] group-hover:shadow-md transition-all">
-                  <img 
-                    src={brand.logo} 
-                    alt={brand.name}
-                    className="max-h-8 max-w-full grayscale group-hover:grayscale-0 transition-all"
-                    onError={(e) => { e.target.style.display = "none"; e.target.parentElement.innerHTML = `<span class="text-xs font-bold text-slate-500">${brand.name}</span>`; }}
-                  />
+                <div 
+                  className="px-6 py-3 rounded-lg border-2 font-bold text-lg transition-all hover:scale-105"
+                  style={{ 
+                    backgroundColor: `${brand.color}15`, 
+                    borderColor: brand.color,
+                    color: brand.color 
+                  }}
+                >
+                  {brand.name}
                 </div>
               </div>
             ))}
