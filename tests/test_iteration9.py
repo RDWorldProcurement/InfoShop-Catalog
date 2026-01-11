@@ -78,8 +78,9 @@ class TestAuthAndSearch:
         assert response.status_code == 200
         data = response.json()
         assert "token" in data
-        assert "user" in data
-        print(f"SUCCESS: Demo login works, user: {data['user'].get('email')}")
+        assert "email" in data  # User data is at root level
+        assert data["email"] == "demo@infosys.com"
+        print(f"SUCCESS: Demo login works, user: {data.get('email')}")
     
     def test_admin_login(self):
         """Test admin user login"""
