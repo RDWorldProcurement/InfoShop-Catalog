@@ -792,16 +792,16 @@ const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ, t 
       )}
       
       <CardContent className="p-5">
-        {/* Category & Supplier Logo */}
+        {/* Category Badge */}
         <div className="flex items-center justify-between mb-3">
           <Badge variant="outline" className="text-xs">{service.category}</Badge>
-          {service.supplier_logo && (
-            <img 
-              src={service.supplier_logo} 
-              alt={service.supplier_name} 
-              className="h-6 w-auto object-contain" 
-              onError={(e) => e.target.style.display = 'none'} 
-            />
+          {service.supplier_name && (
+            <Badge 
+              className="text-xs font-bold text-white px-2 py-0.5"
+              style={{ backgroundColor: service.supplier_color || '#007CC3' }}
+            >
+              {service.supplier_name.split(' ')[0]}
+            </Badge>
           )}
         </div>
         
