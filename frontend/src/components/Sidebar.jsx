@@ -1,12 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
+import { useLanguage } from "../i18n/LanguageContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import {
-  Package, Search, History, RefreshCw, Upload, Award, LogOut, User, Coins
+  Package, Search, History, RefreshCw, Upload, Award, LogOut, User, Coins, Languages
 } from "lucide-react";
 
 const Sidebar = ({ activePage }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t, language, changeLanguage, languageOptions } = useLanguage();
 
   const handleLogout = () => {
     logout();
@@ -76,22 +79,46 @@ const Sidebar = ({ activePage }) => {
 
         {/* Navigation */}
         <nav className="space-y-1 flex-1">
-          <NavItem icon={Search} label="Catalog" path="/catalog" id="catalog" />
-          <NavItem icon={History} label="Order History" path="/orders" id="orders" />
-          <NavItem icon={RefreshCw} label="Repeat Orders" path="/repeat-orders" id="repeat-orders" />
-          <NavItem icon={Upload} label="Bulk Upload" path="/bulk-upload" id="bulk-upload" />
-          <NavItem icon={Award} label="InfoCoins Rewards" path="/rewards" id="rewards" />
+          <NavItem icon={Search} label={t.nav.catalog} path="/catalog" id="catalog" />
+          <NavItem icon={History} label={t.nav.orders} path="/orders" id="orders" />
+          <NavItem icon={RefreshCw} label={t.nav.repeatOrders} path="/repeat-orders" id="repeat-orders" />
+          <NavItem icon={Upload} label={t.nav.bulkUpload} path="/bulk-upload" id="bulk-upload" />
+          <NavItem icon={Award} label={t.nav.rewards} path="/rewards" id="rewards" />
         </nav>
 
+        {/* Language Selector */}
+        <div className="py-4 border-t border-slate-200">
+          <div className="px-4">
+            <p className="text-xs text-slate-500 mb-2 flex items-center gap-1">
+              <Languages className="w-3 h-3" /> Language
+            </p>
+            <Select value={language} onValueChange={changeLanguage}>
+              <SelectTrigger className="h-10 bg-slate-50 border-slate-200" data-testid="sidebar-language-selector">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {languageOptions.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code} data-testid={`sidebar-lang-${lang.code}`}>
+                    <span className="flex items-center gap-2">
+                      <span>{lang.flag}</span>
+                      <span>{lang.name}</span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {/* Logout */}
-        <div className="pt-6 border-t border-slate-200">
+        <div className="pt-4 border-t border-slate-200">
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
             data-testid="sidebar-logout-btn"
           >
             <LogOut className="w-5 h-5" />
-            <span>Sign Out</span>
+            <span>{t.nav.logout}</span>
           </button>
         </div>
       </div>
