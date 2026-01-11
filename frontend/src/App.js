@@ -11,6 +11,7 @@ import OrderHistoryPage from "./pages/OrderHistoryPage";
 import RepeatOrdersPage from "./pages/RepeatOrdersPage";
 import BulkUploadPage from "./pages/BulkUploadPage";
 import InfoCoinsPage from "./pages/InfoCoinsPage";
+import AdminPortalPage from "./pages/AdminPortalPage";
 
 // Components
 import ChatBot from "./components/ChatBot";
