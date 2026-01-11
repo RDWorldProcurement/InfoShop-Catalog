@@ -1705,11 +1705,24 @@ def generate_product_data(index: int, category: str, brand: str) -> Dict:
         "estimated_delivery": f"{random.randint(1, 5)}-{random.randint(6, 10)} business days"
     }
     
+    # Create descriptive product name and description based on category
+    product_name = product['name']
+    
+    # Generate accurate short description based on product specifications
+    specs_text = ", ".join([f"{k}: {v}" for k, v in list(product.get("specs", {}).items())[:3]]) if product.get("specs") else ""
+    
+    short_desc = f"{product_name} by {brand}. {specs_text}" if specs_text else f"Professional-grade {product_name.lower()} from {brand} designed for industrial and enterprise applications."
+    
+    full_desc = f"The {brand} {product_name} delivers exceptional performance and reliability for demanding professional environments. "
+    if product.get("specs"):
+        full_desc += f"Key specifications include: {specs_text}. "
+    full_desc += f"Built with premium materials and backed by {brand}'s reputation for quality. Meets international standards for safety and performance."
+    
     return {
         "id": str(uuid.uuid4()),
-        "name": f"{brand} {product['name']}",
-        "short_description": f"Professional-grade {product['name'].lower()} from {brand}. Designed for enterprise and industrial applications.",
-        "full_description": f"The {brand} {product['name']} delivers exceptional performance and reliability for demanding professional environments. Built with premium materials and backed by {brand}'s reputation for quality. Meets international standards for safety and performance. Ideal for enterprise deployments and industrial applications.",
+        "name": f"{brand} {product_name}",
+        "short_description": short_desc,
+        "full_description": full_desc,
         "category": category,
         "brand": brand,
         "brand_logo": brand_info.get("logo"),
