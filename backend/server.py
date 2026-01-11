@@ -2373,12 +2373,208 @@ async def get_stats():
     return {
         "total_products": "30M+",
         "total_services": "100K+",
-        "total_categories": len(MRO_CATEGORIES),
-        "total_brands": len(MRO_BRANDS),
+        "total_categories": 78,
+        "total_brands": "511+",
         "service_categories": len(SERVICE_CATEGORIES),
         "integrations": ["Coupa", "SAP Ariba", "SAP ERP", "Ivalua", "Oracle"],
         "countries_served": len(COUNTRY_CURRENCIES),
         "punchout_systems": PUNCHOUT_SYSTEMS
+    }
+
+# Admin Routes for Vendor Catalog Upload
+DELIVERY_PARTNERS = [
+    {"id": "grainger", "name": "Grainger", "logo": None, "color": "#E31837"},
+    {"id": "motion", "name": "Motion Industries", "logo": None, "color": "#003366"},
+    {"id": "fastenal", "name": "Fastenal", "logo": None, "color": "#00529B"},
+    {"id": "bdi", "name": "BDI (Bearing Distributors Inc)", "logo": None, "color": "#1E4D8C"},
+    {"id": "msc", "name": "MSC Industrial", "logo": None, "color": "#003B71"},
+    {"id": "mcmaster", "name": "McMaster-Carr", "logo": None, "color": "#8B4513"},
+    {"id": "zoro", "name": "Zoro", "logo": None, "color": "#FF6600"},
+    {"id": "uline", "name": "Uline", "logo": None, "color": "#003366"},
+]
+
+class AdminLogin(BaseModel):
+    username: str
+    password: str
+
+class CatalogUploadResponse(BaseModel):
+    success: bool
+    message: str
+    products_imported: int = 0
+    services_imported: int = 0
+    errors: List[str] = []
+
+# Admin authentication - simple for demo
+ADMIN_CREDENTIALS = {
+    "admin": "admin123",
+    "infosys_admin": "InfosysBPM2024!"
+}
+
+def verify_admin(username: str, password: str) -> bool:
+    return ADMIN_CREDENTIALS.get(username) == password
+
+@api_router.post("/admin/login")
+async def admin_login(credentials: AdminLogin):
+    if verify_admin(credentials.username, credentials.password):
+        admin_token = create_jwt_token(f"admin_{credentials.username}", credentials.username)
+        return {"success": True, "token": admin_token, "username": credentials.username}
+    raise HTTPException(status_code=401, detail="Invalid admin credentials")
+
+@api_router.get("/admin/delivery-partners")
+async def get_delivery_partners():
+    return {"partners": DELIVERY_PARTNERS}
+
+@api_router.post("/admin/upload-catalog")
+async def upload_vendor_catalog(
+    file: UploadFile = File(...),
+    partner_id: str = Form(...),
+    catalog_type: str = Form(...)  # "products" or "services"
+):
+    """
+    Upload vendor catalog from delivery partners like Grainger, MOTION, Fastenal, BDI
+    Accepts CSV/Excel files with product or service data
+    """
+    # Validate partner
+    partner = next((p for p in DELIVERY_PARTNERS if p["id"] == partner_id), None)
+    if not partner:
+        raise HTTPException(status_code=400, detail=f"Invalid delivery partner: {partner_id}")
+    
+    # Validate file type
+    allowed_extensions = ['.csv', '.xlsx', '.xls']
+    file_ext = os.path.splitext(file.filename)[1].lower()
+    if file_ext not in allowed_extensions:
+        raise HTTPException(status_code=400, detail=f"File type not supported. Allowed: {', '.join(allowed_extensions)}")
+    
+    # Read file content
+    content = await file.read()
+    
+    products_imported = 0
+    services_imported = 0
+    errors = []
+    
+    try:
+        if file_ext == '.csv':
+            import csv
+            import io
+            
+            decoded = content.decode('utf-8')
+            reader = csv.DictReader(io.StringIO(decoded))
+            rows = list(reader)
+        else:
+            # Excel file
+            import openpyxl
+            import io
+            
+            wb = openpyxl.load_workbook(io.BytesIO(content))
+            ws = wb.active
+            headers = [cell.value for cell in ws[1]]
+            rows = []
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                rows.append(dict(zip(headers, row)))
+        
+        # Process rows
+        for idx, row in enumerate(rows):
+            try:
+                if catalog_type == "products":
+                    product_data = {
+                        "id": str(uuid.uuid4()),
+                        "name": row.get("name") or row.get("product_name") or row.get("Name"),
+                        "description": row.get("description") or row.get("Description") or "",
+                        "brand": row.get("brand") or row.get("Brand") or partner["name"],
+                        "category": row.get("category") or row.get("Category") or "General MRO",
+                        "sku": row.get("sku") or row.get("SKU") or row.get("part_number") or f"{partner_id.upper()}-{idx:06d}",
+                        "unspsc_code": row.get("unspsc") or row.get("UNSPSC") or "31000000",
+                        "base_price": float(row.get("price") or row.get("Price") or row.get("unit_price") or 0),
+                        "unit": row.get("unit") or row.get("UOM") or "EA",
+                        "delivery_partner": partner["name"],
+                        "delivery_partner_id": partner_id,
+                        "image_url": row.get("image_url") or PRODUCT_IMAGE_URLS.get("Hand Tools"),
+                        "imported_at": datetime.now(timezone.utc).isoformat(),
+                        "source": f"vendor_upload_{partner_id}"
+                    }
+                    
+                    if product_data["name"]:
+                        await db.vendor_products.insert_one(product_data)
+                        products_imported += 1
+                else:  # services
+                    service_data = {
+                        "id": str(uuid.uuid4()),
+                        "name": row.get("name") or row.get("service_name") or row.get("Name"),
+                        "description": row.get("description") or row.get("Description") or "",
+                        "category": row.get("category") or row.get("Category") or "Facilities Management & Workplace Services",
+                        "unspsc_code": row.get("unspsc") or row.get("UNSPSC") or "76100000",
+                        "base_rate": float(row.get("rate") or row.get("Rate") or row.get("price") or 0),
+                        "pricing_model": row.get("pricing_model") or row.get("unit") or "Per Hour",
+                        "supplier_name": row.get("supplier") or row.get("Supplier") or partner["name"],
+                        "delivery_partner": partner["name"],
+                        "delivery_partner_id": partner_id,
+                        "image_url": row.get("image_url") or SERVICE_IMAGE_URLS.get("Commercial Cleaning"),
+                        "imported_at": datetime.now(timezone.utc).isoformat(),
+                        "source": f"vendor_upload_{partner_id}"
+                    }
+                    
+                    if service_data["name"]:
+                        await db.vendor_services.insert_one(service_data)
+                        services_imported += 1
+                        
+            except Exception as e:
+                errors.append(f"Row {idx + 2}: {str(e)}")
+                
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
+    
+    return CatalogUploadResponse(
+        success=True,
+        message=f"Catalog uploaded successfully from {partner['name']}",
+        products_imported=products_imported,
+        services_imported=services_imported,
+        errors=errors[:10]  # Return first 10 errors only
+    )
+
+@api_router.get("/admin/uploaded-catalogs")
+async def get_uploaded_catalogs():
+    """Get summary of uploaded vendor catalogs"""
+    products_by_partner = {}
+    services_by_partner = {}
+    
+    # Count products by partner
+    products = await db.vendor_products.find({}, {"delivery_partner": 1, "_id": 0}).to_list(10000)
+    for p in products:
+        partner = p.get("delivery_partner", "Unknown")
+        products_by_partner[partner] = products_by_partner.get(partner, 0) + 1
+    
+    # Count services by partner
+    services = await db.vendor_services.find({}, {"delivery_partner": 1, "_id": 0}).to_list(10000)
+    for s in services:
+        partner = s.get("delivery_partner", "Unknown")
+        services_by_partner[partner] = services_by_partner.get(partner, 0) + 1
+    
+    return {
+        "products_by_partner": products_by_partner,
+        "services_by_partner": services_by_partner,
+        "total_vendor_products": sum(products_by_partner.values()),
+        "total_vendor_services": sum(services_by_partner.values()),
+        "delivery_partners": DELIVERY_PARTNERS
+    }
+
+@api_router.delete("/admin/clear-catalog/{partner_id}")
+async def clear_partner_catalog(partner_id: str, catalog_type: str = "all"):
+    """Clear uploaded catalog from a specific delivery partner"""
+    deleted_products = 0
+    deleted_services = 0
+    
+    if catalog_type in ["products", "all"]:
+        result = await db.vendor_products.delete_many({"delivery_partner_id": partner_id})
+        deleted_products = result.deleted_count
+    
+    if catalog_type in ["services", "all"]:
+        result = await db.vendor_services.delete_many({"delivery_partner_id": partner_id})
+        deleted_services = result.deleted_count
+    
+    return {
+        "success": True,
+        "deleted_products": deleted_products,
+        "deleted_services": deleted_services
     }
 
 app.include_router(api_router)
