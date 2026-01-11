@@ -14,21 +14,26 @@ import {
   Palette, Monitor, Box, Factory, Languages, Play, Search, ShoppingCart, ExternalLink
 } from "lucide-react";
 
-// Realistic product images - using verified working Unsplash URLs
+// Product images hosted on Emergent CDN (guaranteed to work)
 const PRODUCT_IMAGES = {
-  bearings: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400&h=400&fit=crop",
-  tools: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop",
-  safety: "https://images.unsplash.com/photo-1618090584126-129cd1f3fbae?w=400&h=400&fit=crop",
-  electrical: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=400&fit=crop",
-  motors: "https://images.unsplash.com/photo-1581093458791-9d42e3c2fd45?w=400&h=400&fit=crop",
-  automation: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=400&fit=crop"
+  bearings: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7ac37795d30541fe96a379b8ebc9a669a9f5534a1c47d157f2dcfce68eda8fde.png",
+  tools: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7428451866e1f3032551dea27aa96a5ca7d02246c6de0264aee39902b9eaacc1.png",
+  safety: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/61099fb65121a227a0c6e32140edac60830b2fd0c6269420c02ee34b2e9933a2.png",
+  electrical: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/562b9e992a87f1bfff8fdab06372e7f83f30fc65f6c717042f84a02c0dc0d13a.png",
+  motors: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/5799cc3ba8a91a189fdb881e022a3f566437398eff99e81d6dc937471ef1340f.png",
+  automation: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/022021c9eb3d4350b596e47b5cbbc21f913a9ca5428f805d45b37108e6428799.png",
+  laptop: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/8cba2db4e0d25e92ff75257a0fe03a81a4de63378bee8e48888c0141833e5fc5.png",
+  monitor: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/0e831c2f54678ddcfa8e298f8509c1864a8a8849444986660861bb8de54b9e8c.png",
+  wrench: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/77f9d6c3fedcd85729745ffaf16ab46b268ba0176386a36e9d3bd3d1b2e6c293.png",
+  screwdriver: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/075214c7f6dce1e67075c623d025158b3d3cac86e45217650f7d58db7662f1d6.png",
+  glasses: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/640a7752a6b06696c964fa101d2ac30566e54c02284234bfb6699da588d0f2e9.png",
 };
 
 const SERVICE_IMAGES = {
-  facilities: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=400&fit=crop",
-  it: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=400&fit=crop",
-  logistics: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&h=400&fit=crop",
-  marketing: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop"
+  facilities: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/022021c9eb3d4350b596e47b5cbbc21f913a9ca5428f805d45b37108e6428799.png",
+  it: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/8cba2db4e0d25e92ff75257a0fe03a81a4de63378bee8e48888c0141833e5fc5.png",
+  logistics: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/77f9d6c3fedcd85729745ffaf16ab46b268ba0176386a36e9d3bd3d1b2e6c293.png",
+  marketing: "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/0e831c2f54678ddcfa8e298f8509c1864a8a8849444986660861bb8de54b9e8c.png"
 };
 
 // Brand data with colors (no external logos - they get blocked)
