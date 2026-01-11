@@ -793,6 +793,7 @@ def generate_product_data(index: int, category: str, brand: str) -> Dict:
         "category": category,
         "brand": brand,
         "brand_logo": brand_info.get("logo"),
+        "brand_color": brand_info.get("color", "#007CC3"),
         "sku": f"{brand[:3].upper()}-{category[:3].upper()}-{index:06d}",
         "unspsc_code": unspsc,
         "unspsc_name": category,
