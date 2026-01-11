@@ -220,12 +220,21 @@ const OrderHistoryPage = () => {
             ) : (
               <div className="space-y-4">
                 {orders.map((order) => (
-                  <Card key={order.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedOrder(selectedOrder?.id === order.id ? null : order)} data-testid={`order-card-${order.id}`}>
+                  <Card key={order.id} className={`hover:shadow-lg transition-shadow cursor-pointer ${order.status === 'delivered' ? 'border-l-4 border-l-green-500' : order.status === 'shipped' ? 'border-l-4 border-l-purple-500' : ''}`} onClick={() => setSelectedOrder(selectedOrder?.id === order.id ? null : order)} data-testid={`order-card-${order.id}`}>
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between flex-wrap gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-[#007CC3]/10 rounded-xl flex items-center justify-center">
-                            <Package className="w-6 h-6 text-[#007CC3]" />
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            order.status === 'delivered' ? 'bg-green-100' : 
+                            order.status === 'shipped' ? 'bg-purple-100' : 
+                            order.status === 'processing' ? 'bg-indigo-100' :
+                            order.status === 'confirmed' ? 'bg-blue-100' : 'bg-amber-100'
+                          }`}>
+                            {order.status === 'delivered' ? <CheckCircle className="w-6 h-6 text-green-600" /> :
+                             order.status === 'shipped' ? <Truck className="w-6 h-6 text-purple-600" /> :
+                             order.status === 'processing' ? <Package className="w-6 h-6 text-indigo-600" /> :
+                             order.status === 'confirmed' ? <CheckCircle className="w-6 h-6 text-blue-600" /> :
+                             <Clock className="w-6 h-6 text-amber-600" />}
                           </div>
                           <div>
                             <p className="font-semibold text-slate-900 font-mono">{order.id}</p>
@@ -236,32 +245,85 @@ const OrderHistoryPage = () => {
                           <p className="font-bold text-lg text-slate-900">{user?.currency?.symbol || '$'}{order.total_amount?.toFixed(2)}</p>
                           <p className="text-sm text-slate-500">{order.items?.length || 0} items</p>
                         </div>
-                        {getStatusBadge(order.status)}
+                        <div className="flex flex-col items-end gap-1">
+                          {getStatusBadge(order.status)}
+                          {order.status_description && (
+                            <span className="text-xs text-slate-500">{order.status_description}</span>
+                          )}
+                        </div>
                         <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform ${selectedOrder?.id === order.id ? 'rotate-90' : ''}`} />
                       </div>
 
+                      {/* Tracking Info for Shipped Orders */}
+                      {order.tracking_number && (
+                        <div className="mt-3 p-3 bg-purple-50 rounded-lg flex items-center gap-3">
+                          <Truck className="w-5 h-5 text-purple-600" />
+                          <div>
+                            <p className="text-sm font-medium text-purple-800">{order.carrier || 'Carrier'}</p>
+                            <p className="text-xs text-purple-600 font-mono">{order.tracking_number}</p>
+                          </div>
+                          {order.estimated_delivery && order.status !== 'delivered' && (
+                            <div className="ml-auto text-right">
+                              <p className="text-xs text-purple-600">Est. Delivery</p>
+                              <p className="text-sm font-medium text-purple-800">{new Date(order.estimated_delivery).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                          {order.status === 'delivered' && order.signed_by && (
+                            <div className="ml-auto text-right">
+                              <p className="text-xs text-green-600">Signed by</p>
+                              <p className="text-sm font-medium text-green-800">{order.signed_by}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {selectedOrder?.id === order.id && (
                         <div className="mt-6 pt-6 border-t animate-in slide-in-from-top-2">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Product</TableHead>
-                                <TableHead className="text-right">Qty</TableHead>
-                                <TableHead className="text-right">Unit Price</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {order.items?.map((item, idx) => (
-                                <TableRow key={idx}>
-                                  <TableCell className="font-medium">{item.product_name}</TableCell>
-                                  <TableCell className="text-right">{item.quantity}</TableCell>
-                                  <TableCell className="text-right">{user?.currency?.symbol || '$'}{item.unit_price?.toFixed(2)}</TableCell>
-                                  <TableCell className="text-right font-semibold">{user?.currency?.symbol || '$'}{item.total_price?.toFixed(2)}</TableCell>
+                          {/* Status Timeline */}
+                          <OrderStatusTimeline status={order.status} />
+                          
+                          {/* Items Table */}
+                          <div className="mt-6">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Product</TableHead>
+                                  <TableHead className="text-right">Qty</TableHead>
+                                  <TableHead className="text-right">Unit Price</TableHead>
+                                  <TableHead className="text-right">Total</TableHead>
                                 </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
+                              </TableHeader>
+                              <TableBody>
+                                {order.items?.map((item, idx) => (
+                                  <TableRow key={idx}>
+                                    <TableCell>
+                                      <div className="flex items-center gap-3">
+                                        {item.image_url && (
+                                          <img src={item.image_url} alt="" className="w-10 h-10 object-contain rounded bg-slate-50" onError={(e) => e.target.style.display = 'none'} />
+                                        )}
+                                        <span className="font-medium">{item.product_name}</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">{item.quantity}</TableCell>
+                                    <TableCell className="text-right">{user?.currency?.symbol || '$'}{item.unit_price?.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right font-semibold">{user?.currency?.symbol || '$'}{item.total_price?.toFixed(2)}</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+
+                          {/* Order Summary */}
+                          <div className="mt-4 p-4 bg-slate-50 rounded-lg flex justify-between items-center">
+                            <div>
+                              <p className="text-sm text-slate-500">Order placed on</p>
+                              <p className="font-medium">{new Date(order.created_at).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-slate-500">Order Total</p>
+                              <p className="text-xl font-bold text-[#007CC3]">{user?.currency?.symbol || '$'}{order.total_amount?.toFixed(2)}</p>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </CardContent>
