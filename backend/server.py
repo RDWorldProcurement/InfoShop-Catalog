@@ -521,6 +521,7 @@ IT_SERVICES_CATALOG = [
         "supplier_color": "#007DB8",
         "pricing_model": "Per Device",
         "base_price": 85.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/cff7a5158c43f81799d59a99494279b2c5f255b2610fe406a1ffe6934277c4a7.png",
         "short_description": "Complete device imaging, setup, and user migration",
         "full_description": "Full PC lifecycle deployment including asset tagging, image deployment, domain join, software installation, data migration, and user orientation. Includes packaging disposal.",
         "service_includes": [
@@ -548,6 +549,7 @@ IT_SERVICES_CATALOG = [
         "supplier_color": "#0096D6",
         "pricing_model": "Per Server",
         "base_price": 450.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/a1c30bd322a62ea6d441b12da74c66ca96707140958e1737c0d9a286f041a795.png",
         "short_description": "Physical server installation with OS and baseline config",
         "full_description": "Complete server deployment including rack mounting, power and network cabling, BIOS/firmware updates, OS installation, baseline security hardening, and integration with monitoring systems.",
         "service_includes": [
@@ -575,6 +577,7 @@ IT_SERVICES_CATALOG = [
         "supplier_color": "#007CC3",
         "pricing_model": "Per Assessment",
         "base_price": 5500.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/88995698058a90986297157d130fa19ac15656bbe7ac2296b1949cbb9993e380.png",
         "short_description": "Comprehensive vulnerability scan and penetration testing",
         "full_description": "Full network security assessment including vulnerability scanning, penetration testing, firewall review, and detailed remediation recommendations with executive summary.",
         "service_includes": [
@@ -602,6 +605,7 @@ IT_SERVICES_CATALOG = [
         "supplier_color": "#007CC3",
         "pricing_model": "Per User/Month",
         "base_price": 75.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/f848c4af2e1f5caac71aa56dc1f1b9285fb801ad8e1ee77ad4185116211e3627.png",
         "short_description": "24/7 helpdesk, remote support, and proactive monitoring",
         "full_description": "Comprehensive managed IT services including 24/7 helpdesk, remote troubleshooting, patch management, antivirus monitoring, and monthly reporting.",
         "service_includes": [
