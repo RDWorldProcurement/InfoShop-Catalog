@@ -213,9 +213,9 @@ const OrderHistoryPage = () => {
               <Card className="text-center py-16">
                 <CardContent>
                   <History className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-slate-700 mb-2">No Orders Yet</h3>
+                  <h3 className="text-xl font-semibold text-slate-700 mb-2">{t.orders.noOrders}</h3>
                   <p className="text-slate-500 mb-6">Start shopping to see your order history</p>
-                  <Button onClick={() => navigate("/catalog")} className="bg-[#007CC3] hover:bg-[#00629B]">Browse Catalog</Button>
+                  <Button onClick={() => navigate("/catalog")} className="bg-[#007CC3] hover:bg-[#00629B]">{t.nav.catalog}</Button>
                 </CardContent>
               </Card>
             ) : (
