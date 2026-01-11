@@ -188,8 +188,8 @@ const LandingPage = () => {
               {[
                 { value: stats.total_products, label: t.landing.stats.products, icon: Package, color: "bg-blue-50 text-[#007CC3]" },
                 { value: stats.total_services, label: t.landing.stats.services, icon: Settings, color: "bg-purple-50 text-purple-600" },
-                { value: `${stats.total_categories}+`, label: t.landing.stats.categories, icon: Layers, color: "bg-green-50 text-green-600" },
-                { value: `${stats.total_brands}+`, label: t.landing.stats.brands, icon: Factory, color: "bg-orange-50 text-orange-600" },
+                { value: `${stats.total_categories}`, label: t.landing.stats.categories, icon: Layers, color: "bg-green-50 text-green-600" },
+                { value: `${stats.total_brands}`, label: t.landing.stats.brands, icon: Factory, color: "bg-orange-50 text-orange-600" },
               ].map((stat, idx) => (
                 <Card key={idx} className="border-slate-200 hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
