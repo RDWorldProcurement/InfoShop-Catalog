@@ -1941,6 +1941,98 @@ async def create_order(items: List[CartItem], current_user: dict = Depends(get_c
 @api_router.get("/orders/history")
 async def get_order_history(current_user: dict = Depends(get_current_user)):
     orders = await db.orders.find({"user_id": current_user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # If no orders exist, return sample orders with 5 different statuses
+    if not orders:
+        currency = COUNTRY_CURRENCIES.get(current_user.get("country", "USA"), COUNTRY_CURRENCIES["USA"])
+        sample_orders = [
+            # Status 1: Pending - Just placed
+            {
+                "id": "ORD-A1B2C3D4",
+                "user_id": current_user["id"],
+                "items": [
+                    {"product_name": "HP ProBook 450 G10 Business Laptop", "quantity": 2, "unit_price": round(1299.00 * currency["rate"], 2), "total_price": round(2598.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("IT Equipment - Laptops")},
+                    {"product_name": "Dell UltraSharp U2723QE 27\" 4K Monitor", "quantity": 2, "unit_price": round(799.00 * currency["rate"], 2), "total_price": round(1598.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("IT Equipment - Monitors")}
+                ],
+                "total_amount": round(4196.00 * currency["rate"], 2),
+                "currency_code": currency["code"],
+                "status": "pending",
+                "status_description": "Order received, awaiting processing",
+                "created_at": (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat(),
+                "estimated_delivery": (datetime.now(timezone.utc) + timedelta(days=7)).isoformat(),
+                "tracking_number": None
+            },
+            # Status 2: Confirmed - Payment verified
+            {
+                "id": "ORD-E5F6G7H8",
+                "user_id": current_user["id"],
+                "items": [
+                    {"product_name": "ABB Industrial AC Motor 7.5HP", "quantity": 1, "unit_price": round(1850.00 * currency["rate"], 2), "total_price": round(1850.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("Motors & Drives")},
+                    {"product_name": "Siemens VFD Variable Frequency Drive 15HP", "quantity": 1, "unit_price": round(2450.00 * currency["rate"], 2), "total_price": round(2450.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("Motors & Drives")}
+                ],
+                "total_amount": round(4300.00 * currency["rate"], 2),
+                "currency_code": currency["code"],
+                "status": "confirmed",
+                "status_description": "Payment verified, preparing for shipment",
+                "created_at": (datetime.now(timezone.utc) - timedelta(days=1)).isoformat(),
+                "estimated_delivery": (datetime.now(timezone.utc) + timedelta(days=5)).isoformat(),
+                "tracking_number": None
+            },
+            # Status 3: Processing - Being prepared
+            {
+                "id": "ORD-I9J0K1L2",
+                "user_id": current_user["id"],
+                "items": [
+                    {"product_name": "Fluke 289 True-RMS Industrial Multimeter", "quantity": 3, "unit_price": round(595.00 * currency["rate"], 2), "total_price": round(1785.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("Test & Measurement")},
+                    {"product_name": "Kennametal Carbide End Mill Set", "quantity": 2, "unit_price": round(485.00 * currency["rate"], 2), "total_price": round(970.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("Cutting Tools")}
+                ],
+                "total_amount": round(2755.00 * currency["rate"], 2),
+                "currency_code": currency["code"],
+                "status": "processing",
+                "status_description": "Items being picked and packed in warehouse",
+                "created_at": (datetime.now(timezone.utc) - timedelta(days=2)).isoformat(),
+                "estimated_delivery": (datetime.now(timezone.utc) + timedelta(days=3)).isoformat(),
+                "tracking_number": None
+            },
+            # Status 4: Shipped - In transit
+            {
+                "id": "ORD-M3N4O5P6",
+                "user_id": current_user["id"],
+                "items": [
+                    {"product_name": "Lincoln Electric MIG Welder 250A", "quantity": 1, "unit_price": round(2150.00 * currency["rate"], 2), "total_price": round(2150.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("Welding")},
+                    {"product_name": "3M Powered Air Purifying Respirator System", "quantity": 2, "unit_price": round(1250.00 * currency["rate"], 2), "total_price": round(2500.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("Safety & PPE")}
+                ],
+                "total_amount": round(4650.00 * currency["rate"], 2),
+                "currency_code": currency["code"],
+                "status": "shipped",
+                "status_description": "Package in transit with carrier",
+                "created_at": (datetime.now(timezone.utc) - timedelta(days=4)).isoformat(),
+                "estimated_delivery": (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(),
+                "tracking_number": "1Z999AA10123456784",
+                "carrier": "UPS Ground"
+            },
+            # Status 5: Delivered - Completed
+            {
+                "id": "ORD-Q7R8S9T0",
+                "user_id": current_user["id"],
+                "items": [
+                    {"product_name": "Parker Hydraulic Gear Pump 20GPM", "quantity": 2, "unit_price": round(875.00 * currency["rate"], 2), "total_price": round(1750.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("Hydraulics & Pneumatics")},
+                    {"product_name": "Festo Pneumatic Cylinder 100mm Bore", "quantity": 4, "unit_price": round(425.00 * currency["rate"], 2), "total_price": round(1700.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("Hydraulics & Pneumatics")},
+                    {"product_name": "Honeywell Safety Harness Full Body", "quantity": 5, "unit_price": round(345.00 * currency["rate"], 2), "total_price": round(1725.00 * currency["rate"], 2), "image_url": PRODUCT_IMAGE_URLS.get("Safety Gloves")}
+                ],
+                "total_amount": round(5175.00 * currency["rate"], 2),
+                "currency_code": currency["code"],
+                "status": "delivered",
+                "status_description": "Delivered and signed for",
+                "created_at": (datetime.now(timezone.utc) - timedelta(days=7)).isoformat(),
+                "delivery_date": (datetime.now(timezone.utc) - timedelta(days=2)).isoformat(),
+                "tracking_number": "1Z999AA10987654321",
+                "carrier": "FedEx Express",
+                "signed_by": "J. Smith"
+            }
+        ]
+        orders = sample_orders
+    
     return {"orders": orders}
 
 # Repeat Orders, Bulk Upload, InfoCoins remain same...
