@@ -329,7 +329,7 @@ IT_PRODUCTS_CATALOG = [
         "sku": "DELL-P5680-i9",
         "unspsc_code": "43211503",
         "base_price": 3299.00,
-        "image_url": "PRODUCT_IMAGE_URLS.get("HP Laptop", PRODUCT_IMAGE_URLS.get("IT Equipment - Laptops"))",
+        "image_url": PRODUCT_IMAGE_URLS.get("HP Laptop", PRODUCT_IMAGE_URLS.get("IT Equipment - Laptops")),
         "short_description": "16\" 3.5K OLED, Intel Core i9-13900H, 64GB RAM, 2TB SSD, RTX 3500",
         "full_description": "Dell Precision 5680 is engineered for CAD, 3D modeling, and AI workloads. Features NVIDIA RTX 3500 Ada graphics, stunning 3.5K OLED display with 120Hz refresh, and ISV-certified reliability.",
         "specifications": {
