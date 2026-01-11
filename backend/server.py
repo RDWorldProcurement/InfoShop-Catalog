@@ -247,7 +247,7 @@ IT_PRODUCTS_CATALOG = [
         "sku": "HP-PB450G10-i7",
         "unspsc_code": "43211503",
         "base_price": 1299.00,
-        "image_url": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&q=80",
+        "image_url": PRODUCT_IMAGE_URLS.get("HP Laptop", PRODUCT_IMAGE_URLS.get("IT Equipment - Laptops")),
         "short_description": "15.6\" FHD Display, Intel Core i7-1355U, 16GB RAM, 512GB SSD",
         "full_description": "The HP ProBook 450 G10 is designed for business professionals who need reliability and performance. Features a 15.6-inch Full HD anti-glare display, Intel Core i7-1355U processor (up to 5.0 GHz), 16GB DDR4 RAM, and 512GB NVMe SSD. Includes Windows 11 Pro, Intel Iris Xe Graphics, fingerprint reader, and HD webcam with privacy shutter.",
         "specifications": {
@@ -274,7 +274,7 @@ IT_PRODUCTS_CATALOG = [
         "sku": "HP-EB840G10-i7",
         "unspsc_code": "43211503",
         "base_price": 1849.00,
-        "image_url": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&q=80",
+        "image_url": PRODUCT_IMAGE_URLS.get("HP Laptop", PRODUCT_IMAGE_URLS.get("IT Equipment - Laptops")),
         "short_description": "14\" WUXGA Display, Intel Core i7-1365U, 32GB RAM, 1TB SSD",
         "full_description": "HP EliteBook 840 G10 delivers enterprise-grade security with stunning design. Features Sure View Reflect privacy screen, Wolf Security for Business, and military-grade durability (MIL-STD 810H). Perfect for executive and hybrid workforce.",
         "specifications": {
@@ -302,7 +302,7 @@ IT_PRODUCTS_CATALOG = [
         "sku": "DELL-LAT5540-i7",
         "unspsc_code": "43211503",
         "base_price": 1449.00,
-        "image_url": "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80",
+        "image_url": PRODUCT_IMAGE_URLS.get("HP Laptop", PRODUCT_IMAGE_URLS.get("IT Equipment - Laptops")),
         "short_description": "15.6\" FHD+ Display, Intel Core i7-1365U, 16GB RAM, 512GB SSD",
         "full_description": "Dell Latitude 5540 combines performance with enterprise manageability. Built for IT deployment with Dell Optimizer AI, SafeBIOS, and comprehensive Dell Technologies services.",
         "specifications": {
