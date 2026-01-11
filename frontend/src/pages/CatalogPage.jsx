@@ -659,14 +659,14 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
 };
 
 // Service Card Component
-const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ }) => {
+const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ, t }) => {
   return (
     <Card className={`hover:shadow-xl transition-all ${service.is_sponsored ? 'ring-2 ring-amber-200' : ''}`} data-testid={`service-card-${service.id}`}>
       {service.is_sponsored && (
         <div className="absolute top-3 right-3 z-10">
           <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">
             <Star className="w-3 h-3 mr-1 fill-amber-500" />
-            Sponsored
+            {t?.catalog?.sponsored || "Sponsored"}
           </Badge>
         </div>
       )}
@@ -695,20 +695,20 @@ const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ }) 
             {service.supplier_name && (
               <p className="text-xs text-slate-500 mb-3">
                 <CheckCircle className="w-3 h-3 inline mr-1 text-green-500" />
-                Partner: {service.supplier_name}
+                {t?.common?.supplier || "Partner"}: {service.supplier_name}
               </p>
             )}
             <Button className="w-full bg-[#007CC3] hover:bg-[#00629B]" onClick={onAddToCart} data-testid="add-service-btn">
               <ShoppingCart className="w-4 h-4 mr-2" />
-              Add to Cart
+              {t?.catalog?.addToCart || "Add to Cart"}
             </Button>
           </>
         ) : service.result_type === "quotation_required" ? (
           <div className="text-center py-2">
-            <p className="text-sm text-slate-600 mb-3">No supplier mapped</p>
+            <p className="text-sm text-slate-600 mb-3">{t?.catalog?.noPartner || "No supplier mapped"}</p>
             <Button onClick={onRequestQuotation} className="w-full bg-[#FF6B00] hover:bg-[#E65000]" data-testid="service-quotation-btn">
               <Zap className="w-4 h-4 mr-2" />
-              Get Quote
+              {t?.catalog?.getQuote || "Get Quote"}
             </Button>
           </div>
         ) : (
@@ -716,7 +716,7 @@ const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ }) 
             <p className="text-sm text-slate-600 mb-3">Service not available</p>
             <Button onClick={onSubmitRFQ} variant="outline" className="w-full" data-testid="service-rfq-btn">
               <FileText className="w-4 h-4 mr-2" />
-              Submit RFQ
+              {t?.catalog?.submitRfq || "Submit RFQ"}
             </Button>
           </div>
         )}
