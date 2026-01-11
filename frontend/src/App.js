@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
 
 // Pages
@@ -15,6 +15,9 @@ import InfoCoinsPage from "./pages/InfoCoinsPage";
 // Components
 import ChatBot from "./components/ChatBot";
 import { Toaster } from "./components/ui/sonner";
+
+// Language
+import { LanguageProvider } from "./i18n/LanguageContext";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -75,7 +78,7 @@ const ProtectedRoute = ({ children }) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#F8F9FA]">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#007CC3] border-t-transparent"></div>
       </div>
     );
@@ -91,56 +94,58 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <div className="App min-h-screen bg-slate-50">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route
-              path="/catalog"
-              element={
-                <ProtectedRoute>
-                  <CatalogPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/orders"
-              element={
-                <ProtectedRoute>
-                  <OrderHistoryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/repeat-orders"
-              element={
-                <ProtectedRoute>
-                  <RepeatOrdersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/bulk-upload"
-              element={
-                <ProtectedRoute>
-                  <BulkUploadPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/rewards"
-              element={
-                <ProtectedRoute>
-                  <InfoCoinsPage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-          <ChatBot />
-          <Toaster position="top-right" richColors />
-        </div>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <div className="App min-h-screen bg-[#F8F9FA]">
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/catalog"
+                element={
+                  <ProtectedRoute>
+                    <CatalogPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <OrderHistoryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/repeat-orders"
+                element={
+                  <ProtectedRoute>
+                    <RepeatOrdersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bulk-upload"
+                element={
+                  <ProtectedRoute>
+                    <BulkUploadPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/rewards"
+                element={
+                  <ProtectedRoute>
+                    <InfoCoinsPage />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+            <ChatBot />
+            <Toaster position="top-right" richColors />
+          </div>
+        </AuthProvider>
+      </LanguageProvider>
     </BrowserRouter>
   );
 }
