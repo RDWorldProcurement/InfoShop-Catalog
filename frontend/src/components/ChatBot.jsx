@@ -22,6 +22,14 @@ const ChatBot = () => {
   const [sessionId, setSessionId] = useState(null);
   const messagesEndRef = useRef(null);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   // Don't show chatbot on landing page or login page
   const hiddenPages = ["/", "/login"];
   if (hiddenPages.includes(location.pathname)) {
@@ -32,14 +40,6 @@ const ChatBot = () => {
   if (!user) {
     return null;
   }
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const sendMessage = async () => {
     if (!message.trim() || loading) return;
