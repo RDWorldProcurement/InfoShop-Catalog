@@ -337,8 +337,17 @@ const LandingPage = () => {
           <p className="text-slate-500 mb-8">{t.landing.integrationsSubtitle}</p>
           <div className="flex flex-wrap justify-center gap-4">
             {INTEGRATIONS.map((integration, idx) => (
-              <div key={idx} className="flex items-center gap-3 px-6 py-4 bg-white border border-slate-200 rounded-lg hover:border-[#007CC3] hover:shadow-lg transition-all">
-                <img src={integration.logo} alt={integration.name} className="w-8 h-8 object-contain" onError={(e) => e.target.style.display = "none"} />
+              <div 
+                key={idx} 
+                className="flex items-center gap-3 px-6 py-4 bg-white border-2 rounded-lg hover:shadow-lg transition-all"
+                style={{ borderColor: integration.color }}
+              >
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-sm"
+                  style={{ backgroundColor: integration.color }}
+                >
+                  {integration.name.charAt(0)}
+                </div>
                 <span className="font-medium text-slate-700">{integration.name}</span>
               </div>
             ))}
