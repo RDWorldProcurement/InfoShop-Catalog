@@ -78,8 +78,8 @@ const LandingPage = () => {
   const [stats, setStats] = useState({
     total_products: "30M+",
     total_services: "100K+",
-    total_categories: 35,
-    total_brands: 50
+    total_categories: 78,
+    total_brands: "511+"
   });
 
   useEffect(() => {
