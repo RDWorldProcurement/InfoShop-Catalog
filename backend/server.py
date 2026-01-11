@@ -925,6 +925,306 @@ IT_PRODUCTS_CATALOG = [
     }
 ]
 
+# New Vendor Products - Donaldson, Avantor, Markem-Imaje
+NEW_VENDOR_PRODUCTS = [
+    # Donaldson Products - Filtration Solutions
+    {
+        "id": "DON-FILT-001",
+        "name": "Donaldson PowerCore Air Filter Element",
+        "brand": "Donaldson",
+        "category": "Filtration",
+        "sku": "DON-PC-G2",
+        "unspsc_code": "40161500",
+        "base_price": 285.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/920a11b0254f17e72f4a3b2a14027ff42d9fb11f2c45ab67408d34471c2b3991.png",
+        "short_description": "High-efficiency PowerCore G2 air filtration element for heavy equipment",
+        "full_description": "Donaldson PowerCore G2 air filter delivers superior engine protection with breakthrough filtration technology. Compact design provides more filtration capacity in less space with extended service life.",
+        "specifications": {
+            "Filter Media": "Ultra-Web Nanofiber",
+            "Efficiency": "99.99% at 4 microns",
+            "Air Flow": "Up to 2,500 CFM",
+            "Dimensions": "12\" x 8\" x 6\"",
+            "Application": "Heavy Equipment, Trucks, Agriculture",
+            "Service Life": "Up to 3x standard filters",
+            "Operating Temp": "-40°F to +250°F"
+        },
+        "availability": {"in_stock": True, "quantity": 234, "warehouse": "US-Central"},
+        "rating": 4.8,
+        "reviews_count": 456
+    },
+    {
+        "id": "DON-FILT-002",
+        "name": "Donaldson Hydraulic Filter Assembly P566672",
+        "brand": "Donaldson",
+        "category": "Filtration",
+        "sku": "DON-P566672",
+        "unspsc_code": "40161501",
+        "base_price": 178.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/11d201fe0b5b4bef07c03b28000c28ba86ef8177ac5694ca45ad7dae9c8ac9d4.png",
+        "short_description": "Premium hydraulic filter for mobile and industrial equipment",
+        "full_description": "Donaldson Duramax hydraulic filter delivers exceptional contamination control for hydraulic systems. Synteq XP media technology provides high dirt-holding capacity and long service life.",
+        "specifications": {
+            "Filter Media": "Synteq XP Synthetic",
+            "Beta Ratio": "β₁₀ ≥ 1000",
+            "Flow Rate": "50 GPM",
+            "Collapse Pressure": "435 PSI",
+            "Operating Pressure": "150 PSI",
+            "Thread Size": "1-1/4\" SAE-16",
+            "Element Length": "8.66\""
+        },
+        "availability": {"in_stock": True, "quantity": 312, "warehouse": "US-East"},
+        "rating": 4.7,
+        "reviews_count": 289
+    },
+    {
+        "id": "DON-FILT-003",
+        "name": "Donaldson Torit PowerCore Dust Collector TG6",
+        "brand": "Donaldson",
+        "category": "Filtration",
+        "sku": "DON-TG6-5000",
+        "unspsc_code": "40161502",
+        "base_price": 12500.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/254fb871dea9172c9defc7ec40ceb0fe0a7680d955f413aa73cf05fbb0afd386.png",
+        "short_description": "Industrial dust collection system with PowerCore technology",
+        "full_description": "Donaldson Torit PowerCore TG Series dust collector combines PowerCore filtration with pulse-jet cleaning for superior dust collection. Ideal for weld fume, grinding dust, and general manufacturing.",
+        "specifications": {
+            "Airflow Capacity": "5,000 CFM",
+            "Filter Area": "1,500 sq ft",
+            "Efficiency": "99.99% at 0.5 microns",
+            "Motor": "15 HP",
+            "Voltage": "460V 3-Phase",
+            "Dimensions": "72\" W x 48\" D x 120\" H",
+            "Collection Bin": "55 Gallon",
+            "Cleaning": "Automatic Pulse-Jet"
+        },
+        "availability": {"in_stock": True, "quantity": 8, "warehouse": "US-West"},
+        "rating": 4.9,
+        "reviews_count": 127
+    },
+    {
+        "id": "DON-FILT-004",
+        "name": "Donaldson Fuel Filter Kit P553004",
+        "brand": "Donaldson",
+        "category": "Filtration",
+        "sku": "DON-P553004",
+        "unspsc_code": "40161503",
+        "base_price": 89.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/11d201fe0b5b4bef07c03b28000c28ba86ef8177ac5694ca45ad7dae9c8ac9d4.png",
+        "short_description": "High-performance diesel fuel filter with water separator",
+        "full_description": "Donaldson fuel filter kit with integrated water separator provides superior fuel system protection. Advanced media removes water and contaminants to protect injectors and fuel pumps.",
+        "specifications": {
+            "Efficiency": "98.7% at 4 microns",
+            "Water Separation": "95%",
+            "Flow Rate": "90 GPH",
+            "Micron Rating": "4 Micron",
+            "Application": "Diesel Engines",
+            "Thread": "1-14 UNS",
+            "Change Interval": "15,000 miles"
+        },
+        "availability": {"in_stock": True, "quantity": 567, "warehouse": "US-Central"},
+        "rating": 4.6,
+        "reviews_count": 834
+    },
+    # Avantor Products - Laboratory Supplies
+    {
+        "id": "AVT-LAB-001",
+        "name": "Avantor J.T.Baker Reagent Grade Chemicals Kit",
+        "brand": "Avantor",
+        "category": "Laboratory Supplies",
+        "sku": "AVT-JTB-CHEM-KIT",
+        "unspsc_code": "41100000",
+        "base_price": 425.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/bda0f8ddcb8e8de02c4616297d73d60d7a4332948c4c0f8e4d43f9cee4ea1d99.png",
+        "short_description": "Premium laboratory reagent chemical kit for analytical applications",
+        "full_description": "Avantor J.T.Baker reagent grade chemicals kit includes essential solvents and reagents for analytical chemistry. Meets or exceeds ACS specifications for purity and performance.",
+        "specifications": {
+            "Contents": "Acetone, Methanol, Isopropanol, Ethanol, Hexane",
+            "Grade": "ACS Reagent Grade",
+            "Purity": "≥99.5%",
+            "Container Size": "4L each",
+            "Certification": "Certificate of Analysis included",
+            "Storage": "Room temperature, away from heat",
+            "Shelf Life": "36 months"
+        },
+        "availability": {"in_stock": True, "quantity": 156, "warehouse": "US-East"},
+        "rating": 4.9,
+        "reviews_count": 312
+    },
+    {
+        "id": "AVT-LAB-002",
+        "name": "Avantor VWR Borosilicate Glassware Set",
+        "brand": "Avantor",
+        "category": "Laboratory Supplies",
+        "sku": "AVT-VWR-GLASS-SET",
+        "unspsc_code": "41100001",
+        "base_price": 345.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/0c4ded7d30419f0e2db518c70c5b61015ad39e470fb06392d9e7e8ccac2b3d8b.png",
+        "short_description": "Complete laboratory glassware set in premium borosilicate glass",
+        "full_description": "Avantor VWR laboratory glassware set includes essential beakers, flasks, and graduated cylinders in borosilicate 3.3 glass. Designed for chemical resistance and thermal stability.",
+        "specifications": {
+            "Material": "Borosilicate 3.3 Glass",
+            "Contents": "Beakers (6), Erlenmeyer Flasks (4), Graduated Cylinders (3), Volumetric Flasks (4)",
+            "Sizes": "50mL to 1000mL",
+            "Graduations": "White enamel, permanent",
+            "Thermal Resistance": "Up to 500°C",
+            "Chemical Resistance": "High",
+            "Autoclavable": "Yes"
+        },
+        "availability": {"in_stock": True, "quantity": 89, "warehouse": "US-West"},
+        "rating": 4.8,
+        "reviews_count": 234
+    },
+    {
+        "id": "AVT-LAB-003",
+        "name": "Avantor Laboratory PPE Safety Kit",
+        "brand": "Avantor",
+        "category": "Laboratory Supplies",
+        "sku": "AVT-PPE-KIT",
+        "unspsc_code": "46180001",
+        "base_price": 189.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/61f1f2f87a0b950443add33a553f6456b702582c73e0a7351e246e5676760d5a.png",
+        "short_description": "Complete laboratory personal protective equipment kit",
+        "full_description": "Avantor laboratory PPE kit provides comprehensive protection for lab personnel. Includes nitrile gloves, safety goggles, lab coat, and face shield for chemical handling safety.",
+        "specifications": {
+            "Contents": "Lab Coat (1), Safety Goggles (1), Face Shield (1), Nitrile Gloves (100pk), Shoe Covers (50pk)",
+            "Lab Coat Material": "Polypropylene, fluid resistant",
+            "Glove Material": "Nitrile, powder-free",
+            "Glove Thickness": "4 mil",
+            "Goggle Type": "Indirect vent, anti-fog",
+            "Sizes Available": "S, M, L, XL",
+            "Standards": "ANSI Z87.1, ASTM D6319"
+        },
+        "availability": {"in_stock": True, "quantity": 234, "warehouse": "US-Central"},
+        "rating": 4.7,
+        "reviews_count": 456
+    },
+    {
+        "id": "AVT-LAB-004",
+        "name": "Avantor Chromatography Column Kit",
+        "brand": "Avantor",
+        "category": "Laboratory Supplies",
+        "sku": "AVT-CHROM-KIT",
+        "unspsc_code": "41100002",
+        "base_price": 875.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/0c4ded7d30419f0e2db518c70c5b61015ad39e470fb06392d9e7e8ccac2b3d8b.png",
+        "short_description": "HPLC and flash chromatography column starter kit",
+        "full_description": "Avantor chromatography kit includes HPLC columns and flash cartridges for separation and purification. Ideal for pharmaceutical and research applications.",
+        "specifications": {
+            "HPLC Columns": "C18 (3), C8 (2), Silica (2)",
+            "Column Dimensions": "4.6 x 150mm, 4.6 x 250mm",
+            "Particle Size": "5 μm",
+            "Flash Cartridges": "12g, 24g, 40g sizes",
+            "Pore Size": "100Å",
+            "pH Range": "2-8",
+            "Application": "Small molecule separation"
+        },
+        "availability": {"in_stock": True, "quantity": 45, "warehouse": "US-East"},
+        "rating": 4.8,
+        "reviews_count": 167
+    },
+    # Markem-Imaje Products - Industrial Coding & Marking
+    {
+        "id": "MKI-CODE-001",
+        "name": "Markem-Imaje 9450 Continuous Inkjet Printer",
+        "brand": "Markem-Imaje",
+        "category": "Industrial Coding",
+        "sku": "MKI-9450-CIJ",
+        "unspsc_code": "44100000",
+        "base_price": 8500.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/dcbc55f9918f49116b8e9d85b0ef14471548a0e8682df9b9d9489aad94d48172.png",
+        "short_description": "High-speed continuous inkjet printer for product coding",
+        "full_description": "Markem-Imaje 9450 delivers reliable continuous inkjet printing for high-speed production lines. Features automatic ink viscosity control, simple interface, and minimal maintenance requirements.",
+        "specifications": {
+            "Print Speed": "Up to 2,857 characters/second",
+            "Lines of Print": "1-5 lines",
+            "Character Height": "1.5mm to 15mm",
+            "Print Distance": "1-15mm",
+            "Ink Types": "MEK, Acetone, Ethanol-based",
+            "Interface": "7\" Color Touchscreen",
+            "Communication": "Ethernet, RS232, USB",
+            "IP Rating": "IP55"
+        },
+        "availability": {"in_stock": True, "quantity": 23, "warehouse": "US-West"},
+        "rating": 4.8,
+        "reviews_count": 189
+    },
+    {
+        "id": "MKI-CODE-002",
+        "name": "Markem-Imaje SmartLase C350 Laser Coder",
+        "brand": "Markem-Imaje",
+        "category": "Industrial Coding",
+        "sku": "MKI-C350-LASER",
+        "unspsc_code": "44100001",
+        "base_price": 18500.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/f072196072ed9dc67a0130899ab9aacebfdfb10d650b2681c5735dd7f1c7692e.png",
+        "short_description": "CO2 laser marking system for permanent product coding",
+        "full_description": "Markem-Imaje SmartLase C350 provides permanent, high-contrast laser marking on packaging materials. Zero consumables, low maintenance, and environmentally friendly coding solution.",
+        "specifications": {
+            "Laser Type": "CO2, 30W",
+            "Wavelength": "10.6 μm",
+            "Marking Speed": "Up to 1,500 characters/second",
+            "Marking Area": "120mm x 120mm",
+            "Resolution": "1000 dpi",
+            "Focal Length": "170mm, 250mm, 350mm options",
+            "Cooling": "Air-cooled",
+            "Communication": "Ethernet, RS232, Profinet"
+        },
+        "availability": {"in_stock": True, "quantity": 12, "warehouse": "US-Central"},
+        "rating": 4.9,
+        "reviews_count": 98
+    },
+    {
+        "id": "MKI-CODE-003",
+        "name": "Markem-Imaje 2200 Print & Apply Labeler",
+        "brand": "Markem-Imaje",
+        "category": "Industrial Coding",
+        "sku": "MKI-2200-PA",
+        "unspsc_code": "44100002",
+        "base_price": 14500.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/0b758ba424771fe8b64df70bb8728a8b9ce3fde545e92f400ca3dc3dc88a4076.png",
+        "short_description": "Automated label print and apply system for packaging lines",
+        "full_description": "Markem-Imaje 2200 Series print and apply labeler combines high-resolution thermal transfer printing with precision label application. Ideal for case, pallet, and product labeling.",
+        "specifications": {
+            "Print Technology": "Thermal Transfer, 300 dpi",
+            "Print Speed": "Up to 16 IPS",
+            "Label Width": "1\" to 6\"",
+            "Label Length": "0.5\" to 20\"",
+            "Application Methods": "Tamp, Blow, Wipe",
+            "Ribbon Length": "1,500 meters",
+            "Construction": "Stainless Steel",
+            "Communication": "Ethernet, RS232, USB"
+        },
+        "availability": {"in_stock": True, "quantity": 18, "warehouse": "US-East"},
+        "rating": 4.7,
+        "reviews_count": 134
+    },
+    {
+        "id": "MKI-CODE-004",
+        "name": "Markem-Imaje 5800 High-Resolution Inkjet",
+        "brand": "Markem-Imaje",
+        "category": "Industrial Coding",
+        "sku": "MKI-5800-HR",
+        "unspsc_code": "44100003",
+        "base_price": 5200.00,
+        "image_url": "https://static.prod-images.emergentagent.com/jobs/8461848d-5003-4951-88f2-3971eec2f2c7/images/dcbc55f9918f49116b8e9d85b0ef14471548a0e8682df9b9d9489aad94d48172.png",
+        "short_description": "High-resolution large character inkjet for secondary packaging",
+        "full_description": "Markem-Imaje 5800 offers high-resolution printing on porous substrates like corrugated cardboard. Perfect for case coding with crisp graphics, barcodes, and text.",
+        "specifications": {
+            "Resolution": "185 dpi",
+            "Print Height": "Up to 70mm (2.75\")",
+            "Print Speed": "Up to 90 m/min",
+            "Ink Type": "Water-based or Oil-based",
+            "Cartridge Life": "Up to 350,000 prints",
+            "Printheads": "1-4 heads cascadable",
+            "Interface": "10\" Color Touchscreen",
+            "IP Rating": "IP65"
+        },
+        "availability": {"in_stock": True, "quantity": 34, "warehouse": "US-West"},
+        "rating": 4.6,
+        "reviews_count": 212
+    }
+]
+
 # Detailed IT Services Catalog
 IT_SERVICES_CATALOG = [
     {
