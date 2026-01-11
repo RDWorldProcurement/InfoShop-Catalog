@@ -556,7 +556,7 @@ const CatalogPage = () => {
 };
 
 // Product Card Component
-const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotation }) => {
+const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotation, t }) => {
   const [showAlternates, setShowAlternates] = useState(false);
 
   return (
@@ -566,7 +566,7 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
         <div className="absolute top-3 right-3 z-10">
           <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">
             <Star className="w-3 h-3 mr-1 fill-amber-500" />
-            Sponsored
+            {t?.catalog?.sponsored || "Sponsored"}
           </Badge>
         </div>
       )}
@@ -575,7 +575,7 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
         <img src={product.image_url} alt={product.name} className="w-full h-40 object-cover"
              onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400"; }} />
         {product.result_type === "quotation_required" && (
-          <Badge className="absolute top-3 left-3 bg-[#FF6B00]">Quote Required</Badge>
+          <Badge className="absolute top-3 left-3 bg-[#FF6B00]">{t?.catalog?.getQuote || "Quote Required"}</Badge>
         )}
       </div>
       
@@ -605,7 +605,7 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
               </span>
               <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {product.lead_time_days}d
+                {product.lead_time_days}{t?.catalog?.days || "d"}
               </span>
             </div>
 
@@ -618,7 +618,7 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
             {product.alternate_products?.length > 0 && (
               <button onClick={() => setShowAlternates(!showAlternates)} className="text-xs text-[#007CC3] flex items-center gap-1 mb-3 hover:underline">
                 <ChevronDown className={`w-3 h-3 transition-transform ${showAlternates ? 'rotate-180' : ''}`} />
-                {product.alternate_products.length} Alternate(s)
+                {product.alternate_products.length} {t?.catalog?.alternates || "Alternate(s)"}
               </button>
             )}
             
@@ -635,21 +635,21 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
 
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={onCheckInventory} data-testid="check-inventory-btn">
-                Check Stock
+                {t?.catalog?.checkStock || "Check Stock"}
               </Button>
               <Button size="sm" className="flex-1 bg-[#007CC3] hover:bg-[#00629B] text-xs" onClick={onAddToCart} data-testid="add-to-cart-btn">
                 <ShoppingCart className="w-3 h-3 mr-1" />
-                Add
+                {t?.catalog?.addToCart || "Add"}
               </Button>
             </div>
           </>
         ) : (
           <div className="text-center py-3">
             <AlertCircle className="w-8 h-8 text-[#FF6B00] mx-auto mb-2" />
-            <p className="text-sm text-slate-600 mb-3">No delivery partner</p>
+            <p className="text-sm text-slate-600 mb-3">{t?.catalog?.noPartner || "No delivery partner"}</p>
             <Button onClick={onRequestQuotation} className="w-full bg-[#FF6B00] hover:bg-[#E65000] text-sm" data-testid="request-quotation-btn">
               <Zap className="w-4 h-4 mr-2" />
-              Get Quote
+              {t?.catalog?.getQuote || "Get Quote"}
             </Button>
           </div>
         )}
