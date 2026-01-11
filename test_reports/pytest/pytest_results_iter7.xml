@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="12" skipped="0" tests="12" time="0.703" timestamp="2026-01-11T16:55:39.715915+00:00" hostname="agent-env-30e7d10a-d030-47f2-95ba-dccc99fa2c34"><testcase classname="tests.test_translation_api.TestProductTranslation" name="test_products_search_english_default" time="0.071"><failure message="AssertionError: Expected 200, got 403&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:18: in test_products_search_english_default
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+E   AssertionError: Expected 200, got 403
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestProductTranslation" name="test_products_search_french_translation" time="0.042"><failure message="AssertionError: Expected 200, got 403&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:34: in test_products_search_french_translation
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+E   AssertionError: Expected 200, got 403
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestProductTranslation" name="test_products_search_german_translation" time="0.046"><failure message="AssertionError: Expected 200, got 403&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:52: in test_products_search_german_translation
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+E   AssertionError: Expected 200, got 403
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestProductTranslation" name="test_products_search_italian_translation" time="0.039"><failure message="AssertionError: Expected 200, got 403&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:68: in test_products_search_italian_translation
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+E   AssertionError: Expected 200, got 403
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestProductTranslation" name="test_products_search_dutch_translation" time="0.041"><failure message="AssertionError: Expected 200, got 403&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:84: in test_products_search_dutch_translation
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+E   AssertionError: Expected 200, got 403
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestServiceTranslation" name="test_services_search_english_default" time="0.034"><failure message="AssertionError: Expected 200, got 403&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:104: in test_services_search_english_default
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+E   AssertionError: Expected 200, got 403
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestServiceTranslation" name="test_services_search_french_translation" time="0.037"><failure message="AssertionError: Expected 200, got 403&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:118: in test_services_search_french_translation
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+E   AssertionError: Expected 200, got 403
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestServiceTranslation" name="test_services_search_german_translation" time="0.041"><failure message="AssertionError: Expected 200, got 403&#10;assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:134: in test_services_search_german_translation
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+E   AssertionError: Expected 200, got 403
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestTranslationCaching" name="test_translation_caching_performance" time="0.036"><failure message="assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:157: in test_translation_caching_performance
+    assert response1.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestProductImagesCDN" name="test_product_images_use_cdn" time="0.035"><failure message="assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:180: in test_product_images_use_cdn
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestProductSpecifications" name="test_product_has_specifications_in_description" time="0.037"><failure message="assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:207: in test_product_has_specifications_in_description
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="tests.test_translation_api.TestTranslationCompare" name="test_french_translation_differs_from_english" time="0.040"><failure message="assert 403 == 200&#10; +  where 403 = &lt;Response [403]&gt;.status_code">tests/test_translation_api.py:244: in test_french_translation_differs_from_english
+    assert en_response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase></testsuite></testsuites>
