@@ -557,12 +557,30 @@ const CatalogPage = () => {
   );
 };
 
-// Product Card Component
+// Product Card Component with Amazon-like display
 const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotation, t }) => {
+  const [showSpecs, setShowSpecs] = useState(false);
   const [showAlternates, setShowAlternates] = useState(false);
 
+  // Generate star rating display
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalf = rating % 1 >= 0.5;
+    for (let i = 0; i < 5; i++) {
+      if (i < fullStars) {
+        stars.push(<Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />);
+      } else if (i === fullStars && hasHalf) {
+        stars.push(<Star key={i} className="w-3 h-3 fill-amber-400/50 text-amber-400" />);
+      } else {
+        stars.push(<Star key={i} className="w-3 h-3 text-gray-300" />);
+      }
+    }
+    return stars;
+  };
+
   return (
-    <Card className={`overflow-hidden hover:shadow-xl transition-all group ${product.is_sponsored ? 'ring-2 ring-amber-200' : ''}`} data-testid={`product-card-${product.id}`}>
+    <Card className={`overflow-hidden hover:shadow-xl transition-all group relative ${product.is_sponsored ? 'ring-2 ring-amber-200' : ''}`} data-testid={`product-card-${product.id}`}>
       {/* Sponsored Badge */}
       {product.is_sponsored && (
         <div className="absolute top-3 right-3 z-10">
@@ -573,75 +591,162 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
         </div>
       )}
       
-      <div className="relative">
-        <img src={product.image_url} alt={product.name} className="w-full h-40 object-cover"
-             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400"; }} />
+      {/* Product Image */}
+      <div className="relative bg-white p-4">
+        <img 
+          src={product.image_url} 
+          alt={product.name} 
+          className="w-full h-48 object-contain mx-auto"
+          onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80"; }} 
+        />
         {product.result_type === "quotation_required" && (
-          <Badge className="absolute top-3 left-3 bg-[#FF6B00]">{t?.catalog?.getQuote || "Quote Required"}</Badge>
+          <Badge className="absolute top-2 left-2 bg-[#FF6B00]">{t?.catalog?.getQuote || "Quote Required"}</Badge>
+        )}
+        {product.availability?.in_stock && (
+          <Badge className="absolute bottom-2 left-2 bg-green-600 text-white text-xs">
+            {t?.catalog?.inStock || "In Stock"}
+          </Badge>
         )}
       </div>
       
-      <CardContent className="p-4">
+      <CardContent className="p-4 border-t">
         {/* Brand with logo */}
         <div className="flex items-center gap-2 mb-2">
           {product.brand_logo && (
-            <img src={product.brand_logo} alt="" className="w-4 h-4 object-contain" onError={(e) => e.target.style.display = 'none'} />
+            <img 
+              src={product.brand_logo} 
+              alt={product.brand} 
+              className="h-5 w-auto object-contain" 
+              onError={(e) => e.target.style.display = 'none'} 
+            />
           )}
-          <Badge variant="outline" className="text-xs">{product.brand}</Badge>
+          <Badge variant="outline" className="text-xs font-medium">{product.brand}</Badge>
         </div>
         
-        <h3 className="font-semibold text-slate-900 mb-1 line-clamp-2 text-sm" style={{ fontFamily: 'Manrope' }}>{product.name}</h3>
+        {/* Product Name */}
+        <h3 className="font-semibold text-slate-900 mb-2 line-clamp-2 text-sm leading-tight hover:text-[#007CC3] cursor-pointer" style={{ fontFamily: 'Manrope' }}>
+          {product.name}
+        </h3>
         
-        {/* UNSPSC Code */}
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded font-mono">UNSPSC: {product.unspsc_code}</span>
+        {/* Rating */}
+        {product.rating && (
+          <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center">{renderStars(product.rating)}</div>
+            <span className="text-xs text-[#007CC3] hover:underline cursor-pointer">
+              {product.reviews_count?.toLocaleString()} reviews
+            </span>
+          </div>
+        )}
+        
+        {/* Short Description */}
+        {product.short_description && (
+          <p className="text-xs text-slate-600 mb-2 line-clamp-2">{product.short_description}</p>
+        )}
+        
+        {/* UNSPSC Code & Category */}
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-mono">UNSPSC: {product.unspsc_code}</span>
+          <span className="text-xs text-slate-400">•</span>
+          <span className="text-xs text-slate-500">{product.category}</span>
         </div>
-        
-        <p className="text-xs text-slate-500 mb-3">{product.category}</p>
 
-        {product.result_type === "with_partner" ? (
-          <>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xl font-bold text-[#007CC3]" style={{ fontFamily: 'Manrope' }}>
-                {product.currency_symbol}{product.price?.toFixed(2)}
-              </span>
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {product.lead_time_days}{t?.catalog?.days || "d"}
-              </span>
-            </div>
-
-            {product.delivery_partners?.length > 1 && (
-              <div className="mb-3 text-xs">
-                <span className="text-slate-500">{product.delivery_partners.length} delivery options available</span>
-              </div>
-            )}
-
-            {product.alternate_products?.length > 0 && (
-              <button onClick={() => setShowAlternates(!showAlternates)} className="text-xs text-[#007CC3] flex items-center gap-1 mb-3 hover:underline">
-                <ChevronDown className={`w-3 h-3 transition-transform ${showAlternates ? 'rotate-180' : ''}`} />
-                {product.alternate_products.length} {t?.catalog?.alternates || "Alternate(s)"}
-              </button>
-            )}
-            
-            {showAlternates && (
-              <div className="space-y-1 mb-3">
-                {product.alternate_products.map((alt, idx) => (
-                  <div key={idx} className="p-2 bg-green-50 rounded text-xs flex justify-between">
-                    <span className="text-green-700">{alt.brand}</span>
-                    <span className="font-semibold text-green-700">{product.currency_symbol}{alt.price?.toFixed(2)}</span>
+        {/* Specifications Toggle */}
+        {product.specifications && Object.keys(product.specifications).length > 0 && (
+          <div className="mb-3">
+            <button 
+              onClick={() => setShowSpecs(!showSpecs)} 
+              className="text-xs text-[#007CC3] flex items-center gap-1 hover:underline"
+            >
+              <Info className="w-3 h-3" />
+              {showSpecs ? 'Hide' : 'View'} {t?.catalog?.specifications || "Specifications"}
+              <ChevronDown className={`w-3 h-3 transition-transform ${showSpecs ? 'rotate-180' : ''}`} />
+            </button>
+            {showSpecs && (
+              <div className="mt-2 p-2 bg-slate-50 rounded-lg text-xs space-y-1 max-h-32 overflow-y-auto">
+                {Object.entries(product.specifications).map(([key, value]) => (
+                  <div key={key} className="flex justify-between">
+                    <span className="text-slate-500">{key}:</span>
+                    <span className="font-medium text-slate-700">{value}</span>
                   </div>
                 ))}
               </div>
             )}
+          </div>
+        )}
 
+        {product.result_type === "with_partner" ? (
+          <>
+            {/* Price Section */}
+            <div className="flex items-end justify-between mb-3">
+              <div>
+                <span className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope' }}>
+                  {product.currency_symbol}{product.price?.toFixed(2)}
+                </span>
+                <span className="text-xs text-slate-500 ml-1">/{product.unit}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center gap-1">
+                  <Truck className="w-3 h-3" />
+                  {product.lead_time_days} {t?.catalog?.days || "days"}
+                </span>
+              </div>
+            </div>
+
+            {/* Availability Info */}
+            {product.availability && (
+              <div className="text-xs text-slate-500 mb-3">
+                <span className="text-green-600 font-medium">
+                  {product.availability.quantity} {t?.catalog?.units || "units"}
+                </span>
+                {' '}available • Ships from {product.availability.warehouse}
+              </div>
+            )}
+
+            {/* Delivery Partners */}
+            {product.delivery_partners?.length > 1 && (
+              <div className="mb-3 text-xs text-slate-500">
+                <Truck className="w-3 h-3 inline mr-1" />
+                {product.delivery_partners.length} delivery options from {product.currency_symbol}
+                {Math.min(...product.delivery_partners.map(dp => dp.price)).toFixed(2)}
+              </div>
+            )}
+
+            {/* Alternates */}
+            {product.alternate_products?.length > 0 && (
+              <>
+                <button 
+                  onClick={() => setShowAlternates(!showAlternates)} 
+                  className="text-xs text-[#007CC3] flex items-center gap-1 mb-2 hover:underline"
+                >
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showAlternates ? 'rotate-180' : ''}`} />
+                  {product.alternate_products.length} {t?.catalog?.alternates || "Alternate(s)"} - Save up to {
+                    Math.round((1 - Math.min(...product.alternate_products.map(a => a.price)) / product.price) * 100)
+                  }%
+                </button>
+                {showAlternates && (
+                  <div className="space-y-1 mb-3">
+                    {product.alternate_products.map((alt, idx) => (
+                      <div key={idx} className="p-2 bg-green-50 rounded text-xs flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          {alt.brand_logo && <img src={alt.brand_logo} alt="" className="h-3 w-auto" onError={(e) => e.target.style.display = 'none'} />}
+                          <span className="text-green-700">{alt.brand}</span>
+                        </div>
+                        <span className="font-semibold text-green-700">{product.currency_symbol}{alt.price?.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Action Buttons */}
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={onCheckInventory} data-testid="check-inventory-btn">
                 {t?.catalog?.checkStock || "Check Stock"}
               </Button>
-              <Button size="sm" className="flex-1 bg-[#007CC3] hover:bg-[#00629B] text-xs" onClick={onAddToCart} data-testid="add-to-cart-btn">
+              <Button size="sm" className="flex-1 bg-[#FF9900] hover:bg-[#FF6B00] text-white text-xs font-medium" onClick={onAddToCart} data-testid="add-to-cart-btn">
                 <ShoppingCart className="w-3 h-3 mr-1" />
-                {t?.catalog?.addToCart || "Add"}
+                {t?.catalog?.addToCart || "Add to Cart"}
               </Button>
             </div>
           </>
