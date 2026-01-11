@@ -37,7 +37,7 @@ const CATEGORY_ICONS = {
   "Cleaning & Janitorial": Sparkles,
   "HVAC & Refrigeration": Thermometer,
   "Hydraulics & Pneumatics": Gauge,
-  "Laboratory Supplies": Flask,
+  "Laboratory Supplies": Beaker,
   "Lubrication": Droplet,
   "Material Handling": Package,
   "Motors & Drives": Cpu,
