@@ -14,42 +14,43 @@ import {
   Palette, Monitor, Box, Factory, Languages, Play
 } from "lucide-react";
 
-// Realistic product images
+// Realistic product images - using verified working Unsplash URLs
 const PRODUCT_IMAGES = {
-  bearings: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
-  tools: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400",
-  safety: "https://images.unsplash.com/photo-1578874691223-64558a3ca096?w=400",
-  electrical: "https://images.unsplash.com/photo-1555664424-778a1e5e1b48?w=400",
-  motors: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400",
-  automation: "https://images.unsplash.com/photo-1565514020179-026b92b2d0b3?w=400"
+  bearings: "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400&h=400&fit=crop",
+  tools: "https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=400&h=400&fit=crop",
+  safety: "https://images.unsplash.com/photo-1618090584126-129cd1f3fbae?w=400&h=400&fit=crop",
+  electrical: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=400&fit=crop",
+  motors: "https://images.unsplash.com/photo-1581093458791-9d42e3c2fd45?w=400&h=400&fit=crop",
+  automation: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=400&fit=crop"
 };
 
 const SERVICE_IMAGES = {
-  facilities: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400",
-  it: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400",
-  logistics: "https://images.unsplash.com/photo-4481259/pexels-photo-4481259.jpeg?w=400",
-  marketing: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400"
+  facilities: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=400&fit=crop",
+  it: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=400&fit=crop",
+  logistics: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&h=400&fit=crop",
+  marketing: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=400&fit=crop"
 };
 
+// Brand data with colors (no external logos - they get blocked)
 const BRANDS = [
-  { name: "SKF", logo: "https://logo.clearbit.com/skf.com" },
-  { name: "3M", logo: "https://logo.clearbit.com/3m.com" },
-  { name: "Bosch", logo: "https://logo.clearbit.com/bosch.com" },
-  { name: "Siemens", logo: "https://logo.clearbit.com/siemens.com" },
-  { name: "Honeywell", logo: "https://logo.clearbit.com/honeywell.com" },
-  { name: "ABB", logo: "https://logo.clearbit.com/abb.com" },
-  { name: "Parker", logo: "https://logo.clearbit.com/parker.com" },
-  { name: "Schneider", logo: "https://logo.clearbit.com/se.com" },
-  { name: "Fluke", logo: "https://logo.clearbit.com/fluke.com" },
-  { name: "DeWalt", logo: "https://logo.clearbit.com/dewalt.com" },
+  { name: "SKF", color: "#005B94" },
+  { name: "3M", color: "#FF0000" },
+  { name: "Bosch", color: "#E30016" },
+  { name: "Siemens", color: "#009999" },
+  { name: "Honeywell", color: "#E31837" },
+  { name: "ABB", color: "#FF000F" },
+  { name: "Parker", color: "#004B87" },
+  { name: "Schneider", color: "#3DCD58" },
+  { name: "Fluke", color: "#FFC20E" },
+  { name: "DeWalt", color: "#FEBD17" },
 ];
 
 const INTEGRATIONS = [
-  { name: "Coupa", logo: "https://logo.clearbit.com/coupa.com" },
-  { name: "SAP Ariba", logo: "https://logo.clearbit.com/ariba.com" },
-  { name: "SAP ERP", logo: "https://logo.clearbit.com/sap.com" },
-  { name: "Ivalua", logo: "https://logo.clearbit.com/ivalua.com" },
-  { name: "Oracle", logo: "https://logo.clearbit.com/oracle.com" },
+  { name: "Coupa", color: "#0070C0" },
+  { name: "SAP Ariba", color: "#F0AB00" },
+  { name: "SAP ERP", color: "#0077B5" },
+  { name: "Ivalua", color: "#00B2A9" },
+  { name: "Oracle", color: "#F80000" },
 ];
 
 const FEATURED_PRODUCTS = [
