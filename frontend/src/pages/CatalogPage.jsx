@@ -87,8 +87,8 @@ const CatalogPage = () => {
         const response = await axios.get(`${API}/products/search`, {
           params: {
             q: searchQuery,
-            category: selectedCategory || undefined,
-            brand: selectedBrand || undefined,
+            category: selectedCategory !== "all" ? selectedCategory : undefined,
+            brand: selectedBrand !== "all" ? selectedBrand : undefined,
             limit: 20
           }
         });
