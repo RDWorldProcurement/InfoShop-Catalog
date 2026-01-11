@@ -66,13 +66,20 @@ const LoginPage = () => {
     <div className="min-h-screen flex">
       {/* Left Panel - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#007CC3] to-[#004C79] p-12 flex-col justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-            <Package className="w-7 h-7 text-white" />
+        <div className="space-y-6">
+          <img 
+            src="https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png" 
+            alt="Infosys BPM"
+            className="h-10 brightness-200"
+          />
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <Package className="w-7 h-7 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-white" style={{ fontFamily: 'Manrope' }}>
+              OMNISupply.io
+            </span>
           </div>
-          <span className="text-2xl font-bold text-white" style={{ fontFamily: 'Manrope' }}>
-            OMNISupply.io
-          </span>
         </div>
         
         <div className="space-y-8">
