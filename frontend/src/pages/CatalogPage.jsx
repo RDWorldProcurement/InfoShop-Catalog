@@ -104,15 +104,27 @@ const CatalogPage = () => {
     try {
       if (activeTab === "products") {
         const response = await axios.get(`${API}/products/search`, {
-          params: { q: searchQuery, category: selectedCategory !== "all" ? selectedCategory : undefined,
-                   brand: selectedBrand !== "all" ? selectedBrand : undefined, limit: 20 }
+          params: { 
+            q: searchQuery, 
+            category: selectedCategory !== "all" ? selectedCategory : undefined,
+            brand: selectedBrand !== "all" ? selectedBrand : undefined, 
+            limit: 20,
+            lang: language 
+          }
         });
         setProducts(response.data.results);
+        if (response.data.categories) setCategories(response.data.categories);
       } else {
         const response = await axios.get(`${API}/services/search`, {
-          params: { q: searchQuery, category: selectedCategory !== "all" ? selectedCategory : undefined, limit: 20 }
+          params: { 
+            q: searchQuery, 
+            category: selectedCategory !== "all" ? selectedCategory : undefined, 
+            limit: 20,
+            lang: language 
+          }
         });
         setServices(response.data.results);
+        if (response.data.categories) setServiceCategories(response.data.categories);
       }
     } catch (error) {
       toast.error("Search failed. Please try again.");
