@@ -926,7 +926,8 @@ async def search_products(
         results.append({
             "id": product["id"],
             "name": product["name"],
-            "description": product["description"],
+            "short_description": product.get("short_description", product.get("full_description", "")[:100]),
+            "full_description": product.get("full_description", ""),
             "category": product["category"],
             "brand": product["brand"],
             "brand_logo": product["brand_logo"],
@@ -938,6 +939,11 @@ async def search_products(
             "currency_symbol": currency["symbol"],
             "unit": product["unit"],
             "image_url": product["image_url"],
+            "specifications": product.get("specifications", {}),
+            "availability": product.get("availability", {"in_stock": True, "quantity": random.randint(10, 500)}),
+            "rating": product.get("rating", round(random.uniform(4.0, 5.0), 1)),
+            "reviews_count": product.get("reviews_count", random.randint(10, 500)),
+            "features": product.get("features", []),
             "spec_document_url": product["spec_document_url"],
             "lead_time_days": lead_time,
             "delivery_partners": [
