@@ -474,6 +474,14 @@ const CatalogPage = () => {
                   onAddToCart={() => addToCart(product)}
                   onCheckInventory={() => checkInventory(product)}
                   onRequestQuotation={() => { setSelectedProduct(product); setQuotationModalOpen(true); }}
+                  onCompare={() => {
+                    if (compareList.find(p => p.id === product.id)) {
+                      removeFromCompare(product.id);
+                    } else {
+                      addToCompare(product);
+                    }
+                  }}
+                  isInCompare={!!compareList.find(p => p.id === product.id)}
                   t={t}
                 />
               ))}
