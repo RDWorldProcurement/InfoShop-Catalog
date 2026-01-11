@@ -1091,8 +1091,10 @@ async def search_services(
             "unspsc_name": it_service["unspsc_name"],
             "supplier_name": it_service.get("supplier_name"),
             "supplier_logo": it_service.get("supplier_logo"),
+            "supplier_color": it_service.get("supplier_color", "#007CC3"),
             "unit_of_measure": it_service["pricing_model"],
             "base_price": it_service["base_price"],
+            "image_url": it_service.get("image_url", DEFAULT_SERVICE_IMAGE),
             "service_includes": it_service.get("service_includes", []),
             "availability": it_service.get("availability", {}),
             "rating": it_service.get("rating", 4.5),
@@ -1102,6 +1104,8 @@ async def search_services(
     
     # Add regular services
     for service in SERVICES_DATA:
+        # Get image URL for the service category
+        service_image = SERVICE_IMAGE_URLS.get(service["category"], DEFAULT_SERVICE_IMAGE)
         all_services.append({
             "id": str(uuid.uuid4()),
             "name": service["name"],
@@ -1112,8 +1116,10 @@ async def search_services(
             "unspsc_name": service["unspsc_name"],
             "supplier_name": service["supplier_name"],
             "supplier_logo": None,
+            "supplier_color": "#007CC3",
             "unit_of_measure": service["unit_of_measure"],
             "base_price": service["base_price"],
+            "image_url": service_image,
             "service_includes": [],
             "availability": {"available": True, "lead_time_days": random.randint(1, 7)},
             "rating": round(random.uniform(4.0, 5.0), 1),
