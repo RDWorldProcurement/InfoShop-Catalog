@@ -67,11 +67,14 @@ const LoginPage = () => {
       {/* Left Panel - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#007CC3] to-[#004C79] p-12 flex-col justify-between">
         <div className="space-y-6">
-          <img 
-            src="https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png" 
-            alt="Infosys BPM"
-            className="h-10 brightness-200"
-          />
+          {/* Prominent Infosys BPM Logo */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 inline-block">
+            <img 
+              src="https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png" 
+              alt="Infosys BPM"
+              className="h-14 brightness-200 drop-shadow-lg"
+            />
+          </div>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
               <Package className="w-7 h-7 text-white" />
@@ -105,6 +108,21 @@ const LoginPage = () => {
               </div>
               <span>Real-time inventory & pricing from multiple partners</span>
             </div>
+          </div>
+
+          {/* Admin Access Info */}
+          <div className="mt-8 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 bg-[#FF6B00] rounded-lg flex items-center justify-center">
+                <Info className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-white font-semibold text-sm">Admin Portal Access</span>
+            </div>
+            <div className="text-white/90 text-sm space-y-1.5">
+              <p><span className="text-white/60">Email:</span> <span className="font-mono bg-white/10 px-2 py-0.5 rounded">admin@omnisupply.io</span></p>
+              <p><span className="text-white/60">Password:</span> <span className="font-mono bg-white/10 px-2 py-0.5 rounded">admin123</span></p>
+            </div>
+            <p className="text-white/50 text-xs mt-2">For vendor catalog uploads & management</p>
           </div>
         </div>
 

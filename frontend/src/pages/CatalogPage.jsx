@@ -749,13 +749,13 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
             )}
 
             {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={onCheckInventory} data-testid="check-inventory-btn">
-                {t?.catalog?.checkStock || "Check Stock"}
-              </Button>
-              <Button size="sm" className="flex-1 bg-[#FF9900] hover:bg-[#FF6B00] text-white text-xs font-medium" onClick={onAddToCart} data-testid="add-to-cart-btn">
-                <ShoppingCart className="w-3 h-3 mr-1" />
+            <div className="flex flex-col gap-2">
+              <Button size="sm" className="w-full bg-[#FF9900] hover:bg-[#FF6B00] text-white text-sm font-semibold py-2.5 shadow-md hover:shadow-lg transition-all" onClick={onAddToCart} data-testid="add-to-cart-btn">
+                <ShoppingCart className="w-4 h-4 mr-2" />
                 {t?.catalog?.addToCart || "Add to Cart"}
+              </Button>
+              <Button variant="outline" size="sm" className="w-full text-xs py-2 border-slate-300 hover:bg-slate-50" onClick={onCheckInventory} data-testid="check-inventory-btn">
+                {t?.catalog?.checkStock || "Check Stock"}
               </Button>
             </div>
           </>
