@@ -174,12 +174,17 @@ SERVICE_IMAGE_URLS = {
     "Corporate & Business Support Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/49c83afc1a588e3c2810a205953d952ac31ad730ca2f9871863edeeea2072a83.png",
     "Digital Marketing & Creative Agency Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/516a358136877fc314216c27facefe3422f8dfa69a45e5553584d72a437e9fce.png",
     "Facilities Management & Workplace Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/23544d6096e596b6e3954fec76d55a7fa874df0072512cd79110a2a41cce3b44.png",
-    "HSE, Quality & Compliance Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/fe8d00e1aa563322f54f4f711f9ca62d6e19e4e650e77212f58c422838058d38.png",
+    "HSE, Quality & Compliance Services": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/1e0527ecaf208bd7905092e337f70a54eabef0782a81bd6e510c8e4d5c3c18ac.png",
     "IT & Workplace Technology Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/cff7a5158c43f81799d59a99494279b2c5f255b2610fe406a1ffe6934277c4a7.png",
-    "Logistics, Warehouse & Supply Chain Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/4ccc2dd9b16b78fb703249f4d7c2bc9d3f841939480ecd0ca75cf4f628a370cc.png",
+    "Logistics, Warehouse & Supply Chain Services": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/6810b3362e86e8ba23010897c9d6d3718dce4d1803e090213f94464944c1175b.png",
     "Temp Labor across Technical Skilled Capabilities": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/ec1d202cfaeb46233ae208411d641185f676c426d6219f30dc8a7f6d57ccaa7b.png",
     "Server Installation": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/a1c30bd322a62ea6d441b12da74c66ca96707140958e1737c0d9a286f041a795.png",
     "WiFi Setup": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/88c4a88606ac13bb8e539641523213064945b830124a9c902aa9147532aa3c49.png",
+    "Data Center Services": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/45b8605364d7a481ab4a4bf15be73f59f9761da18220b1efb363c134d7ce0fb4.png",
+    "Equipment Maintenance": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/fd8c452c65505c4fa649fae356b50b7dcc945b4ca0d180088866270a0b7d86f5.png",
+    "Training Services": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/8d3d10c922ac4516e87dff834b0b0f3d00633c1032b7667687f506addb1e98b3.png",
+    "Quality Control": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/1e0527ecaf208bd7905092e337f70a54eabef0782a81bd6e510c8e4d5c3c18ac.png",
+    "Commercial Cleaning": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/124d0636fdb6759f0b0e809e00fe07c91c12562a510f2da1e68cc2cb7a0fd266.png",
 }
 
 # Default fallback service image
