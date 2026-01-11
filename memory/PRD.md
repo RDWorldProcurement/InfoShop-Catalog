@@ -1,7 +1,7 @@
 # OMNISupply.io - Product Requirements Document
 
 ## Original Problem Statement
-Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys Limited customers, offering 30M+ Industrial MRO Products, OEM Spare Parts, and 100K+ Rate Card Enabled Services with Infosys Preferred Pricing based on global spend aggregation.
+Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys Limited customers, offering 30M+ Industrial MRO Products, OEM Spare Parts, and 100K+ Professional Services with Infosys Preferred Pricing.
 
 ## User Personas
 1. **Procurement Teams** - Searching and ordering MRO products in bulk
@@ -10,83 +10,81 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
 4. **Operations Staff** - Day-to-day ordering of consumables and spare parts
 
 ## Core Requirements
-1. Landing Page with platform overview, categories, brands, services, and ERP integrations
-2. Login with demo credentials and country selection for multi-currency support
-3. eCatalog with Products (3M+) and Services (100K+) search
-4. Product distribution: 70% with delivery partners, 20% quotation required, 10% RFQ
-5. Service distribution: 40% with supplier, 10% quotation, 50% RFQ
-6. Order History, Repeat Orders (weekly/monthly/quarterly), Bulk Upload
-7. InfoCoins rewards program
-8. InfoConnect AI Chatbot
+1. Landing Page with Products AND Services prominence
+2. Login with demo credentials and country selection for multi-currency
+3. eCatalog with Products (30M+) and Services (100K+) search
+4. UNSPSC codes displayed on all products and services
+5. Cart with PunchOut transfer (Coupa, SAP Ariba, SAP ERP, Ivalua, Oracle)
+6. Sponsored products/services (subtle promotion)
+7. Brand logos and category icons
+8. Order Management with Quotations/RFQs with different statuses
 
 ## What's Been Implemented (January 11, 2025)
-### Backend (FastAPI + MongoDB)
-- [x] JWT Authentication with demo login
-- [x] Multi-country currency support (15 countries)
-- [x] Product search API with 70/20/10% distribution logic
-- [x] Service search API with 40/10/50% distribution logic
-- [x] Delivery partners with price/lead-time inverse relationship
-- [x] Alternate product suggestions
-- [x] Real-time inventory check API
-- [x] RFQ submission system
-- [x] Quotation request system
-- [x] Order history management
-- [x] Repeat order scheduling
-- [x] Bulk upload with Excel processing
-- [x] InfoCoins rewards and redemption
-- [x] InfoConnect chatbot with GPT-5.2 (Emergent LLM Key)
-- [x] Platform statistics API
 
-### Frontend (React + Shadcn UI)
-- [x] Landing page with Infosys BPM branding
-- [x] Login page with demo credentials display
-- [x] Catalog page with product/service tabs
-- [x] Product cards with delivery partners, alternates
-- [x] RFQ and Quotation modals
-- [x] Order History page
-- [x] Repeat Orders management page
-- [x] Bulk Upload with drag-drop
-- [x] InfoCoins rewards redemption page
-- [x] ChatBot widget (toggleable)
-- [x] Responsive sidebar navigation
+### Phase 1 - MVP
+- [x] Landing page with hero, stats, categories, brands
+- [x] JWT Authentication with demo login
+- [x] Product/Service catalog with 70/20/10% distribution
+- [x] Order history, repeat orders, bulk upload
+- [x] InfoCoins rewards program
+- [x] InfoConnect AI chatbot (GPT-5.2)
+
+### Phase 2 - Enhancements
+- [x] **Infosys BPM Logo** on all screens (header, sidebar, footer)
+- [x] **UNSPSC Codes** displayed on all products and services
+- [x] **Shopping Cart** functionality with add/remove items
+- [x] **PunchOut Transfer** to Coupa, SAP Ariba, SAP ERP, Ivalua, Oracle
+- [x] **"Pending Customer PO"** status after cart transfer
+- [x] **Sponsored Items** - 10% of results marked with subtle amber badge
+- [x] **Brand Logos** in filters and product cards
+- [x] **Bento Grid Layout** highlighting both Products AND Services equally
+- [x] **Enhanced Order History** with tabs:
+  - Orders tab with status tracking
+  - PunchOut Transfers tab showing transferred carts
+  - Quotations tab with pending/received responses
+  - RFQs tab with pending/received responses
+- [x] **Add to Cart from Quotations** when response received
+- [x] **Cancel Quotation** with reason/comments
+- [x] **Services Catalog** prominently featured on landing page
+
+### API Endpoints
+- POST /api/auth/login - Login with country selection
+- GET /api/products/search - Products with UNSPSC codes
+- GET /api/services/search - Services with UNSPSC codes
+- GET /api/cart - Get cart items
+- POST /api/cart/add - Add item to cart
+- DELETE /api/cart/remove/{id} - Remove from cart
+- POST /api/cart/transfer - PunchOut transfer to ERP
+- GET /api/cart/transfers - List cart transfers
+- GET /api/punchout/systems - Available PunchOut systems
+- GET /api/quotation/list - List quotations with statuses
+- POST /api/quotation/{id}/respond - Accept or cancel quotation
+- GET /api/rfq/list - List RFQs with statuses
 
 ## Technology Stack
 - **Backend**: FastAPI, MongoDB, JWT, emergentintegrations
 - **Frontend**: React, Tailwind CSS, Shadcn UI
 - **AI**: GPT-5.2 via Emergent LLM Key
-- **Data**: Mock MRO products (35 categories, 54 brands)
+- **Branding**: Infosys BPM colors (#007CC3, #FF6B00)
 
 ## Prioritized Backlog
 
-### P0 (Must Have - Done)
-- [x] Core product/service catalog
-- [x] Authentication flow
-- [x] Search and filtering
-
-### P1 (High Priority - For Next Phase)
-- [ ] Add to cart functionality
-- [ ] Checkout flow with order confirmation
-- [ ] Email notifications for RFQs and orders
+### P1 (Next Phase)
+- [ ] Product detail page with full specifications
+- [ ] Order tracking with timeline/status updates
+- [ ] Email notifications for RFQs/quotations
 - [ ] User profile management
 - [ ] Product favorites/wishlist
 
-### P2 (Medium Priority)
-- [ ] Advanced search with filters
-- [ ] Price comparison across partners
-- [ ] Order tracking with timeline
-- [ ] Dashboard with analytics
+### P2 (Future)
+- [ ] Advanced search with multiple filters
 - [ ] Export reports (PDF/Excel)
-
-### P3 (Nice to Have)
-- [ ] PunchOut catalog integration
-- [ ] ERP system connectors
-- [ ] Mobile responsive optimization
+- [ ] Dashboard with analytics
 - [ ] Multi-language support
-- [ ] Advanced chatbot training
+- [ ] Mobile responsive optimization
 
 ## Next Tasks
-1. Implement cart and checkout flow
-2. Add order status tracking
-3. Integrate email notifications
-4. Enhance chatbot with product-specific knowledge
-5. Add product image gallery in detail view
+1. Add product detail modal with full specs
+2. Implement order tracking timeline
+3. Add email notifications
+4. Enhance chatbot with product knowledge
