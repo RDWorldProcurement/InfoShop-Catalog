@@ -203,6 +203,8 @@ MRO_CATEGORIES = [
     {"name": "IT Equipment - Networking", "unspsc": "43222600", "icon": "wifi"},
     {"name": "IT Equipment - Servers", "unspsc": "43211800", "icon": "server"},
     {"name": "IT Equipment - Peripherals", "unspsc": "43211700", "icon": "keyboard"},
+    {"name": "Filtration", "unspsc": "40161500", "icon": "filter"},
+    {"name": "Industrial Coding", "unspsc": "44100000", "icon": "printer"},
 ]
 
 # MRO Brands - using text-based display (logos removed due to external service reliability issues)
