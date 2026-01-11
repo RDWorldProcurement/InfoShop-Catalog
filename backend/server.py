@@ -127,6 +127,43 @@ MRO_BRANDS = [
     {"name": "Logitech", "logo": None, "color": "#00B8FC"},
 ]
 
+# Product images hosted on Emergent CDN (guaranteed to work)
+PRODUCT_IMAGE_URLS = {
+    "Bearings & Power Transmission": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7ac37795d30541fe96a379b8ebc9a669a9f5534a1c47d157f2dcfce68eda8fde.png",
+    "Electrical & Lighting": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/562b9e992a87f1bfff8fdab06372e7f83f30fc65f6c717042f84a02c0dc0d13a.png",
+    "Fasteners & Hardware": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/77f9d6c3fedcd85729745ffaf16ab46b268ba0176386a36e9d3bd3d1b2e6c293.png",
+    "Hand Tools": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/075214c7f6dce1e67075c623d025158b3d3cac86e45217650f7d58db7662f1d6.png",
+    "Power Tools": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7428451866e1f3032551dea27aa96a5ca7d02246c6de0264aee39902b9eaacc1.png",
+    "Safety & PPE": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/61099fb65121a227a0c6e32140edac60830b2fd0c6269420c02ee34b2e9933a2.png",
+    "Abrasives": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7ac37795d30541fe96a379b8ebc9a669a9f5534a1c47d157f2dcfce68eda8fde.png",
+    "Adhesives & Sealants": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/e937d26ba9dc90a270d3f1672abc004a7cbd5351be7177df115648759a328877.png",
+    "Cleaning & Janitorial": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/640a7752a6b06696c964fa101d2ac30566e54c02284234bfb6699da588d0f2e9.png",
+    "HVAC & Refrigeration": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/5799cc3ba8a91a189fdb881e022a3f566437398eff99e81d6dc937471ef1340f.png",
+    "Hydraulics & Pneumatics": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7ac37795d30541fe96a379b8ebc9a669a9f5534a1c47d157f2dcfce68eda8fde.png",
+    "Laboratory Supplies": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/640a7752a6b06696c964fa101d2ac30566e54c02284234bfb6699da588d0f2e9.png",
+    "Lubrication": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/e937d26ba9dc90a270d3f1672abc004a7cbd5351be7177df115648759a328877.png",
+    "Material Handling": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/77f9d6c3fedcd85729745ffaf16ab46b268ba0176386a36e9d3bd3d1b2e6c293.png",
+    "Motors & Drives": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/562b9e992a87f1bfff8fdab06372e7f83f30fc65f6c717042f84a02c0dc0d13a.png",
+    "Packaging & Shipping": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/77f9d6c3fedcd85729745ffaf16ab46b268ba0176386a36e9d3bd3d1b2e6c293.png",
+    "Pipe, Valves & Fittings": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7ac37795d30541fe96a379b8ebc9a669a9f5534a1c47d157f2dcfce68eda8fde.png",
+    "Plumbing": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/77f9d6c3fedcd85729745ffaf16ab46b268ba0176386a36e9d3bd3d1b2e6c293.png",
+    "Pumps": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7ac37795d30541fe96a379b8ebc9a669a9f5534a1c47d157f2dcfce68eda8fde.png",
+    "Raw Materials": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/e937d26ba9dc90a270d3f1672abc004a7cbd5351be7177df115648759a328877.png",
+    "Test & Measurement": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/075214c7f6dce1e67075c623d025158b3d3cac86e45217650f7d58db7662f1d6.png",
+    "Welding": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7428451866e1f3032551dea27aa96a5ca7d02246c6de0264aee39902b9eaacc1.png",
+    "Industrial Automation": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/022021c9eb3d4350b596e47b5cbbc21f913a9ca5428f805d45b37108e6428799.png",
+    "Cutting Tools": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/075214c7f6dce1e67075c623d025158b3d3cac86e45217650f7d58db7662f1d6.png",
+    "Storage & Organization": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/77f9d6c3fedcd85729745ffaf16ab46b268ba0176386a36e9d3bd3d1b2e6c293.png",
+    "IT Equipment - Laptops": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/8cba2db4e0d25e92ff75257a0fe03a81a4de63378bee8e48888c0141833e5fc5.png",
+    "IT Equipment - Monitors": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/0e831c2f54678ddcfa8e298f8509c1864a8a8849444986660861bb8de54b9e8c.png",
+    "IT Equipment - Networking": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/022021c9eb3d4350b596e47b5cbbc21f913a9ca5428f805d45b37108e6428799.png",
+    "IT Equipment - Servers": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/022021c9eb3d4350b596e47b5cbbc21f913a9ca5428f805d45b37108e6428799.png",
+    "IT Equipment - Peripherals": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/075214c7f6dce1e67075c623d025158b3d3cac86e45217650f7d58db7662f1d6.png",
+}
+
+# Default fallback image
+DEFAULT_PRODUCT_IMAGE = "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7ac37795d30541fe96a379b8ebc9a669a9f5534a1c47d157f2dcfce68eda8fde.png"
+
 # Service Categories with UNSPSC codes
 SERVICE_CATEGORIES = [
     {"name": "Corporate & Business Support Services", "unspsc": "80100000", "icon": "briefcase"},
