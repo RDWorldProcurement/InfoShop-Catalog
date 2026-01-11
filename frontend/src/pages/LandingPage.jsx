@@ -11,7 +11,7 @@ import {
   Package, Settings, ShieldCheck, Truck, Zap, Globe, ChevronRight,
   Building2, BarChart3, Users, CheckCircle, ArrowRight, Layers,
   Wrench, Cpu, Cog, Droplet, Lightbulb, Shield, Briefcase,
-  Palette, Monitor, Box, Factory, Languages, Play
+  Palette, Monitor, Box, Factory, Languages, Play, Search, ShoppingCart, ExternalLink
 } from "lucide-react";
 
 // Realistic product images - using verified working Unsplash URLs
