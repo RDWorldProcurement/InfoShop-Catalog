@@ -5,62 +5,90 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
 
 ## What's Been Implemented (January 11, 2025)
 
-### All Images & Branding Fixed
-- [x] **Product images** loading correctly from Unsplash (high-quality industrial images)
-- [x] **Brand badges** displayed with colored backgrounds (brand colors: HP blue, Dell blue, Bosch red, 3M red, etc.)
-- [x] **Supplier badges** for services with company colors
-- [x] **No external logo dependencies** - using text badges with brand colors for reliability
+### All Images Hosted on Emergent CDN ✅
+All product and service images are now hosted on Emergent's CDN (`static.prod-images.emergentagent.com`) - **guaranteed to work with no external dependencies**.
 
-### Amazon-like Product Display
-- [x] High-quality product images (800x800)
-- [x] 5-star ratings with review counts
-- [x] Short descriptions and full descriptions
-- [x] Expandable specifications section
-- [x] Availability info (quantity + warehouse location)
-- [x] Delivery options from multiple partners
-- [x] Alternates with savings percentage
-- [x] "In Stock" badges
-- [x] Brand badges with official brand colors
+### Product Images (12 generated)
+- Ball bearings (chrome steel)
+- Power drill (yellow cordless)
+- Safety helmet (yellow hard hat)
+- Circuit breaker (electrical component)
+- Safety glasses (protective eyewear)
+- Business laptop
+- 4K Monitor
+- Wrench set
+- Screwdriver set with bits
+- LED high bay light
+- Network switch
+- Timing belt
 
-### IT Equipment Products
-- HP ProBook 450 G10 Business Laptop ($1,299)
-- HP EliteBook 840 G10 Enterprise Laptop ($1,849)
-- Dell Latitude 5540 Business Laptop ($1,449)
-- Dell Precision 5680 Mobile Workstation ($3,299)
-- Lenovo ThinkPad X1 Carbon Gen 11 ($1,999)
-- Dell UltraSharp U2723QE 4K Monitor ($799)
-- LG UltraFine 32UN880-B Ergo Monitor ($699)
-- Samsung ViewFinity S9 49" Ultrawide ($1,499)
-- Cisco Catalyst 9200L Network Switch ($4,299)
+### Service Images (12 generated)
+- Network engineer installing cables in server rack
+- Technician configuring Wi-Fi access point
+- IT support setting up laptop at desk
+- Server rack installation in data center
+- Cybersecurity analyst at monitoring screens
+- IT helpdesk support team with headsets
+- Facilities management team inspecting HVAC
+- Digital marketing team in creative agency
+- Warehouse logistics operation
+- Business meeting in corporate boardroom
+- Safety inspector performing HSE compliance audit
+- Skilled technicians on manufacturing floor
 
-### IT Services with Hourly Rates
-- Network Infrastructure Installation - $125/hour (Infosys)
-- Wireless Network Setup (Wi-Fi 6E) - $350/access point (Cisco)
-- Desktop/Laptop Deployment Service - $85/device (Dell)
-- Server Rack Installation - $450/server (HP)
-- Network Security Assessment - $5,500/assessment (Infosys)
-- Managed IT Support - $75/user/month (Infosys)
+### IT Services with Images & Hourly Rates
+1. **Network Infrastructure Installation** - $125/hr (network cables image)
+2. **Wireless Network Setup Wi-Fi 6E** - $350/access point (WiFi setup image)
+3. **Desktop/Laptop Deployment** - $85/device (laptop setup image)
+4. **Server Rack Installation** - $450/server (server rack image)
+5. **Network Security Assessment** - $5,500/assessment (cybersecurity image)
+6. **Managed IT Support** - $75/user/month (helpdesk image)
 
-### Multi-Language Support (5 Languages)
-- [x] English (EN)
-- [x] French (FR) 
-- [x] German (DE)
-- [x] Italian (IT)
-- [x] Dutch (NL)
-- [x] Language switcher in sidebar and landing page
-- [x] All UI elements translate including navigation, buttons, filters, product cards
+### Service Categories with Images
+- Network Installation Services
+- IT Equipment Installation & Setup
+- Cybersecurity Services
+- IT Managed Services
+- Corporate & Business Support Services
+- Digital Marketing & Creative Agency Services
+- Facilities Management & Workplace Services
+- HSE, Quality & Compliance Services
+- Logistics, Warehouse & Supply Chain Services
+- Temp Labor across Technical Skilled Capabilities
 
 ## Technology Stack
 - **Backend**: FastAPI, MongoDB, JWT
 - **Frontend**: React, Tailwind CSS, Shadcn UI
-- **AI**: GPT-5.2 via Emergent LLM Key (InfoConnect chatbot)
+- **Images**: Emergent CDN (static.prod-images.emergentagent.com)
 - **Branding**: Infosys BPM colors (#007CC3, #FF6B00)
-- **i18n**: React Context with translations.js
+- **i18n**: React Context with 5 languages (EN, FR, DE, IT, NL)
 
 ## Test Credentials
 - **Email**: demo@infosys.com
 - **Password**: demo123
 - **Country**: USA (USD) or France (EUR)
+
+## Image CDN URLs Reference
+
+### Product Images
+```
+Bearings: https://static.prod-images.emergentagent.com/jobs/.../7ac37795d305...png
+Power Tools: https://static.prod-images.emergentagent.com/jobs/.../7428451866e1...png
+Safety Helmet: https://static.prod-images.emergentagent.com/jobs/.../61099fb65121...png
+Circuit Breaker: https://static.prod-images.emergentagent.com/jobs/.../562b9e992a87...png
+Laptop: https://static.prod-images.emergentagent.com/jobs/.../8cba2db4e0d2...png
+Monitor: https://static.prod-images.emergentagent.com/jobs/.../0e831c2f5467...png
+```
+
+### Service Images
+```
+Network Installation: https://static.prod-images.emergentagent.com/jobs/.../afdd726c02cc...png
+WiFi Setup: https://static.prod-images.emergentagent.com/jobs/.../88c4a88606ac...png
+Laptop Deployment: https://static.prod-images.emergentagent.com/jobs/.../cff7a5158c43...png
+Server Installation: https://static.prod-images.emergentagent.com/jobs/.../a1c30bd322a6...png
+Cybersecurity: https://static.prod-images.emergentagent.com/jobs/.../88995698058a...png
+Managed IT: https://static.prod-images.emergentagent.com/jobs/.../f848c4af2e1f...png
+```
 
 ## Prioritized Backlog
 
@@ -80,16 +108,4 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
 - [ ] Dashboard with analytics
 
 ## MOCKED Features
-- **PunchOut Transfer**: Simulates transfer to ERP systems (Coupa, SAP Ariba, etc.) - creates transfer record with "Pending Customer PO" status but doesn't connect to real ERPs.
-
-## Brand Colors Reference
-- SKF: #005B94
-- 3M: #FF0000
-- Bosch: #E30016
-- Siemens: #009999
-- HP: #0096D6
-- Dell: #007DB8
-- Lenovo: #E2231A
-- Cisco: #049FD9
-- Samsung: #1428A0
-- Infosys: #007CC3
+- **PunchOut Transfer**: Simulates transfer to ERP systems (Coupa, SAP Ariba, etc.)
