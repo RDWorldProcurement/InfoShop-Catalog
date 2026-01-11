@@ -36,8 +36,8 @@ const Sidebar = ({ activePage }) => {
   };
 
   return (
-    <aside className="w-72 bg-white border-r border-slate-200 flex-shrink-0 min-h-screen hidden lg:block">
-      <div className="p-6 h-full flex flex-col">
+    <aside className="w-72 bg-white border-r border-slate-200 flex-shrink-0 h-screen sticky top-0 hidden lg:block overflow-y-auto">
+      <div className="p-6 min-h-full flex flex-col">
         {/* Logo Section */}
         <div className="mb-8">
           <img 
