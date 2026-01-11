@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth, API } from "../App";
+import { useLanguage } from "../i18n/LanguageContext";
 import axios from "axios";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -20,6 +21,7 @@ import Sidebar from "../components/Sidebar";
 const OrderHistoryPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("orders");
   const [orders, setOrders] = useState([]);
   const [quotations, setQuotations] = useState([]);
@@ -161,12 +163,12 @@ const OrderHistoryPage = () => {
       <main className="flex-1 p-6">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope' }}>Order Management</h1>
-            <p className="text-slate-500 mt-1">Track orders, quotations, and RFQ responses</p>
+            <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope' }}>{t.orders.title}</h1>
+            <p className="text-slate-500 mt-1">{t.orders.subtitle}</p>
           </div>
           <Button onClick={() => navigate("/catalog")} className="bg-[#007CC3] hover:bg-[#00629B]" data-testid="new-order-btn">
             <Package className="w-4 h-4 mr-2" />
-            New Order
+            {t.nav.catalog}
           </Button>
         </div>
 
@@ -174,22 +176,22 @@ const OrderHistoryPage = () => {
           <TabsList className="bg-slate-100 p-1 rounded-xl mb-6">
             <TabsTrigger value="orders" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white">
               <History className="w-4 h-4 mr-2" />
-              Orders
+              {t.orders.tabs.orders}
             </TabsTrigger>
             <TabsTrigger value="transfers" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white">
               <ExternalLink className="w-4 h-4 mr-2" />
-              PunchOut Transfers
+              {t.orders.tabs.transfers}
             </TabsTrigger>
             <TabsTrigger value="quotations" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white">
               <Zap className="w-4 h-4 mr-2" />
-              Quotations
+              {t.orders.tabs.quotations}
               {quotations.filter(q => q.status === 'response_received').length > 0 && (
                 <Badge className="ml-2 bg-green-100 text-green-700">{quotations.filter(q => q.status === 'response_received').length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="rfqs" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white">
               <FileText className="w-4 h-4 mr-2" />
-              RFQs
+              {t.orders.tabs.rfqs}
               {rfqs.filter(r => r.status === 'response_received').length > 0 && (
                 <Badge className="ml-2 bg-green-100 text-green-700">{rfqs.filter(r => r.status === 'response_received').length}</Badge>
               )}
