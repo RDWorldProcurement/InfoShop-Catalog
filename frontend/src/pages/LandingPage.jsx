@@ -141,6 +141,15 @@ const LandingPage = () => {
               </Select>
               
               <Button 
+                variant="ghost"
+                onClick={() => navigate("/admin")}
+                className="text-slate-600 hover:text-[#007CC3]"
+                data-testid="nav-admin-btn"
+              >
+                Admin
+              </Button>
+              
+              <Button 
                 onClick={() => navigate("/login")}
                 className="bg-[#007CC3] hover:bg-[#00629B] text-white px-6"
                 data-testid="nav-access-catalog-btn"
