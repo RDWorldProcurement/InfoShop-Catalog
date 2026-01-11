@@ -196,7 +196,7 @@ SERVICE_IMAGE_URLS = {
     "Cybersecurity Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/88995698058a90986297157d130fa19ac15656bbe7ac2296b1949cbb9993e380.png",
     "IT Managed Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/f848c4af2e1f5caac71aa56dc1f1b9285fb801ad8e1ee77ad4185116211e3627.png",
     "Corporate & Business Support Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/49c83afc1a588e3c2810a205953d952ac31ad730ca2f9871863edeeea2072a83.png",
-    "Digital Marketing & Creative Agency Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/516a358136877fc314216c27facefe3422f8dfa69a45e5553584d72a437e9fce.png",
+    "Digital Marketing & Creative Agency Services": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/3e0d7da8578b2c511105784ffde94733d5a947a499e7481de09ef3466e65afa6.png",
     "Facilities Management & Workplace Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/23544d6096e596b6e3954fec76d55a7fa874df0072512cd79110a2a41cce3b44.png",
     "HSE, Quality & Compliance Services": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/1e0527ecaf208bd7905092e337f70a54eabef0782a81bd6e510c8e4d5c3c18ac.png",
     "IT & Workplace Technology Services": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/cff7a5158c43f81799d59a99494279b2c5f255b2610fe406a1ffe6934277c4a7.png",
@@ -209,6 +209,13 @@ SERVICE_IMAGE_URLS = {
     "Training Services": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/8d3d10c922ac4516e87dff834b0b0f3d00633c1032b7667687f506addb1e98b3.png",
     "Quality Control": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/1e0527ecaf208bd7905092e337f70a54eabef0782a81bd6e510c8e4d5c3c18ac.png",
     "Commercial Cleaning": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/124d0636fdb6759f0b0e809e00fe07c91c12562a510f2da1e68cc2cb7a0fd266.png",
+    # Digital Marketing Services Images
+    "Social Media Marketing": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/3e0d7da8578b2c511105784ffde94733d5a947a499e7481de09ef3466e65afa6.png",
+    "SEO Optimization": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/065098b74382dcef95f4d43a5acfec01cf7019a80344289d9bbcf29876951ecf.png",
+    "Content Marketing": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/11858f0f46d7b769347af0396a64091c470e4cfaf679e89ea3f0d9bc9c197174.png",
+    "Email Marketing": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/6643f65c20391b649166e5889b2700f56e38fbc70128635358567cc335c9ca9c.png",
+    "PPC Advertising": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/06ee08e5c3b4256c9a72385c72da51dd6abf1464eab5586423dce224913af57d.png",
+    "Brand Identity Design": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/317b64184657f818f660ec7fb260ac16010f4fb505facb3924e1b120b1ea17d2.png",
 }
 
 # Default fallback service image
