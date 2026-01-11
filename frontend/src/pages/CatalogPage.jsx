@@ -239,7 +239,7 @@ const CatalogPage = () => {
                 <Search className="w-5 h-5 text-slate-400 ml-4" />
                 <input
                   type="text"
-                  placeholder={`Search ${activeTab === 'products' ? '30M+ products' : '100K+ services'}...`}
+                  placeholder={activeTab === 'products' ? t.catalog.searchPlaceholder : t.catalog.searchPlaceholderServices}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -264,7 +264,7 @@ const CatalogPage = () => {
 
             {/* Currency Display */}
             <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-sm text-slate-500">Currency:</span>
+              <span className="text-sm text-slate-500">{t.common.currency}:</span>
               <span className="font-semibold text-slate-900">{user?.currency?.code}</span>
             </div>
           </div>
@@ -278,19 +278,19 @@ const CatalogPage = () => {
               <TabsList className="bg-slate-100 p-1 rounded-xl">
                 <TabsTrigger value="products" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm" data-testid="products-tab">
                   <Package className="w-4 h-4 mr-2" />
-                  Products
+                  {t.nav.products}
                   <Badge className="ml-2 bg-[#007CC3]/10 text-[#007CC3]">30M+</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="services" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm" data-testid="services-tab">
                   <Settings className="w-4 h-4 mr-2" />
-                  Services
+                  {t.nav.services}
                   <Badge className="ml-2 bg-purple-100 text-purple-700">100K+</Badge>
                 </TabsTrigger>
               </TabsList>
 
               <Button variant="outline" onClick={() => setRfqModalOpen(true)} data-testid="submit-rfq-btn">
                 <FileText className="w-4 h-4 mr-2" />
-                Submit RFQ
+                {t.catalog.submitRfq}
               </Button>
             </div>
           </Tabs>
@@ -299,10 +299,10 @@ const CatalogPage = () => {
           <div className="flex flex-wrap gap-4 mb-6">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-56 bg-white" data-testid="category-filter">
-                <SelectValue placeholder="All Categories" />
+                <SelectValue placeholder={t.catalog.allCategories} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">{t.catalog.allCategories}</SelectItem>
                 {(activeTab === 'products' ? categories : serviceCategories).map((cat) => (
                   <SelectItem key={cat.name} value={cat.name}>
                     <span className="flex items-center gap-2">
@@ -317,10 +317,10 @@ const CatalogPage = () => {
             {activeTab === 'products' && (
               <Select value={selectedBrand} onValueChange={setSelectedBrand}>
                 <SelectTrigger className="w-48 bg-white" data-testid="brand-filter">
-                  <SelectValue placeholder="All Brands" />
+                  <SelectValue placeholder={t.catalog.allBrands} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Brands</SelectItem>
+                  <SelectItem value="all">{t.catalog.allBrands}</SelectItem>
                   {brands.map((brand) => (
                     <SelectItem key={brand.name} value={brand.name}>
                       <span className="flex items-center gap-2">
