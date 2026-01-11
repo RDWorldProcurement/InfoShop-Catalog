@@ -354,6 +354,7 @@ const CatalogPage = () => {
                   onAddToCart={() => addToCart(product)}
                   onCheckInventory={() => checkInventory(product)}
                   onRequestQuotation={() => { setSelectedProduct(product); setQuotationModalOpen(true); }}
+                  t={t}
                 />
               ))}
             </div>
@@ -366,6 +367,7 @@ const CatalogPage = () => {
                   onAddToCart={() => addToCart(service, true)}
                   onRequestQuotation={() => { setSelectedProduct(service); setQuotationModalOpen(true); }}
                   onSubmitRFQ={() => { setRfqForm(prev => ({ ...prev, product_description: service.name, is_product: false })); setRfqModalOpen(true); }}
+                  t={t}
                 />
               ))}
             </div>
