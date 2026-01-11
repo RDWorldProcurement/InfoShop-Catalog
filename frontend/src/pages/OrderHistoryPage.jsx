@@ -106,55 +106,54 @@ const OrderHistoryPage = () => {
 
   const getStatusBadge = (status) => {
     const config = {
-      pending: { class: "bg-amber-100 text-amber-700", icon: Clock },
-      confirmed: { class: "bg-blue-100 text-blue-700", icon: CheckCircle },
-      shipped: { class: "bg-purple-100 text-purple-700", icon: Truck },
-      delivered: { class: "bg-green-100 text-green-700", icon: CheckCircle },
-      cancelled: { class: "bg-red-100 text-red-700", icon: XCircle },
-      submitted: { class: "bg-blue-100 text-blue-700", icon: FileText },
-      response_received: { class: "bg-green-100 text-green-700", icon: CheckCircle },
-      accepted: { class: "bg-green-100 text-green-700", icon: CheckCircle },
-      "Pending Customer PO": { class: "bg-amber-100 text-amber-700", icon: Clock },
+      pending: { class: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock, label: "Pending" },
+      confirmed: { class: "bg-blue-100 text-blue-700 border-blue-200", icon: CheckCircle, label: "Confirmed" },
+      processing: { class: "bg-indigo-100 text-indigo-700 border-indigo-200", icon: Package, label: "Processing" },
+      shipped: { class: "bg-purple-100 text-purple-700 border-purple-200", icon: Truck, label: "Shipped" },
+      delivered: { class: "bg-green-100 text-green-700 border-green-200", icon: CheckCircle, label: "Delivered" },
+      cancelled: { class: "bg-red-100 text-red-700 border-red-200", icon: XCircle, label: "Cancelled" },
+      submitted: { class: "bg-blue-100 text-blue-700 border-blue-200", icon: FileText, label: "Submitted" },
+      response_received: { class: "bg-green-100 text-green-700 border-green-200", icon: CheckCircle, label: "Response Received" },
+      accepted: { class: "bg-green-100 text-green-700 border-green-200", icon: CheckCircle, label: "Accepted" },
+      "Pending Customer PO": { class: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock, label: "Pending Customer PO" },
     };
     const c = config[status] || config.pending;
     const Icon = c.icon;
     return (
-      <Badge className={`${c.class} flex items-center gap-1`}>
+      <Badge className={`${c.class} flex items-center gap-1 border`}>
         <Icon className="w-3 h-3" />
-        {status?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+        {c.label || status?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
       </Badge>
     );
   };
 
-  // Generate sample data if empty
-  useEffect(() => {
-    if (!loading && orders.length === 0) {
-      const sampleOrders = [
-        { id: "ORD-A7B2C9", items: [{ product_name: "SKF Ball Bearing 6205-2RS", quantity: 10, unit_price: 45.00, total_price: 450.00 },
-          { product_name: "3M Industrial Safety Helmet", quantity: 5, unit_price: 35.00, total_price: 175.00 }],
-          total_amount: 625.00, currency_code: user?.currency?.code || "USD", status: "delivered",
-          created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-          estimated_delivery: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "ORD-D4E5F6", items: [{ product_name: "Bosch Professional Cordless Drill", quantity: 2, unit_price: 189.00, total_price: 378.00 }],
-          total_amount: 378.00, currency_code: user?.currency?.code || "USD", status: "shipped",
-          created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          estimated_delivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() },
-      ];
-      setOrders(sampleOrders);
-    }
+  // Order status timeline component
+  const OrderStatusTimeline = ({ status }) => {
+    const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
+    const currentIndex = statuses.indexOf(status);
     
-    if (!loading && transfers.length === 0) {
-      const sampleTransfers = [
-        { id: "TRF-001", system: "Coupa", system_logo: "https://logo.clearbit.com/coupa.com",
-          items: [{ product_name: "Parker Hydraulic Valve", quantity: 3 }], total_amount: 1650.00,
-          status: "Pending Customer PO", transferred_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "TRF-002", system: "SAP Ariba", system_logo: "https://logo.clearbit.com/ariba.com",
-          items: [{ product_name: "Siemens Motor Drive", quantity: 1 }], total_amount: 2450.00,
-          status: "Pending Customer PO", transferred_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() },
-      ];
-      setTransfers(sampleTransfers);
-    }
-  }, [loading]);
+    return (
+      <div className="flex items-center justify-between w-full mt-4 px-2">
+        {statuses.map((s, index) => {
+          const isCompleted = index <= currentIndex;
+          const isCurrent = index === currentIndex;
+          return (
+            <div key={s} className="flex flex-col items-center relative flex-1">
+              {index > 0 && (
+                <div className={`absolute left-0 right-1/2 top-3 h-0.5 -translate-y-1/2 ${index <= currentIndex ? 'bg-[#007CC3]' : 'bg-slate-200'}`} style={{ left: '-50%', right: '50%' }} />
+              )}
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center z-10 ${isCompleted ? 'bg-[#007CC3] text-white' : 'bg-slate-200 text-slate-400'} ${isCurrent ? 'ring-2 ring-[#007CC3] ring-offset-2' : ''}`}>
+                {isCompleted ? <CheckCircle className="w-4 h-4" /> : <span className="text-xs">{index + 1}</span>}
+              </div>
+              <span className={`text-xs mt-1 capitalize ${isCurrent ? 'text-[#007CC3] font-semibold' : 'text-slate-400'}`}>{s}</span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Remove the sample data effect since backend now provides it
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex">
