@@ -172,6 +172,8 @@ const LandingPage = () => {
     total_categories: 78,
     total_brands: "511+"
   });
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const fetchStats = async () => {
