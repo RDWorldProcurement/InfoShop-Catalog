@@ -127,16 +127,30 @@ MRO_BRANDS = [
     {"name": "Logitech", "logo": None, "color": "#00B8FC"},
 ]
 
-# Product images hosted on Emergent CDN (guaranteed to work)
+# Product images hosted on Emergent CDN - product-specific matches
 PRODUCT_IMAGE_URLS = {
-    "Bearings & Power Transmission": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7ac37795d30541fe96a379b8ebc9a669a9f5534a1c47d157f2dcfce68eda8fde.png",
-    "Electrical & Lighting": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/562b9e992a87f1bfff8fdab06372e7f83f30fc65f6c717042f84a02c0dc0d13a.png",
+    # Specific product images (brand-matched)
+    "SKF Ball Bearing": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/5d11401880367c9ecb4d3d43cf84af6a95372bff44764d01080f72fdadaccc38.png",
+    "3M Safety Helmet": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/d5fdc07665f86ea5f580ac7e6fd0e73c4925625f60f6055ebcda4f23f08d0431.png",
+    "3M Safety Glasses": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/9c7ea6cfd47a7569144fd2bb61eb54feef71eabfcdda4f5f7fa2f001d3c668ad.png",
+    "Bosch Drill": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/abca8f6c400eccd9885f40052859c77b18c5a13dbde5ed8763170d9ab7fd9c41.png",
+    "Stanley Wrench": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/25e01814ef99f668b385220f94849941ba287aee8811756d6a673bc4069e2c85.png",
+    "Gates Timing Belt": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/b339b39dd2001c7b78175f881458bfe5c1cc9ac85b875769eaabab2ed13b9ccd.png",
+    "Schneider Circuit Breaker": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/1b06c8223f99520d00c70296b71296814d63202c0c3d150b627d2bb53ce629a6.png",
+    "HP Laptop": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/f6f1caf66bd07154a37a0dadfa973a662a67d39d32552f5d51d73e7cec65e616.png",
+    "Dell Monitor": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/08c23c33778bc9d3ce86d151e5eee5000a143292981570e9eb926791a48d5f62.png",
+    "Cisco Switch": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/6663d8398909e7e6833d27291342928ba4b7567abeeb7570dc5c39af9136f127.png",
+    "Henkel Adhesive": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/1ad744a50cda48b7b4ced8b7f15874c83dd722b367c119e969f45cb842db7b6f.png",
+    "Philips LED Light": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/6339f73a3f393ecb8997ea7a9444a9068c2c829d743f44b928094ecf8464e143.png",
+    # Category fallback images
+    "Bearings & Power Transmission": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/5d11401880367c9ecb4d3d43cf84af6a95372bff44764d01080f72fdadaccc38.png",
+    "Electrical & Lighting": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/1b06c8223f99520d00c70296b71296814d63202c0c3d150b627d2bb53ce629a6.png",
     "Fasteners & Hardware": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/77f9d6c3fedcd85729745ffaf16ab46b268ba0176386a36e9d3bd3d1b2e6c293.png",
-    "Hand Tools": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/075214c7f6dce1e67075c623d025158b3d3cac86e45217650f7d58db7662f1d6.png",
-    "Power Tools": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7428451866e1f3032551dea27aa96a5ca7d02246c6de0264aee39902b9eaacc1.png",
-    "Safety & PPE": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/61099fb65121a227a0c6e32140edac60830b2fd0c6269420c02ee34b2e9933a2.png",
+    "Hand Tools": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/25e01814ef99f668b385220f94849941ba287aee8811756d6a673bc4069e2c85.png",
+    "Power Tools": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/abca8f6c400eccd9885f40052859c77b18c5a13dbde5ed8763170d9ab7fd9c41.png",
+    "Safety & PPE": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/d5fdc07665f86ea5f580ac7e6fd0e73c4925625f60f6055ebcda4f23f08d0431.png",
     "Abrasives": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/7ac37795d30541fe96a379b8ebc9a669a9f5534a1c47d157f2dcfce68eda8fde.png",
-    "Adhesives & Sealants": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/e937d26ba9dc90a270d3f1672abc004a7cbd5351be7177df115648759a328877.png",
+    "Adhesives & Sealants": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/1ad744a50cda48b7b4ced8b7f15874c83dd722b367c119e969f45cb842db7b6f.png",
     "Cleaning & Janitorial": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/899b4b3e6aceed339189fb8d0b0fa309930af38864a707139f102cc7b47c1bfd.png",
     "HVAC & Refrigeration": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/5deee0f39fbb43dd7a40094f3273b92017a5b99cb2f2a4ffe89656529a244bf5.png",
     "Hydraulics & Pneumatics": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/67b16a05b97dae42c11c9c72f6e05b8af5d7aec7f63f9dfbd8e237a3fd5fc463.png",
@@ -154,12 +168,22 @@ PRODUCT_IMAGE_URLS = {
     "Industrial Automation": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/022021c9eb3d4350b596e47b5cbbc21f913a9ca5428f805d45b37108e6428799.png",
     "Cutting Tools": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/5f3ec0cc9e4246d05af7b1609a78a8d3c2c76abbebba2fcb9823ffac8851309d.png",
     "Storage & Organization": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/ad801ca5185620afbcc264b33f0c59dacf2085f9b98895eb624068ec3ebad64d.png",
-    "IT Equipment - Laptops": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/8cba2db4e0d25e92ff75257a0fe03a81a4de63378bee8e48888c0141833e5fc5.png",
-    "IT Equipment - Monitors": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/0e831c2f54678ddcfa8e298f8509c1864a8a8849444986660861bb8de54b9e8c.png",
-    "IT Equipment - Networking": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/022021c9eb3d4350b596e47b5cbbc21f913a9ca5428f805d45b37108e6428799.png",
+    "IT Equipment - Laptops": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/f6f1caf66bd07154a37a0dadfa973a662a67d39d32552f5d51d73e7cec65e616.png",
+    "IT Equipment - Monitors": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/08c23c33778bc9d3ce86d151e5eee5000a143292981570e9eb926791a48d5f62.png",
+    "IT Equipment - Networking": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/6663d8398909e7e6833d27291342928ba4b7567abeeb7570dc5c39af9136f127.png",
     "IT Equipment - Servers": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/022021c9eb3d4350b596e47b5cbbc21f913a9ca5428f805d45b37108e6428799.png",
     "IT Equipment - Peripherals": "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/075214c7f6dce1e67075c623d025158b3d3cac86e45217650f7d58db7662f1d6.png",
     "Safety Gloves": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/9f7011dbf936aa67ab41af039d39e363f5a435c0efbfbed8a069e7684f74ad25.png",
+}
+
+# Reward images for InfoCoins redemption
+REWARD_IMAGE_URLS = {
+    "Executive Jacket": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/7a28899414c059decd7892a76b2510a988cbd7721cd8cc81edb9db0b2d98abb8.png",
+    "Insulated Tumbler": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/e20ad22b18b960ea85b19e85bf4ff46d506caa85fc150f5ed6f1b6f4b693fde8.png",
+    "Leather Backpack": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/24f072b8fe320ed518c80d29f9dc4b59278746c3e30e7d4e9e4be2a654c9fb68.png",
+    "Wireless Earbuds": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/f9f47c254925d769c605a9cacaf94508b5b86b3a75ca50b7ad1ea13892d9ead4.png",
+    "Desk Organizer Set": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/41326a793c1dca20d6762573d31aba0fcb23091926051fb6868ffa92c39df981.png",
+    "Smartwatch": "https://static.prod-images.emergentagent.com/jobs/9c245588-b7cf-44e6-ac82-aa2be101ce17/images/4b7a4dd5c087a82d7316e8d008a8dc5946dcc6733dc8596fcea9bd56143dde46.png",
 }
 
 # Default fallback image
