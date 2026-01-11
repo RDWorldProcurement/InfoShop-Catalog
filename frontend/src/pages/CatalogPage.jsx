@@ -610,17 +610,14 @@ const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotatio
       </div>
       
       <CardContent className="p-4 border-t">
-        {/* Brand with logo */}
+        {/* Brand Badge - styled with brand color */}
         <div className="flex items-center gap-2 mb-2">
-          {product.brand_logo && (
-            <img 
-              src={product.brand_logo} 
-              alt={product.brand} 
-              className="h-5 w-auto object-contain" 
-              onError={(e) => e.target.style.display = 'none'} 
-            />
-          )}
-          <Badge variant="outline" className="text-xs font-medium">{product.brand}</Badge>
+          <Badge 
+            className="text-xs font-bold text-white px-2 py-0.5"
+            style={{ backgroundColor: product.brand_color || '#007CC3' }}
+          >
+            {product.brand}
+          </Badge>
         </div>
         
         {/* Product Name */}
