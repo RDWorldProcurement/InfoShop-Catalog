@@ -494,7 +494,8 @@ class OMNISupplyAPITester:
         if self.failed_tests:
             self.log("\n❌ FAILED TESTS:")
             for failure in self.failed_tests:
-                self.log(f"   • {failure['test']}: {failure.get('error', f\"Status {failure.get('actual')} != {failure.get('expected')}\")}")
+                error_msg = failure.get('error', f"Status {failure.get('actual')} != {failure.get('expected')}")
+                self.log(f"   • {failure['test']}: {error_msg}")
         
         return self.tests_passed == self.tests_run
 
