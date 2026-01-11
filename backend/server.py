@@ -892,6 +892,14 @@ async def chat_message(chat: dict, current_user: dict = Depends(get_current_user
         logging.error(f"Chat error: {e}")
         return {"response": "I'm here to help! You can search for products, check order history, or explore InfoCoins rewards.", "session_id": session_id}
 
+@api_router.get("/chat/history")
+async def get_chat_history(session_id: str = Query(...), current_user: dict = Depends(get_current_user)):
+    history = await db.chat_history.find(
+        {"session_id": session_id, "user_id": current_user["id"]},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(50)
+    return {"history": history}
+
 # Stats
 @api_router.get("/stats")
 async def get_stats():
