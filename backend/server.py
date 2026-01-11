@@ -2136,71 +2136,139 @@ async def search_products(
     results = []
     
     search_term = q.lower()
-    matching_categories = [c["name"] for c in MRO_CATEGORIES if search_term in c["name"].lower()] if search_term else [c["name"] for c in MRO_CATEGORIES[:10]]
-    matching_brands = [b["name"] for b in MRO_BRANDS if search_term in b["name"].lower()] if search_term else [b["name"] for b in MRO_BRANDS[:10]]
     
-    if category and category != "all":
-        matching_categories = [c for c in matching_categories if c.lower() == category.lower()] or [category]
-    if brand and brand != "all":
-        matching_brands = [b for b in matching_brands if b.lower() == brand.lower()] or [brand]
+    # First, add real catalog products (IT_PRODUCTS_CATALOG + NEW_VENDOR_PRODUCTS)
+    all_catalog_products = IT_PRODUCTS_CATALOG + NEW_VENDOR_PRODUCTS
     
-    for i in range(limit):
-        cat = random.choice(matching_categories if matching_categories else [c["name"] for c in MRO_CATEGORIES])
-        br = random.choice(matching_brands if matching_brands else [b["name"] for b in MRO_BRANDS])
-        product = generate_product_data(i + (page - 1) * limit, cat, br)
+    # Filter catalog products based on search, category, and brand
+    filtered_catalog = []
+    for product in all_catalog_products:
+        # Search filter
+        if search_term:
+            name_match = search_term in product["name"].lower()
+            brand_match = search_term in product.get("brand", "").lower()
+            category_match = search_term in product.get("category", "").lower()
+            desc_match = search_term in product.get("short_description", "").lower() or search_term in product.get("full_description", "").lower()
+            if not (name_match or brand_match or category_match or desc_match):
+                continue
         
-        rand = random.random()
-        
-        if rand < 0.70:
-            partner_count = random.choice([1, 2, 3])
-            delivery_partners = generate_delivery_partners(product["base_price"], partner_count)
-            result_type = "with_partner"
-            price = delivery_partners[0].price if delivery_partners else product["base_price"]
-            lead_time = delivery_partners[0].lead_time_days if delivery_partners else 5
-        elif rand < 0.90:
-            delivery_partners = []
-            result_type = "quotation_required"
-            price = None
-            lead_time = None
-        else:
+        # Category filter
+        if category and category != "all" and product.get("category", "").lower() != category.lower():
             continue
         
-        alternates = get_alternate_products(product, br) if result_type == "with_partner" else []
+        # Brand filter
+        if brand and brand != "all" and product.get("brand", "").lower() != brand.lower():
+            continue
+        
+        filtered_catalog.append(product)
+    
+    # Add filtered catalog products to results
+    for product in filtered_catalog:
+        brand_info = next((b for b in MRO_BRANDS if b["name"] == product.get("brand")), {})
+        base_price = product.get("base_price", 100)
         
         results.append({
             "id": product["id"],
             "name": product["name"],
-            "short_description": product.get("short_description", product.get("full_description", "")[:100]),
+            "short_description": product.get("short_description", ""),
             "full_description": product.get("full_description", ""),
             "category": product["category"],
-            "brand": product["brand"],
-            "brand_logo": product.get("brand_logo"),
-            "brand_color": product.get("brand_color"),
+            "brand": product.get("brand", ""),
+            "brand_logo": brand_info.get("logo"),
+            "brand_color": brand_info.get("color", "#007CC3"),
             "sku": product["sku"],
             "unspsc_code": product["unspsc_code"],
-            "unspsc_name": product["unspsc_name"],
-            "price": round(price * currency["rate"], 2) if price else None,
+            "unspsc_name": product.get("category", ""),
+            "price": round(base_price * currency["rate"], 2),
             "currency_code": currency["code"],
             "currency_symbol": currency["symbol"],
-            "unit": product["unit"],
+            "unit": product.get("unit", "EA"),
             "image_url": product["image_url"],
             "specifications": product.get("specifications", {}),
             "availability": product.get("availability", {"in_stock": True, "quantity": random.randint(10, 500)}),
             "rating": product.get("rating", round(random.uniform(4.0, 5.0), 1)),
             "reviews_count": product.get("reviews_count", random.randint(10, 500)),
             "features": product.get("features", []),
-            "spec_document_url": product["spec_document_url"],
-            "lead_time_days": lead_time,
+            "spec_document_url": f"https://docs.omnisupply.io/specs/{product['id']}.pdf",
+            "lead_time_days": random.randint(2, 7),
             "delivery_partners": [
-                {"partner_id": dp.partner_id, "price": round(dp.price * currency["rate"], 2),
-                 "lead_time_days": dp.lead_time_days, "available_quantity": dp.available_quantity}
-                for dp in delivery_partners
-            ] if result_type == "with_partner" else [],
-            "has_delivery_partner": result_type == "with_partner",
-            "alternate_products": [{**alt, "price": round(alt["price"] * currency["rate"], 2)} for alt in alternates],
-            "result_type": result_type,
-            "is_sponsored": product["is_sponsored"]
+                {"partner_id": "DP001", "price": round(base_price * currency["rate"], 2),
+                 "lead_time_days": random.randint(2, 5), "available_quantity": random.randint(50, 500)}
+            ],
+            "has_delivery_partner": True,
+            "alternate_products": [],
+            "result_type": "with_partner",
+            "is_sponsored": random.random() < 0.1
         })
+    
+    # Generate additional products to fill up to the limit
+    remaining = limit - len(results)
+    if remaining > 0:
+        matching_categories = [c["name"] for c in MRO_CATEGORIES if search_term in c["name"].lower()] if search_term else [c["name"] for c in MRO_CATEGORIES[:10]]
+        matching_brands = [b["name"] for b in MRO_BRANDS if search_term in b["name"].lower()] if search_term else [b["name"] for b in MRO_BRANDS[:10]]
+        
+        if category and category != "all":
+            matching_categories = [c for c in matching_categories if c.lower() == category.lower()] or [category]
+        if brand and brand != "all":
+            matching_brands = [b for b in matching_brands if b.lower() == brand.lower()] or [brand]
+        
+        for i in range(remaining):
+            cat = random.choice(matching_categories if matching_categories else [c["name"] for c in MRO_CATEGORIES])
+            br = random.choice(matching_brands if matching_brands else [b["name"] for b in MRO_BRANDS])
+            product = generate_product_data(i + (page - 1) * limit + len(results), cat, br)
+            
+            rand = random.random()
+            
+            if rand < 0.70:
+                partner_count = random.choice([1, 2, 3])
+                delivery_partners = generate_delivery_partners(product["base_price"], partner_count)
+                result_type = "with_partner"
+                price = delivery_partners[0].price if delivery_partners else product["base_price"]
+                lead_time = delivery_partners[0].lead_time_days if delivery_partners else 5
+            elif rand < 0.90:
+                delivery_partners = []
+                result_type = "quotation_required"
+                price = None
+                lead_time = None
+            else:
+                continue
+            
+            alternates = get_alternate_products(product, br) if result_type == "with_partner" else []
+            
+            results.append({
+                "id": product["id"],
+                "name": product["name"],
+                "short_description": product.get("short_description", product.get("full_description", "")[:100]),
+                "full_description": product.get("full_description", ""),
+                "category": product["category"],
+                "brand": product["brand"],
+                "brand_logo": product.get("brand_logo"),
+                "brand_color": product.get("brand_color"),
+                "sku": product["sku"],
+                "unspsc_code": product["unspsc_code"],
+                "unspsc_name": product["unspsc_name"],
+                "price": round(price * currency["rate"], 2) if price else None,
+                "currency_code": currency["code"],
+                "currency_symbol": currency["symbol"],
+                "unit": product["unit"],
+                "image_url": product["image_url"],
+                "specifications": product.get("specifications", {}),
+                "availability": product.get("availability", {"in_stock": True, "quantity": random.randint(10, 500)}),
+                "rating": product.get("rating", round(random.uniform(4.0, 5.0), 1)),
+                "reviews_count": product.get("reviews_count", random.randint(10, 500)),
+                "features": product.get("features", []),
+                "spec_document_url": product["spec_document_url"],
+                "lead_time_days": lead_time,
+                "delivery_partners": [
+                    {"partner_id": dp.partner_id, "price": round(dp.price * currency["rate"], 2),
+                     "lead_time_days": dp.lead_time_days, "available_quantity": dp.available_quantity}
+                    for dp in delivery_partners
+                ] if result_type == "with_partner" else [],
+                "has_delivery_partner": result_type == "with_partner",
+                "alternate_products": [{**alt, "price": round(alt["price"] * currency["rate"], 2)} for alt in alternates],
+                "result_type": result_type,
+                "is_sponsored": product["is_sponsored"]
+            })
     
     # Apply LLM translation if not English
     if lang != "en" and results:
