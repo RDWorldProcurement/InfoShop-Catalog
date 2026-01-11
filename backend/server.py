@@ -357,7 +357,7 @@ IT_PRODUCTS_CATALOG = [
         "sku": "LEN-X1C-G11-i7",
         "unspsc_code": "43211503",
         "base_price": 1999.00,
-        "image_url": "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&q=80",
+        "image_url": PRODUCT_IMAGE_URLS.get("HP Laptop", PRODUCT_IMAGE_URLS.get("IT Equipment - Laptops")),
         "short_description": "14\" 2.8K OLED, Intel Core i7-1365U, 32GB RAM, 1TB SSD",
         "full_description": "The legendary ThinkPad X1 Carbon continues its legacy with Gen 11. Ultra-light at just 1.12kg, featuring stunning OLED display, iconic keyboard, and comprehensive security features.",
         "specifications": {
@@ -385,7 +385,7 @@ IT_PRODUCTS_CATALOG = [
         "sku": "DELL-U2723QE",
         "unspsc_code": "43211902",
         "base_price": 799.00,
-        "image_url": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&q=80",
+        "image_url": PRODUCT_IMAGE_URLS.get("Dell Monitor", PRODUCT_IMAGE_URLS.get("IT Equipment - Monitors")),
         "short_description": "27\" 4K UHD IPS Black, USB-C 90W PD, RJ45, Built-in KVM",
         "full_description": "Dell UltraSharp U2723QE features IPS Black technology for 2000:1 contrast ratio. USB-C hub with 90W power delivery, RJ45 ethernet, and built-in KVM for multi-PC productivity.",
         "specifications": {
@@ -413,7 +413,7 @@ IT_PRODUCTS_CATALOG = [
         "sku": "LG-32UN880B",
         "unspsc_code": "43211902",
         "base_price": 699.00,
-        "image_url": "https://images.unsplash.com/photo-1586210579191-33b45e38fa2c?w=800&q=80",
+        "image_url": PRODUCT_IMAGE_URLS.get("Dell Monitor", PRODUCT_IMAGE_URLS.get("IT Equipment - Monitors")),
         "short_description": "32\" 4K UHD IPS, USB-C 60W PD, Ergo Stand, HDR10",
         "full_description": "LG UltraFine Ergo features a unique C-clamp stand for maximum desk space and flexibility. HDR10 support, 95% DCI-P3 color gamut, and USB-C one-cable solution.",
         "specifications": {
@@ -441,7 +441,7 @@ IT_PRODUCTS_CATALOG = [
         "sku": "SAM-LS49C950",
         "unspsc_code": "43211902",
         "base_price": 1499.00,
-        "image_url": "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&q=80",
+        "image_url": PRODUCT_IMAGE_URLS.get("Dell Monitor", PRODUCT_IMAGE_URLS.get("IT Equipment - Monitors")),
         "short_description": "49\" 5K Dual QHD, 1000R Curve, USB-C 90W, KVM Switch",
         "full_description": "Samsung ViewFinity S9 replaces two monitors with one stunning 49-inch ultrawide. 5120x1440 Dual QHD resolution with 1000R curvature for immersive productivity.",
         "specifications": {
@@ -470,7 +470,7 @@ IT_PRODUCTS_CATALOG = [
         "sku": "C9200L-48P-4G-E",
         "unspsc_code": "43222609",
         "base_price": 4299.00,
-        "image_url": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80",
+        "image_url": PRODUCT_IMAGE_URLS.get("Cisco Switch", PRODUCT_IMAGE_URLS.get("IT Equipment - Networking")),
         "short_description": "48-Port PoE+ Gigabit, 4x1G SFP, 370W PoE Budget, Stackable",
         "full_description": "Cisco Catalyst 9200L delivers enterprise-class access switching with PoE+ for wireless APs, IP phones, and IoT devices. DNA licensing for automation and security.",
         "specifications": {
