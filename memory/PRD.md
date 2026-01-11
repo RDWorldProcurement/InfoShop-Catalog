@@ -19,6 +19,7 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
 7. Brand logos and category icons
 8. Order Management with Quotations/RFQs with different statuses
 9. **Multi-language support** (EN, FR, DE, IT, NL)
+10. **Amazon-like product display** with ratings, reviews, specifications
 
 ## What's Been Implemented
 
@@ -58,25 +59,60 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
   - Buttons (Add to Cart, Check Stock, Get Quote, Submit RFQ)
   - Cart drawer (Shopping Cart, Total, Transfer Cart)
   - Order History tabs (Orders, PunchOut Transfers, Quotations, RFQs)
-- [x] **Product cards** with realistic images, UNSPSC codes, pricing, lead times
-- [x] **Service cards** with category badges, pricing models, supplier info
+
+### Phase 4 - Enhanced Catalog & IT Equipment (Completed - January 11, 2025)
+- [x] **Amazon-like Product Display**:
+  - High-quality product images (800x800)
+  - 5-star ratings with review counts
+  - Short descriptions and full descriptions
+  - Expandable specifications section
+  - Availability info (quantity + warehouse location)
+  - Delivery options from multiple partners
+  - Alternates with savings percentage
+  - "In Stock" badges
+- [x] **IT Equipment Products**:
+  - HP ProBook 450 G10 Business Laptop ($1,299)
+  - HP EliteBook 840 G10 Enterprise Laptop ($1,849)
+  - Dell Latitude 5540 Business Laptop ($1,449)
+  - Dell Precision 5680 Mobile Workstation ($3,299)
+  - Lenovo ThinkPad X1 Carbon Gen 11 ($1,999)
+  - Dell UltraSharp U2723QE 4K Monitor ($799)
+  - LG UltraFine 32UN880-B Ergo Monitor ($699)
+  - Samsung ViewFinity S9 49" Ultrawide ($1,499)
+  - Cisco Catalyst 9200L Network Switch ($4,299)
+- [x] **IT Services with Hourly Rates**:
+  - Network Infrastructure Installation - $125/hour
+  - Wireless Network Setup (Wi-Fi 6E) - $350/access point
+  - Desktop/Laptop Deployment Service - $85/device
+  - Server Rack Installation - $450/server
+  - Network Security Assessment - $5,500/assessment
+  - Managed IT Support - $75/user/month
+- [x] **High-Quality Brand Logos** from Wikipedia:
+  - HP, Dell, Lenovo, Cisco, Samsung, LG, ASUS, Acer, BenQ, Logitech
+  - SKF, 3M, Bosch, Siemens, ABB, Honeywell, Parker, Emerson, Rockwell, Schneider
+- [x] **Service Details**:
+  - Supplier logos (Infosys, Cisco, HP, Dell)
+  - "View Service Details" expandable section
+  - Service includes checklist
+  - Verified Supplier badge
+  - Lead time and regional availability
 
 ## Technology Stack
 - **Backend**: FastAPI, MongoDB, JWT, emergentintegrations
 - **Frontend**: React, Tailwind CSS, Shadcn UI
 - **AI**: GPT-5.2 via Emergent LLM Key
-- **Branding**: Infosys BPM colors (#007CC3, #FF6B00)
-- **i18n**: React Context with translations.js
+- **Branding**: Infosys BPM colors (#007CC3, #FF6B00, #FF9900)
+- **i18n**: React Context with translations.js (5 languages)
 
 ## API Endpoints
 - POST /api/auth/login - Login with country selection
 - GET /api/auth/me - Get current user
-- GET /api/products/search - Products with UNSPSC codes
-- GET /api/products/categories - Product categories
-- GET /api/products/brands - Product brands
+- GET /api/products/search - Products with UNSPSC, specs, availability
+- GET /api/products/categories - Product categories (30 total including IT)
+- GET /api/products/brands - Product brands (30 total including IT brands)
 - GET /api/products/{id}/inventory - Check inventory
-- GET /api/services/search - Services with UNSPSC codes
-- GET /api/services/categories - Service categories
+- GET /api/services/search - Services with UNSPSC, pricing, supplier info
+- GET /api/services/categories - Service categories (11 total including IT services)
 - GET /api/cart - Get cart items
 - POST /api/cart/add - Add item to cart
 - DELETE /api/cart/remove/{id} - Remove from cart
@@ -100,7 +136,7 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
 ## Test Credentials
 - **Email**: demo@infosys.com
 - **Password**: demo123
-- **Country**: USA (or any from the list)
+- **Country**: USA (USD) or France (EUR)
 
 ## Prioritized Backlog
 
@@ -108,7 +144,6 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
 - [ ] Schedule Repeat Orders backend logic
 - [ ] Bulk Submission Excel upload processing
 - [ ] InfoCoins redemption with actual gift catalog
-- [ ] Add icons/logos for brand names and category names
 
 ### P2 (Medium Priority)
 - [ ] Product detail page with full specifications
@@ -130,28 +165,31 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
 ## Test Results (January 11, 2025)
 - Backend: 24/24 tests passed (100%)
 - Frontend: All features working (100%)
-- Multi-language switching: Working for all 5 languages
-- All Phase 1, 2, and 3 features verified
+- Multi-language switching: Working for all 5 languages (EN, FR, DE, IT, NL)
+- IT Equipment products: Visible with search
+- IT Services: Display with hourly rates
+- Brand logos: Loading from Wikipedia
+- Currency conversion: Working (USD, EUR)
 
 ## File Structure
 ```
 /app/
 ├── backend/
-│   ├── server.py         # FastAPI app with all API logic
+│   ├── server.py         # FastAPI app with IT_PRODUCTS_CATALOG, IT_SERVICES_CATALOG
 │   ├── .env
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Sidebar.jsx
+│   │   │   ├── Sidebar.jsx (with language selector)
 │   │   │   └── ChatBot.jsx
 │   │   ├── i18n/
 │   │   │   ├── LanguageContext.js
-│   │   │   └── translations.js
+│   │   │   └── translations.js (EN, FR, DE, IT, NL)
 │   │   ├── pages/
 │   │   │   ├── LandingPage.jsx
 │   │   │   ├── LoginPage.jsx
-│   │   │   ├── CatalogPage.jsx
+│   │   │   ├── CatalogPage.jsx (Amazon-like ProductCard, ServiceCard)
 │   │   │   ├── OrderHistoryPage.jsx
 │   │   │   ├── RepeatOrdersPage.jsx
 │   │   │   ├── BulkUploadPage.jsx
@@ -162,6 +200,11 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
 │   └── package.json
 ├── tests/
 │   └── test_omnisupply_api.py
+├── test_reports/
+│   ├── iteration_1.json
+│   ├── iteration_2.json
+│   ├── iteration_3.json
+│   └── iteration_4.json
 └── memory/
     └── PRD.md
 ```
