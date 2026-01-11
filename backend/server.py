@@ -1945,6 +1945,7 @@ async def search_services(
     category: Optional[str] = None,
     page: int = 1,
     limit: int = 20,
+    lang: str = Query("en", description="Language code (en, fr, de, it, nl)"),
     current_user: dict = Depends(get_current_user)
 ):
     currency = COUNTRY_CURRENCIES.get(current_user.get("country", "USA"), COUNTRY_CURRENCIES["USA"])
