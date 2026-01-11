@@ -791,12 +791,15 @@ def generate_product_data(index: int, category: str, brand: str) -> Dict:
     
     # Get product details or use defaults
     products = product_catalog.get(category, [
-        {"name": "Industrial Component", "specs": {"Type": "Standard", "Grade": "Industrial", "Material": "High-Quality", "Certification": "ISO 9001"}, "image": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80"}
+        {"name": "Industrial Component", "specs": {"Type": "Standard", "Grade": "Industrial", "Material": "High-Quality", "Certification": "ISO 9001"}}
     ])
     
     product = products[index % len(products)]
     unspsc = generate_unspsc_code(category)
     brand_info = get_brand_info(brand)
+    
+    # Get image URL from CDN
+    image_url = PRODUCT_IMAGE_URLS.get(category, DEFAULT_PRODUCT_IMAGE)
     
     # Generate price based on category
     price_ranges = {
@@ -836,7 +839,7 @@ def generate_product_data(index: int, category: str, brand: str) -> Dict:
         "unspsc_name": category,
         "base_price": base_price,
         "unit": random.choice(["EA", "PK", "BX", "SET"]),
-        "image_url": product.get("image", "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80"),
+        "image_url": image_url,
         "specifications": product.get("specs", {}),
         "availability": availability,
         "rating": round(random.uniform(4.0, 5.0), 1),
