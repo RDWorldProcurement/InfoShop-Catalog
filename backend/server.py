@@ -936,7 +936,8 @@ async def search_products(
             "full_description": product.get("full_description", ""),
             "category": product["category"],
             "brand": product["brand"],
-            "brand_logo": product["brand_logo"],
+            "brand_logo": product.get("brand_logo"),
+            "brand_color": product.get("brand_color"),
             "sku": product["sku"],
             "unspsc_code": product["unspsc_code"],
             "unspsc_name": product["unspsc_name"],
@@ -969,7 +970,7 @@ async def search_products(
         "page": page,
         "limit": limit,
         "categories": [{"name": c["name"], "unspsc": c["unspsc"], "icon": c["icon"]} for c in MRO_CATEGORIES],
-        "brands": [{"name": b["name"], "logo": b["logo"]} for b in MRO_BRANDS]
+        "brands": [{"name": b["name"], "logo": b.get("logo"), "color": b.get("color")} for b in MRO_BRANDS]
     }
 
 @api_router.get("/products/{product_id}/inventory")
