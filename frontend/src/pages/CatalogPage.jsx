@@ -64,7 +64,7 @@ const CatalogPage = () => {
     fetchCart();
     fetchPunchoutSystems();
     handleSearch();
-  }, [activeTab]);
+  }, [activeTab, language]);
 
   const fetchCategories = async () => {
     try {
