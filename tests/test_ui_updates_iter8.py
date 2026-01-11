@@ -27,10 +27,12 @@ class TestLoginAndAuth:
         print(f"SUCCESS: Demo login works - token received")
     
     def test_admin_login_success(self):
-        """Test login with admin credentials (admin@omnisupply.io / admin123)"""
-        # Admin login uses 'username' field, not 'email'
+        """Test login with admin credentials (admin / admin123)
+        Note: Login page shows admin@omnisupply.io but backend expects 'admin'
+        """
+        # Admin login uses 'username' field - backend expects 'admin' not 'admin@omnisupply.io'
         response = requests.post(f"{BASE_URL}/api/admin/login", json={
-            "username": "admin@omnisupply.io",
+            "username": "admin",
             "password": "admin123"
         })
         # Admin login should work
