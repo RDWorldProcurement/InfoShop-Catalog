@@ -1516,41 +1516,44 @@ def get_brand_info(brand_name: str) -> Dict:
 
 def generate_product_data(index: int, category: str, brand: str) -> Dict:
     """Generate realistic product data with UNSPSC and detailed specifications"""
-    # Enhanced product names with specifications
+    # Enhanced product names with specifications - all images from Emergent CDN
     product_catalog = {
         "Bearings & Power Transmission": [
-            {"name": "Deep Groove Ball Bearing", "specs": {"Inner Diameter": "25mm", "Outer Diameter": "52mm", "Width": "15mm", "Material": "Chrome Steel", "Seal Type": "2RS Rubber Sealed", "Load Rating": "14kN Dynamic"}, "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"},
-            {"name": "Tapered Roller Bearing", "specs": {"Bore Size": "30mm", "Outside Diameter": "62mm", "Width": "17.25mm", "Material": "Chrome Steel", "Cage Type": "Steel", "Dynamic Load": "44kN"}, "image": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80"},
-            {"name": "Industrial Timing Belt", "specs": {"Pitch": "8mm HTD", "Width": "30mm", "Length": "1200mm", "Material": "Neoprene/Fiberglass", "Teeth Count": "150", "Max Speed": "40m/s"}, "image": "https://images.unsplash.com/photo-1612430146325-87a163519863?w=800&q=80"},
+            {"name": "Deep Groove Ball Bearing", "specs": {"Inner Diameter": "25mm", "Outer Diameter": "52mm", "Width": "15mm", "Material": "Chrome Steel", "Seal Type": "2RS Rubber Sealed", "Load Rating": "14kN Dynamic"}, "image": PRODUCT_IMAGE_URLS.get("SKF Ball Bearing", PRODUCT_IMAGE_URLS.get("Bearings & Power Transmission"))},
+            {"name": "Tapered Roller Bearing", "specs": {"Bore Size": "30mm", "Outside Diameter": "62mm", "Width": "17.25mm", "Material": "Chrome Steel", "Cage Type": "Steel", "Dynamic Load": "44kN"}, "image": PRODUCT_IMAGE_URLS.get("SKF Ball Bearing", PRODUCT_IMAGE_URLS.get("Bearings & Power Transmission"))},
+            {"name": "Industrial Timing Belt", "specs": {"Pitch": "8mm HTD", "Width": "30mm", "Length": "1200mm", "Material": "Neoprene/Fiberglass", "Teeth Count": "150", "Max Speed": "40m/s"}, "image": PRODUCT_IMAGE_URLS.get("Gates Timing Belt", PRODUCT_IMAGE_URLS.get("Bearings & Power Transmission"))},
         ],
         "Electrical & Lighting": [
-            {"name": "Industrial LED High Bay Light", "specs": {"Power": "200W", "Lumens": "26,000lm", "Color Temp": "5000K", "IP Rating": "IP65", "Beam Angle": "120°", "Lifespan": "50,000hrs"}, "image": "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&q=80"},
-            {"name": "Miniature Circuit Breaker", "specs": {"Current Rating": "32A", "Poles": "3P", "Breaking Capacity": "10kA", "Curve Type": "C", "Voltage": "400V AC", "DIN Rail Mount": "Yes"}, "image": "https://images.unsplash.com/photo-1625592831117-b6ef5fe3bdd3?w=800&q=80"},
-            {"name": "Industrial Contactor", "specs": {"Coil Voltage": "24V DC", "Current Rating": "40A", "Contacts": "3NO + 1NC", "Mounting": "DIN Rail", "Duty Cycle": "AC-3", "Mechanical Life": "10M ops"}, "image": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80"},
+            {"name": "Industrial LED High Bay Light", "specs": {"Power": "200W", "Lumens": "26,000lm", "Color Temp": "5000K", "IP Rating": "IP65", "Beam Angle": "120°", "Lifespan": "50,000hrs"}, "image": PRODUCT_IMAGE_URLS.get("Philips LED Light", PRODUCT_IMAGE_URLS.get("Electrical & Lighting"))},
+            {"name": "Miniature Circuit Breaker", "specs": {"Current Rating": "32A", "Poles": "3P", "Breaking Capacity": "10kA", "Curve Type": "C", "Voltage": "400V AC", "DIN Rail Mount": "Yes"}, "image": PRODUCT_IMAGE_URLS.get("Schneider Circuit Breaker", PRODUCT_IMAGE_URLS.get("Electrical & Lighting"))},
+            {"name": "Industrial Contactor", "specs": {"Coil Voltage": "24V DC", "Current Rating": "40A", "Contacts": "3NO + 1NC", "Mounting": "DIN Rail", "Duty Cycle": "AC-3", "Mechanical Life": "10M ops"}, "image": PRODUCT_IMAGE_URLS.get("Schneider Circuit Breaker", PRODUCT_IMAGE_URLS.get("Electrical & Lighting"))},
         ],
         "Hand Tools": [
-            {"name": "Professional Ratcheting Wrench Set", "specs": {"Pieces": "12pc SAE/Metric", "Drive Size": "72-Tooth Ratchet", "Material": "Chrome Vanadium", "Finish": "Polished Chrome", "Case": "Blow Mold", "Warranty": "Lifetime"}, "image": "https://images.unsplash.com/photo-1580402427914-a3b9f8de8b39?w=800&q=80"},
-            {"name": "Precision Screwdriver Set", "specs": {"Pieces": "32pc", "Tip Types": "Phillips/Slotted/Torx/Hex", "Handle": "Ergonomic Cushion Grip", "Blade": "Hardened Steel", "Case": "Rotating Stand", "Magnetic Tips": "Yes"}, "image": "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&q=80"},
+            {"name": "Professional Ratcheting Wrench Set", "specs": {"Pieces": "12pc SAE/Metric", "Drive Size": "72-Tooth Ratchet", "Material": "Chrome Vanadium", "Finish": "Polished Chrome", "Case": "Blow Mold", "Warranty": "Lifetime"}, "image": PRODUCT_IMAGE_URLS.get("Stanley Wrench", PRODUCT_IMAGE_URLS.get("Hand Tools"))},
+            {"name": "Precision Screwdriver Set", "specs": {"Pieces": "32pc", "Tip Types": "Phillips/Slotted/Torx/Hex", "Handle": "Ergonomic Cushion Grip", "Blade": "Hardened Steel", "Case": "Rotating Stand", "Magnetic Tips": "Yes"}, "image": PRODUCT_IMAGE_URLS.get("Stanley Wrench", PRODUCT_IMAGE_URLS.get("Hand Tools"))},
         ],
         "Power Tools": [
-            {"name": "18V Brushless Cordless Drill/Driver Kit", "specs": {"Voltage": "18V/20V MAX", "Chuck": "1/2\" Metal Ratcheting", "Speed": "0-2000 RPM", "Torque": "620 in-lbs", "Battery": "5.0Ah Li-Ion (2x)", "LED Light": "3-Mode"}, "image": "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&q=80"},
-            {"name": "Industrial Angle Grinder", "specs": {"Disc Size": "125mm (5\")", "Power": "1400W", "No Load Speed": "11,500 RPM", "Spindle Thread": "M14", "Guard": "Adjustable", "Soft Start": "Yes"}, "image": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=800&q=80"},
+            {"name": "18V Brushless Cordless Drill/Driver Kit", "specs": {"Voltage": "18V/20V MAX", "Chuck": "1/2\" Metal Ratcheting", "Speed": "0-2000 RPM", "Torque": "620 in-lbs", "Battery": "5.0Ah Li-Ion (2x)", "LED Light": "3-Mode"}, "image": PRODUCT_IMAGE_URLS.get("Bosch Drill", PRODUCT_IMAGE_URLS.get("Power Tools"))},
+            {"name": "Industrial Angle Grinder", "specs": {"Disc Size": "125mm (5\")", "Power": "1400W", "No Load Speed": "11,500 RPM", "Spindle Thread": "M14", "Guard": "Adjustable", "Soft Start": "Yes"}, "image": PRODUCT_IMAGE_URLS.get("Bosch Drill", PRODUCT_IMAGE_URLS.get("Power Tools"))},
         ],
         "Safety & PPE": [
-            {"name": "Premium Safety Helmet", "specs": {"Standard": "EN397/ANSI Z89.1", "Material": "ABS Shell", "Suspension": "6-Point Ratchet", "Ventilation": "4-Point Vented", "Accessory Slots": "Yes", "UV Resistant": "Yes"}, "image": "https://images.unsplash.com/photo-1578874691223-64558a3ca096?w=800&q=80"},
-            {"name": "Impact-Resistant Safety Glasses", "specs": {"Standard": "EN166/ANSI Z87.1+", "Lens": "Polycarbonate Anti-Scratch", "Coating": "Anti-Fog", "UV Protection": "99.9%", "Frame": "Wraparound", "Weight": "28g"}, "image": "https://images.unsplash.com/photo-1617114919297-3c8ddb01f599?w=800&q=80"},
+            {"name": "Premium Safety Helmet", "specs": {"Standard": "EN397/ANSI Z89.1", "Material": "ABS Shell", "Suspension": "6-Point Ratchet", "Ventilation": "4-Point Vented", "Accessory Slots": "Yes", "UV Resistant": "Yes"}, "image": PRODUCT_IMAGE_URLS.get("3M Safety Helmet", PRODUCT_IMAGE_URLS.get("Safety & PPE"))},
+            {"name": "Impact-Resistant Safety Glasses", "specs": {"Standard": "EN166/ANSI Z87.1+", "Lens": "Polycarbonate Anti-Scratch", "Coating": "Anti-Fog", "UV Protection": "99.9%", "Frame": "Wraparound", "Weight": "28g"}, "image": PRODUCT_IMAGE_URLS.get("3M Safety Glasses", PRODUCT_IMAGE_URLS.get("Safety & PPE"))},
         ],
         "IT Equipment - Laptops": [
-            {"name": "ProBook Business Laptop", "specs": {"Processor": "Intel Core i7-1355U", "Memory": "16GB DDR4", "Storage": "512GB NVMe SSD", "Display": "15.6\" FHD IPS", "OS": "Windows 11 Pro", "Battery": "Up to 10hrs"}, "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&q=80"},
-            {"name": "Elite Ultrabook", "specs": {"Processor": "Intel Core i7-1365U vPro", "Memory": "32GB DDR5", "Storage": "1TB NVMe Gen4", "Display": "14\" 2.8K OLED", "OS": "Windows 11 Pro", "Weight": "1.12kg"}, "image": "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&q=80"},
+            {"name": "ProBook Business Laptop", "specs": {"Processor": "Intel Core i7-1355U", "Memory": "16GB DDR4", "Storage": "512GB NVMe SSD", "Display": "15.6\" FHD IPS", "OS": "Windows 11 Pro", "Battery": "Up to 10hrs"}, "image": PRODUCT_IMAGE_URLS.get("HP Laptop", PRODUCT_IMAGE_URLS.get("IT Equipment - Laptops"))},
+            {"name": "Elite Ultrabook", "specs": {"Processor": "Intel Core i7-1365U vPro", "Memory": "32GB DDR5", "Storage": "1TB NVMe Gen4", "Display": "14\" 2.8K OLED", "OS": "Windows 11 Pro", "Weight": "1.12kg"}, "image": PRODUCT_IMAGE_URLS.get("HP Laptop", PRODUCT_IMAGE_URLS.get("IT Equipment - Laptops"))},
         ],
         "IT Equipment - Monitors": [
-            {"name": "Professional 4K USB-C Monitor", "specs": {"Screen Size": "27\"", "Resolution": "3840x2160", "Panel": "IPS", "Refresh": "60Hz", "Ports": "USB-C 90W, HDMI, DP", "Ergonomics": "HAS"}, "image": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&q=80"},
-            {"name": "Ultrawide Curved Monitor", "specs": {"Screen Size": "34\"", "Resolution": "3440x1440", "Panel": "VA 1500R", "Refresh": "100Hz", "HDR": "HDR10", "Built-in KVM": "Yes"}, "image": "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&q=80"},
+            {"name": "Professional 4K USB-C Monitor", "specs": {"Screen Size": "27\"", "Resolution": "3840x2160", "Panel": "IPS", "Refresh": "60Hz", "Ports": "USB-C 90W, HDMI, DP", "Ergonomics": "HAS"}, "image": PRODUCT_IMAGE_URLS.get("Dell Monitor", PRODUCT_IMAGE_URLS.get("IT Equipment - Monitors"))},
+            {"name": "Ultrawide Curved Monitor", "specs": {"Screen Size": "34\"", "Resolution": "3440x1440", "Panel": "VA 1500R", "Refresh": "100Hz", "HDR": "HDR10", "Built-in KVM": "Yes"}, "image": PRODUCT_IMAGE_URLS.get("Dell Monitor", PRODUCT_IMAGE_URLS.get("IT Equipment - Monitors"))},
         ],
         "IT Equipment - Networking": [
-            {"name": "Enterprise Managed Switch", "specs": {"Ports": "48x GbE PoE+", "Uplinks": "4x 10G SFP+", "PoE Budget": "740W", "Switching": "176Gbps", "Management": "CLI/Web/SNMP", "Stackable": "Yes"}, "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80"},
-            {"name": "Enterprise Wireless Access Point", "specs": {"Standard": "Wi-Fi 6E", "Speed": "Up to 5.4Gbps", "Bands": "Tri-Band", "Clients": "500+", "PoE": "802.3at", "MIMO": "4x4:4"}, "image": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80"},
+            {"name": "Enterprise Managed Switch", "specs": {"Ports": "48x GbE PoE+", "Uplinks": "4x 10G SFP+", "PoE Budget": "740W", "Switching": "176Gbps", "Management": "CLI/Web/SNMP", "Stackable": "Yes"}, "image": PRODUCT_IMAGE_URLS.get("Cisco Switch", PRODUCT_IMAGE_URLS.get("IT Equipment - Networking"))},
+            {"name": "Enterprise Wireless Access Point", "specs": {"Standard": "Wi-Fi 6E", "Speed": "Up to 5.4Gbps", "Bands": "Tri-Band", "Clients": "500+", "PoE": "802.3at", "MIMO": "4x4:4"}, "image": PRODUCT_IMAGE_URLS.get("Cisco Switch", PRODUCT_IMAGE_URLS.get("IT Equipment - Networking"))},
+        ],
+        "Adhesives & Sealants": [
+            {"name": "Industrial Adhesive Set", "specs": {"Type": "Multi-purpose", "Bond Strength": "High", "Cure Time": "24hrs", "Temperature Range": "-40°C to 120°C", "Volume": "50ml each"}, "image": PRODUCT_IMAGE_URLS.get("Henkel Adhesive", PRODUCT_IMAGE_URLS.get("Adhesives & Sealants"))},
         ],
     }
     
