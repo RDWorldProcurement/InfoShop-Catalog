@@ -706,11 +706,11 @@ def generate_unspsc_code(category_name: str) -> str:
     return "31000000"  # Default MRO code
 
 def get_brand_info(brand_name: str) -> Dict:
-    """Get brand info with logo"""
+    """Get brand info with color"""
     for brand in MRO_BRANDS:
         if brand["name"] == brand_name:
             return brand
-    return {"name": brand_name, "logo": None}
+    return {"name": brand_name, "logo": None, "color": "#007CC3"}
 
 def generate_product_data(index: int, category: str, brand: str) -> Dict:
     """Generate realistic product data with UNSPSC and detailed specifications"""
