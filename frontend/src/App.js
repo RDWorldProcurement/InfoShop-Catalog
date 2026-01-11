@@ -141,6 +141,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route path="/admin" element={<AdminPortalPage />} />
             </Routes>
             <ChatBot />
             <Toaster position="top-right" richColors />
