@@ -30,8 +30,8 @@ const CatalogPage = () => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedBrand, setSelectedBrand] = useState("all");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
   // Modals
