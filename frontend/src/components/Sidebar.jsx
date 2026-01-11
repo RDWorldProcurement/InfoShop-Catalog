@@ -6,6 +6,25 @@ import {
   Package, Search, History, RefreshCw, Upload, Award, LogOut, User, Coins, Languages
 } from "lucide-react";
 
+// NavItem component moved outside Sidebar to prevent re-creation on each render
+const NavItem = ({ icon: Icon, label, path, id, activePage, navigate }) => {
+  const isActive = activePage === id;
+  return (
+    <button
+      onClick={() => navigate(path)}
+      className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all ${
+        isActive 
+          ? 'bg-[#007CC3]/10 text-[#007CC3] font-semibold' 
+          : 'text-slate-600 hover:bg-slate-100'
+      }`}
+      data-testid={`nav-${id}`}
+    >
+      <Icon className="w-5 h-5" />
+      <span>{label}</span>
+    </button>
+  );
+};
+
 const Sidebar = ({ activePage }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -14,24 +33,6 @@ const Sidebar = ({ activePage }) => {
   const handleLogout = () => {
     logout();
     navigate("/");
-  };
-
-  const NavItem = ({ icon: Icon, label, path, id }) => {
-    const isActive = activePage === id;
-    return (
-      <button
-        onClick={() => navigate(path)}
-        className={`flex items-center gap-3 w-full px-4 py-3 rounded-xl transition-all ${
-          isActive 
-            ? 'bg-[#007CC3]/10 text-[#007CC3] font-semibold' 
-            : 'text-slate-600 hover:bg-slate-100'
-        }`}
-        data-testid={`nav-${id}`}
-      >
-        <Icon className="w-5 h-5" />
-        <span>{label}</span>
-      </button>
-    );
   };
 
   return (
@@ -79,11 +80,11 @@ const Sidebar = ({ activePage }) => {
 
         {/* Navigation */}
         <nav className="space-y-1 flex-1">
-          <NavItem icon={Search} label={t.nav.catalog} path="/catalog" id="catalog" />
-          <NavItem icon={History} label={t.nav.orders} path="/orders" id="orders" />
-          <NavItem icon={RefreshCw} label={t.nav.repeatOrders} path="/repeat-orders" id="repeat-orders" />
-          <NavItem icon={Upload} label={t.nav.bulkUpload} path="/bulk-upload" id="bulk-upload" />
-          <NavItem icon={Award} label={t.nav.rewards} path="/rewards" id="rewards" />
+          <NavItem icon={Search} label={t.nav.catalog} path="/catalog" id="catalog" activePage={activePage} navigate={navigate} />
+          <NavItem icon={History} label={t.nav.orders} path="/orders" id="orders" activePage={activePage} navigate={navigate} />
+          <NavItem icon={RefreshCw} label={t.nav.repeatOrders} path="/repeat-orders" id="repeat-orders" activePage={activePage} navigate={navigate} />
+          <NavItem icon={Upload} label={t.nav.bulkUpload} path="/bulk-upload" id="bulk-upload" activePage={activePage} navigate={navigate} />
+          <NavItem icon={Award} label={t.nav.rewards} path="/rewards" id="rewards" activePage={activePage} navigate={navigate} />
         </nav>
 
         {/* Language Selector */}
