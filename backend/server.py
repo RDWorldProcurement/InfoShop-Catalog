@@ -707,47 +707,104 @@ def get_brand_info(brand_name: str) -> Dict:
     return {"name": brand_name, "logo": None}
 
 def generate_product_data(index: int, category: str, brand: str) -> Dict:
-    """Generate realistic product data with UNSPSC"""
-    product_names = {
-        "Bearings & Power Transmission": ["Ball Bearing", "Roller Bearing", "Timing Belt", "V-Belt", "Chain Drive"],
-        "Electrical & Lighting": ["LED Panel Light", "Circuit Breaker", "Contactor", "Relay", "Terminal Block"],
-        "Fasteners & Hardware": ["Hex Bolt", "Socket Cap Screw", "Nut", "Washer", "Anchor Bolt"],
-        "Hand Tools": ["Wrench Set", "Screwdriver Set", "Pliers", "Hammer", "Tape Measure"],
-        "Power Tools": ["Cordless Drill", "Angle Grinder", "Impact Wrench", "Circular Saw", "Jigsaw"],
-        "Safety & PPE": ["Safety Helmet", "Safety Glasses", "Work Gloves", "Safety Boots", "High-Vis Vest"],
+    """Generate realistic product data with UNSPSC and detailed specifications"""
+    # Enhanced product names with specifications
+    product_catalog = {
+        "Bearings & Power Transmission": [
+            {"name": "Deep Groove Ball Bearing", "specs": {"Inner Diameter": "25mm", "Outer Diameter": "52mm", "Width": "15mm", "Material": "Chrome Steel", "Seal Type": "2RS Rubber Sealed", "Load Rating": "14kN Dynamic"}, "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"},
+            {"name": "Tapered Roller Bearing", "specs": {"Bore Size": "30mm", "Outside Diameter": "62mm", "Width": "17.25mm", "Material": "Chrome Steel", "Cage Type": "Steel", "Dynamic Load": "44kN"}, "image": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80"},
+            {"name": "Industrial Timing Belt", "specs": {"Pitch": "8mm HTD", "Width": "30mm", "Length": "1200mm", "Material": "Neoprene/Fiberglass", "Teeth Count": "150", "Max Speed": "40m/s"}, "image": "https://images.unsplash.com/photo-1612430146325-87a163519863?w=800&q=80"},
+        ],
+        "Electrical & Lighting": [
+            {"name": "Industrial LED High Bay Light", "specs": {"Power": "200W", "Lumens": "26,000lm", "Color Temp": "5000K", "IP Rating": "IP65", "Beam Angle": "120°", "Lifespan": "50,000hrs"}, "image": "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&q=80"},
+            {"name": "Miniature Circuit Breaker", "specs": {"Current Rating": "32A", "Poles": "3P", "Breaking Capacity": "10kA", "Curve Type": "C", "Voltage": "400V AC", "DIN Rail Mount": "Yes"}, "image": "https://images.unsplash.com/photo-1625592831117-b6ef5fe3bdd3?w=800&q=80"},
+            {"name": "Industrial Contactor", "specs": {"Coil Voltage": "24V DC", "Current Rating": "40A", "Contacts": "3NO + 1NC", "Mounting": "DIN Rail", "Duty Cycle": "AC-3", "Mechanical Life": "10M ops"}, "image": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80"},
+        ],
+        "Hand Tools": [
+            {"name": "Professional Ratcheting Wrench Set", "specs": {"Pieces": "12pc SAE/Metric", "Drive Size": "72-Tooth Ratchet", "Material": "Chrome Vanadium", "Finish": "Polished Chrome", "Case": "Blow Mold", "Warranty": "Lifetime"}, "image": "https://images.unsplash.com/photo-1580402427914-a3b9f8de8b39?w=800&q=80"},
+            {"name": "Precision Screwdriver Set", "specs": {"Pieces": "32pc", "Tip Types": "Phillips/Slotted/Torx/Hex", "Handle": "Ergonomic Cushion Grip", "Blade": "Hardened Steel", "Case": "Rotating Stand", "Magnetic Tips": "Yes"}, "image": "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&q=80"},
+        ],
+        "Power Tools": [
+            {"name": "18V Brushless Cordless Drill/Driver Kit", "specs": {"Voltage": "18V/20V MAX", "Chuck": "1/2\" Metal Ratcheting", "Speed": "0-2000 RPM", "Torque": "620 in-lbs", "Battery": "5.0Ah Li-Ion (2x)", "LED Light": "3-Mode"}, "image": "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&q=80"},
+            {"name": "Industrial Angle Grinder", "specs": {"Disc Size": "125mm (5\")", "Power": "1400W", "No Load Speed": "11,500 RPM", "Spindle Thread": "M14", "Guard": "Adjustable", "Soft Start": "Yes"}, "image": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=800&q=80"},
+        ],
+        "Safety & PPE": [
+            {"name": "Premium Safety Helmet", "specs": {"Standard": "EN397/ANSI Z89.1", "Material": "ABS Shell", "Suspension": "6-Point Ratchet", "Ventilation": "4-Point Vented", "Accessory Slots": "Yes", "UV Resistant": "Yes"}, "image": "https://images.unsplash.com/photo-1578874691223-64558a3ca096?w=800&q=80"},
+            {"name": "Impact-Resistant Safety Glasses", "specs": {"Standard": "EN166/ANSI Z87.1+", "Lens": "Polycarbonate Anti-Scratch", "Coating": "Anti-Fog", "UV Protection": "99.9%", "Frame": "Wraparound", "Weight": "28g"}, "image": "https://images.unsplash.com/photo-1617114919297-3c8ddb01f599?w=800&q=80"},
+        ],
+        "IT Equipment - Laptops": [
+            {"name": "ProBook Business Laptop", "specs": {"Processor": "Intel Core i7-1355U", "Memory": "16GB DDR4", "Storage": "512GB NVMe SSD", "Display": "15.6\" FHD IPS", "OS": "Windows 11 Pro", "Battery": "Up to 10hrs"}, "image": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&q=80"},
+            {"name": "Elite Ultrabook", "specs": {"Processor": "Intel Core i7-1365U vPro", "Memory": "32GB DDR5", "Storage": "1TB NVMe Gen4", "Display": "14\" 2.8K OLED", "OS": "Windows 11 Pro", "Weight": "1.12kg"}, "image": "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=800&q=80"},
+        ],
+        "IT Equipment - Monitors": [
+            {"name": "Professional 4K USB-C Monitor", "specs": {"Screen Size": "27\"", "Resolution": "3840x2160", "Panel": "IPS", "Refresh": "60Hz", "Ports": "USB-C 90W, HDMI, DP", "Ergonomics": "HAS"}, "image": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&q=80"},
+            {"name": "Ultrawide Curved Monitor", "specs": {"Screen Size": "34\"", "Resolution": "3440x1440", "Panel": "VA 1500R", "Refresh": "100Hz", "HDR": "HDR10", "Built-in KVM": "Yes"}, "image": "https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&q=80"},
+        ],
+        "IT Equipment - Networking": [
+            {"name": "Enterprise Managed Switch", "specs": {"Ports": "48x GbE PoE+", "Uplinks": "4x 10G SFP+", "PoE Budget": "740W", "Switching": "176Gbps", "Management": "CLI/Web/SNMP", "Stackable": "Yes"}, "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80"},
+            {"name": "Enterprise Wireless Access Point", "specs": {"Standard": "Wi-Fi 6E", "Speed": "Up to 5.4Gbps", "Bands": "Tri-Band", "Clients": "500+", "PoE": "802.3at", "MIMO": "4x4:4"}, "image": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=800&q=80"},
+        ],
     }
     
-    product_images = [
-        "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=400",
-        "https://images.unsplash.com/photo-1625592831117-b6ef5fe3bdd3?w=400",
-        "https://images.unsplash.com/photo-1612430146325-87a163519863?w=400",
-        "https://images.unsplash.com/photo-1616524617587-2ddb5ccf87cc?w=400",
-        "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400",
-    ]
+    # Get product details or use defaults
+    products = product_catalog.get(category, [
+        {"name": "Industrial Component", "specs": {"Type": "Standard", "Grade": "Industrial", "Material": "High-Quality", "Certification": "ISO 9001"}, "image": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80"}
+    ])
     
-    names = product_names.get(category, ["Industrial Component", "MRO Part", "Equipment Part"])
-    name = random.choice(names)
+    product = products[index % len(products)]
     unspsc = generate_unspsc_code(category)
     brand_info = get_brand_info(brand)
+    
+    # Generate price based on category
+    price_ranges = {
+        "IT Equipment - Laptops": (800, 3500),
+        "IT Equipment - Monitors": (300, 1500),
+        "IT Equipment - Networking": (500, 5000),
+        "IT Equipment - Servers": (2000, 15000),
+        "Power Tools": (100, 800),
+        "Safety & PPE": (15, 150),
+    }
+    price_range = price_ranges.get(category, (25, 500))
+    base_price = round(random.uniform(*price_range), 2)
     
     # 10% chance of being sponsored
     is_sponsored = random.random() < 0.10
     
+    # Generate availability info
+    availability = {
+        "in_stock": random.random() > 0.1,
+        "quantity": random.randint(5, 500),
+        "warehouse": random.choice(["US-East", "US-West", "US-Central", "EU-West", "APAC-SG"]),
+        "ships_from": random.choice(["Manufacturer", "Distribution Center", "Local Warehouse"]),
+        "estimated_delivery": f"{random.randint(1, 5)}-{random.randint(6, 10)} business days"
+    }
+    
     return {
         "id": str(uuid.uuid4()),
-        "name": f"{brand} {name}",
-        "description": f"High-quality {name.lower()} from {brand}. Industrial grade, designed for demanding applications. Meets ISO standards.",
+        "name": f"{brand} {product['name']}",
+        "short_description": f"Professional-grade {product['name'].lower()} from {brand}. Designed for enterprise and industrial applications.",
+        "full_description": f"The {brand} {product['name']} delivers exceptional performance and reliability for demanding professional environments. Built with premium materials and backed by {brand}'s reputation for quality. Meets international standards for safety and performance. Ideal for enterprise deployments and industrial applications.",
         "category": category,
         "brand": brand,
         "brand_logo": brand_info.get("logo"),
         "sku": f"{brand[:3].upper()}-{category[:3].upper()}-{index:06d}",
         "unspsc_code": unspsc,
         "unspsc_name": category,
-        "base_price": round(random.uniform(10, 500), 2),
+        "base_price": base_price,
         "unit": random.choice(["EA", "PK", "BX", "SET"]),
-        "image_url": random.choice(product_images),
+        "image_url": product.get("image", "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=800&q=80"),
+        "specifications": product.get("specs", {}),
+        "availability": availability,
+        "rating": round(random.uniform(4.0, 5.0), 1),
+        "reviews_count": random.randint(10, 500),
         "spec_document_url": "https://example.com/specs/document.pdf",
-        "is_sponsored": is_sponsored
+        "is_sponsored": is_sponsored,
+        "features": [
+            "Premium build quality",
+            "Industry-standard compliance",
+            "Extended warranty available",
+            f"Genuine {brand} product"
+        ]
     }
 
 def generate_delivery_partners(base_price: float, count: int) -> List[DeliveryPartner]:
