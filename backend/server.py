@@ -40,6 +40,118 @@ api_router = APIRouter(prefix="/api")
 # Security
 security = HTTPBearer()
 
+# Translation cache to avoid repeated LLM calls
+translation_cache = {}
+
+# Language mapping for translation
+LANGUAGE_NAMES = {
+    "en": "English",
+    "fr": "French",
+    "de": "German",
+    "it": "Italian",
+    "nl": "Dutch"
+}
+
+async def translate_text(text: str, target_lang: str, context: str = "product") -> str:
+    """Translate text using Emergent LLM with caching"""
+    if not text or target_lang == "en":
+        return text
+    
+    # Check cache first
+    cache_key = f"{target_lang}:{hashlib.md5(text.encode()).hexdigest()}"
+    if cache_key in translation_cache:
+        return translation_cache[cache_key]
+    
+    # Check MongoDB cache
+    cached = await db.translations.find_one({"cache_key": cache_key})
+    if cached:
+        translation_cache[cache_key] = cached["translation"]
+        return cached["translation"]
+    
+    try:
+        target_language = LANGUAGE_NAMES.get(target_lang, "French")
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"translate_{cache_key[:8]}",
+            system_message=f"You are a professional B2B e-commerce product translator. Translate the following {context} text from English to {target_language}. Keep technical terms, brand names, model numbers, and specifications intact. Only provide the translation, no explanations."
+        ).with_model("openai", "gpt-4o-mini")
+        
+        response = await chat.send_message(UserMessage(text=text))
+        translated = response.strip() if response else text
+        
+        # Cache in memory and MongoDB
+        translation_cache[cache_key] = translated
+        await db.translations.update_one(
+            {"cache_key": cache_key},
+            {"$set": {"cache_key": cache_key, "original": text, "target_lang": target_lang, 
+                     "translation": translated, "created_at": datetime.now(timezone.utc)}},
+            upsert=True
+        )
+        
+        return translated
+    except Exception as e:
+        logger.error(f"Translation error: {e}")
+        return text
+
+async def translate_product(product: dict, target_lang: str) -> dict:
+    """Translate all product text fields"""
+    if target_lang == "en":
+        return product
+    
+    translated = product.copy()
+    
+    # Translate key fields
+    if product.get("name"):
+        translated["name"] = await translate_text(product["name"], target_lang, "product name")
+    if product.get("short_description"):
+        translated["short_description"] = await translate_text(product["short_description"], target_lang, "product description")
+    if product.get("full_description"):
+        translated["full_description"] = await translate_text(product["full_description"], target_lang, "product description")
+    if product.get("category"):
+        translated["category"] = await translate_text(product["category"], target_lang, "category name")
+    
+    # Translate specifications
+    if product.get("specifications"):
+        translated_specs = {}
+        for key, value in product["specifications"].items():
+            translated_key = await translate_text(key, target_lang, "specification label")
+            # Don't translate numeric values or technical specs
+            if isinstance(value, str) and not any(c.isdigit() for c in value):
+                translated_specs[translated_key] = await translate_text(value, target_lang, "specification value")
+            else:
+                translated_specs[translated_key] = value
+        translated["specifications"] = translated_specs
+    
+    return translated
+
+async def translate_service(service: dict, target_lang: str) -> dict:
+    """Translate all service text fields"""
+    if target_lang == "en":
+        return service
+    
+    translated = service.copy()
+    
+    # Translate key fields
+    if service.get("name"):
+        translated["name"] = await translate_text(service["name"], target_lang, "service name")
+    if service.get("short_description"):
+        translated["short_description"] = await translate_text(service["short_description"], target_lang, "service description")
+    if service.get("full_description"):
+        translated["full_description"] = await translate_text(service["full_description"], target_lang, "service description")
+    if service.get("category"):
+        translated["category"] = await translate_text(service["category"], target_lang, "category name")
+    if service.get("unit_of_measure"):
+        translated["unit_of_measure"] = await translate_text(service["unit_of_measure"], target_lang, "pricing unit")
+    
+    # Translate service includes list
+    if service.get("service_includes"):
+        translated["service_includes"] = [
+            await translate_text(item, target_lang, "service feature") 
+            for item in service["service_includes"]
+        ]
+    
+    return translated
+
 # Currency configurations per country
 COUNTRY_CURRENCIES = {
     "USA": {"code": "USD", "symbol": "$", "rate": 1.0},
