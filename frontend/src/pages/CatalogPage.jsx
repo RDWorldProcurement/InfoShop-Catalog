@@ -393,19 +393,28 @@ const CatalogPage = () => {
           {/* Filters */}
           <div className="flex flex-wrap gap-4 mb-6">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-56 bg-white" data-testid="category-filter">
+              <SelectTrigger className="w-64 bg-white" data-testid="category-filter">
                 <SelectValue placeholder={t.catalog.allCategories} />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t.catalog.allCategories}</SelectItem>
-                {(activeTab === 'products' ? categories : serviceCategories).map((cat) => (
-                  <SelectItem key={cat.name} value={cat.name}>
-                    <span className="flex items-center gap-2">
-                      {cat.name}
-                      <span className="text-xs text-slate-400 font-mono">{cat.unspsc}</span>
-                    </span>
-                  </SelectItem>
-                ))}
+              <SelectContent className="max-h-80">
+                <SelectItem value="all">
+                  <span className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-slate-400" />
+                    {t.catalog.allCategories}
+                  </span>
+                </SelectItem>
+                {(activeTab === 'products' ? categories : serviceCategories).map((cat) => {
+                  const IconComponent = getCategoryIcon(cat.name);
+                  return (
+                    <SelectItem key={cat.name} value={cat.name}>
+                      <span className="flex items-center gap-2">
+                        <IconComponent className="w-4 h-4 text-[#007CC3]" />
+                        <span className="truncate max-w-[180px]">{cat.name}</span>
+                        <span className="text-xs text-slate-400 font-mono">{cat.unspsc}</span>
+                      </span>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
 
@@ -420,12 +429,28 @@ const CatalogPage = () => {
                     <SelectItem key={brand.name} value={brand.name}>
                       <span className="flex items-center gap-2">
                         {brand.logo && <img src={brand.logo} alt="" className="w-4 h-4 object-contain" onError={(e) => e.target.style.display = 'none'} />}
+                        <span 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: brand.color || '#007CC3' }}
+                        />
                         {brand.name}
                       </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+            )}
+
+            {/* Compare Button - Show when products are in compare list */}
+            {compareList.length > 0 && activeTab === 'products' && (
+              <Button
+                onClick={() => setCompareModalOpen(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white gap-2"
+                data-testid="compare-btn"
+              >
+                <GitCompare className="w-4 h-4" />
+                Compare ({compareList.length})
+              </Button>
             )}
           </div>
 
