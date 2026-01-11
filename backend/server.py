@@ -1001,14 +1001,64 @@ async def search_services(
     results = []
     
     search_term = q.lower()
-    filtered_services = SERVICES_DATA.copy()
+    
+    # Combine IT Services Catalog with SERVICES_DATA
+    all_services = []
+    
+    # Add IT Services from detailed catalog
+    for it_service in IT_SERVICES_CATALOG:
+        all_services.append({
+            "id": it_service["id"],
+            "name": it_service["name"],
+            "short_description": it_service["short_description"],
+            "full_description": it_service["full_description"],
+            "category": it_service["category"],
+            "unspsc_code": it_service["unspsc_code"],
+            "unspsc_name": it_service["unspsc_name"],
+            "supplier_name": it_service.get("supplier_name"),
+            "supplier_logo": it_service.get("supplier_logo"),
+            "unit_of_measure": it_service["pricing_model"],
+            "base_price": it_service["base_price"],
+            "service_includes": it_service.get("service_includes", []),
+            "availability": it_service.get("availability", {}),
+            "rating": it_service.get("rating", 4.5),
+            "reviews_count": it_service.get("reviews_count", 100),
+            "is_it_service": True
+        })
+    
+    # Add regular services
+    for service in SERVICES_DATA:
+        all_services.append({
+            "id": str(uuid.uuid4()),
+            "name": service["name"],
+            "short_description": f"Professional {service['name'].lower()} for enterprise environments.",
+            "full_description": f"{service['name']}. Professional service meeting industry standards and compliance requirements.",
+            "category": service["category"],
+            "unspsc_code": service["unspsc_code"],
+            "unspsc_name": service["unspsc_name"],
+            "supplier_name": service["supplier_name"],
+            "supplier_logo": None,
+            "unit_of_measure": service["unit_of_measure"],
+            "base_price": service["base_price"],
+            "service_includes": [],
+            "availability": {"available": True, "lead_time_days": random.randint(1, 7)},
+            "rating": round(random.uniform(4.0, 5.0), 1),
+            "reviews_count": random.randint(20, 300),
+            "is_it_service": False
+        })
+    
+    # Filter by search term
+    filtered_services = all_services
     if search_term:
-        filtered_services = [s for s in SERVICES_DATA if search_term in s["name"].lower() or search_term in s["category"].lower()]
+        filtered_services = [s for s in all_services if 
+            search_term in s["name"].lower() or 
+            search_term in s["category"].lower() or
+            search_term in s.get("short_description", "").lower()]
     if category and category != "all":
         filtered_services = [s for s in filtered_services if s["category"].lower() == category.lower()]
     
     if not filtered_services:
-        filtered_services = SERVICES_DATA[:15]
+        filtered_services = all_services[:15]
     
     for service in filtered_services[:limit]:
         rand = random.random()
@@ -1028,9 +1078,10 @@ async def search_services(
             has_supplier = False
         
         results.append({
-            "id": str(uuid.uuid4()),
+            "id": service["id"],
             "name": service["name"],
-            "description": f"{service['name']}. Professional service meeting industry standards.",
+            "short_description": service.get("short_description", ""),
+            "full_description": service.get("full_description", ""),
             "category": service["category"],
             "unspsc_code": service["unspsc_code"],
             "unspsc_name": service["unspsc_name"],
@@ -1040,6 +1091,11 @@ async def search_services(
             "currency_symbol": currency["symbol"],
             "pricing_model": service["unit_of_measure"],
             "supplier_name": service["supplier_name"] if has_supplier else None,
+            "supplier_logo": service.get("supplier_logo"),
+            "service_includes": service.get("service_includes", []),
+            "availability": service.get("availability", {}),
+            "rating": service.get("rating", 4.5),
+            "reviews_count": service.get("reviews_count", 100),
             "has_supplier": has_supplier,
             "result_type": result_type,
             "is_sponsored": is_sponsored
