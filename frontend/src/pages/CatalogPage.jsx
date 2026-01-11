@@ -18,7 +18,7 @@ import {
   Upload, History, ShoppingCart, CheckCircle, AlertCircle, XCircle, Zap,
   ArrowRight, LogOut, Menu, User, ChevronDown, Star, ExternalLink, Info,
   Cog, Lightbulb, Wrench, Hammer, Shield, Disc, Droplet, Sparkles,
-  Thermometer, Gauge, Flask, Cpu, Box, Layers, Activity, Flame, Bot,
+  Thermometer, Gauge, Beaker, Cpu, Box, Layers, Activity, Flame, Bot,
   Scissors, Archive, Laptop, Monitor, Wifi, Server, Keyboard, Filter, Printer,
   Scale, GitCompare, X, Check, Minus
 } from "lucide-react";
