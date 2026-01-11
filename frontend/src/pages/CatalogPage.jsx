@@ -23,7 +23,7 @@ import Sidebar from "../components/Sidebar";
 const CatalogPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("products");
   const [loading, setLoading] = useState(false);
