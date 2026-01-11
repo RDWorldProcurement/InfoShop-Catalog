@@ -278,7 +278,9 @@ const LandingPage = () => {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="border-slate-300 text-slate-700 px-8 py-6 text-lg"
+                  className="border-slate-300 text-slate-700 px-8 py-6 text-lg hover:bg-slate-50"
+                  onClick={() => { setCurrentSlide(0); setDemoModalOpen(true); }}
+                  data-testid="watch-demo-btn"
                 >
                   <Play className="mr-2 h-5 w-5" /> {t.landing.learnMore}
                 </Button>
