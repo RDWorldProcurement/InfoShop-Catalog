@@ -781,7 +781,7 @@ const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ, t 
   };
 
   return (
-    <Card className={`hover:shadow-xl transition-all relative ${service.is_sponsored ? 'ring-2 ring-amber-200' : ''}`} data-testid={`service-card-${service.id}`}>
+    <Card className={`hover:shadow-xl transition-all relative overflow-hidden ${service.is_sponsored ? 'ring-2 ring-amber-200' : ''}`} data-testid={`service-card-${service.id}`}>
       {service.is_sponsored && (
         <div className="absolute top-3 right-3 z-10">
           <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">
@@ -790,6 +790,17 @@ const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ, t 
           </Badge>
         </div>
       )}
+      
+      {/* Service Image */}
+      <div className="relative h-40 bg-gradient-to-br from-slate-100 to-slate-50">
+        <img 
+          src={service.image_url} 
+          alt={service.name} 
+          className="w-full h-full object-cover"
+          onError={(e) => { e.target.src = "https://static.prod-images.emergentagent.com/jobs/93bd7302-b98c-48b8-885e-c31e5a425122/images/49c83afc1a588e3c2810a205953d952ac31ad730ca2f9871863edeeea2072a83.png"; }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+      </div>
       
       <CardContent className="p-5">
         {/* Category Badge */}
