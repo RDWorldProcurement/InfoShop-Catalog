@@ -237,6 +237,9 @@ MRO_BRANDS = [
     {"name": "Acer", "logo": None, "color": "#83B81A"},
     {"name": "BenQ", "logo": None, "color": "#5B2D87"},
     {"name": "Logitech", "logo": None, "color": "#00B8FC"},
+    {"name": "Donaldson", "logo": None, "color": "#003B73"},
+    {"name": "Avantor", "logo": None, "color": "#6D2077"},
+    {"name": "Markem-Imaje", "logo": None, "color": "#E4002B"},
 ]
 
 # Product images hosted on Emergent CDN - product-specific matches
