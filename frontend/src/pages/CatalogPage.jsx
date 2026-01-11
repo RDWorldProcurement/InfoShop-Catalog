@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth, API } from "../App";
 import axios from "axios";
 import { Button } from "../components/ui/button";
@@ -8,20 +8,20 @@ import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../components/ui/dialog";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { toast } from "sonner";
 import {
   Search, Package, Settings, Coins, Clock, Truck, FileText, RefreshCw,
-  Upload, History, ChevronDown, Filter, ShoppingCart, MessageSquare,
-  CheckCircle, AlertCircle, XCircle, Zap, ArrowRight, LogOut, Menu,
-  Home, Calendar, Boxes, Award, HelpCircle, User, ChevronRight
+  Upload, History, ShoppingCart, CheckCircle, AlertCircle, XCircle, Zap,
+  ArrowRight, LogOut, Menu, User, ChevronDown, Star, ExternalLink, Info
 } from "lucide-react";
+import Sidebar from "../components/Sidebar";
 
 const CatalogPage = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("products");
   const [loading, setLoading] = useState(false);
@@ -34,6 +34,15 @@ const CatalogPage = () => {
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   
+  // Cart state
+  const [cart, setCart] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [punchoutModalOpen, setPunchoutModalOpen] = useState(false);
+  const [selectedPunchoutSystem, setSelectedPunchoutSystem] = useState(null);
+  const [punchoutSystems, setPunchoutSystems] = useState([]);
+  const [transferring, setTransferring] = useState(false);
+  const [transferSuccess, setTransferSuccess] = useState(false);
+  
   // Modals
   const [rfqModalOpen, setRfqModalOpen] = useState(false);
   const [quotationModalOpen, setQuotationModalOpen] = useState(false);
@@ -43,26 +52,16 @@ const CatalogPage = () => {
   
   // RFQ Form
   const [rfqForm, setRfqForm] = useState({
-    product_description: "",
-    quantity: 1,
-    brand_name: "",
-    oem_part_number: "",
-    needed_by: "",
-    delivery_location: "",
-    supplier_name: "",
-    supplier_email: "",
-    request_type: "actual",
-    is_product: true
+    product_description: "", quantity: 1, brand_name: "", oem_part_number: "",
+    needed_by: "", delivery_location: "", supplier_name: "", supplier_email: "",
+    request_type: "actual", is_product: true
   });
 
   useEffect(() => {
     fetchCategories();
-    if (searchQuery || selectedCategory || selectedBrand) {
-      handleSearch();
-    } else {
-      // Initial load with empty search
-      handleSearch();
-    }
+    fetchCart();
+    fetchPunchoutSystems();
+    handleSearch();
   }, [activeTab]);
 
   const fetchCategories = async () => {
@@ -80,26 +79,36 @@ const CatalogPage = () => {
     }
   };
 
+  const fetchCart = async () => {
+    try {
+      const response = await axios.get(`${API}/cart`);
+      setCart(response.data.items || []);
+    } catch (error) {
+      console.error("Failed to fetch cart");
+    }
+  };
+
+  const fetchPunchoutSystems = async () => {
+    try {
+      const response = await axios.get(`${API}/punchout/systems`);
+      setPunchoutSystems(response.data.systems || []);
+    } catch (error) {
+      console.error("Failed to fetch punchout systems");
+    }
+  };
+
   const handleSearch = async () => {
     setLoading(true);
     try {
       if (activeTab === "products") {
         const response = await axios.get(`${API}/products/search`, {
-          params: {
-            q: searchQuery,
-            category: selectedCategory !== "all" ? selectedCategory : undefined,
-            brand: selectedBrand !== "all" ? selectedBrand : undefined,
-            limit: 20
-          }
+          params: { q: searchQuery, category: selectedCategory !== "all" ? selectedCategory : undefined,
+                   brand: selectedBrand !== "all" ? selectedBrand : undefined, limit: 20 }
         });
         setProducts(response.data.results);
       } else {
         const response = await axios.get(`${API}/services/search`, {
-          params: {
-            q: searchQuery,
-            category: selectedCategory !== "all" ? selectedCategory : undefined,
-            limit: 20
-          }
+          params: { q: searchQuery, category: selectedCategory !== "all" ? selectedCategory : undefined, limit: 20 }
         });
         setServices(response.data.results);
       }
@@ -107,6 +116,67 @@ const CatalogPage = () => {
       toast.error("Search failed. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const addToCart = async (item, isService = false) => {
+    try {
+      const cartItem = {
+        product_id: item.id,
+        product_name: item.name,
+        brand: item.brand || "Service",
+        sku: item.sku || item.unspsc_code,
+        unspsc_code: item.unspsc_code,
+        category: item.category,
+        quantity: 1,
+        unit_price: item.price || 0,
+        total_price: item.price || 0,
+        currency_code: item.currency_code,
+        image_url: item.image_url || null,
+        is_service: isService
+      };
+      
+      await axios.post(`${API}/cart/add`, cartItem);
+      toast.success("Added to cart!");
+      fetchCart();
+    } catch (error) {
+      toast.error("Failed to add to cart");
+    }
+  };
+
+  const removeFromCart = async (itemId) => {
+    try {
+      await axios.delete(`${API}/cart/remove/${itemId}`);
+      toast.success("Removed from cart");
+      fetchCart();
+    } catch (error) {
+      toast.error("Failed to remove item");
+    }
+  };
+
+  const transferCart = async () => {
+    if (!selectedPunchoutSystem) {
+      toast.error("Please select a system");
+      return;
+    }
+    
+    setTransferring(true);
+    try {
+      const response = await axios.post(`${API}/cart/transfer`, {
+        system: selectedPunchoutSystem.name,
+        cart_items: cart.map(c => c.id)
+      });
+      
+      // Simulate transfer delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setTransferSuccess(true);
+      setCart([]);
+      toast.success(response.data.message);
+    } catch (error) {
+      toast.error("Transfer failed");
+    } finally {
+      setTransferring(false);
     }
   };
 
@@ -123,24 +193,12 @@ const CatalogPage = () => {
 
   const submitRFQ = async () => {
     try {
-      const response = await axios.post(`${API}/rfq/submit`, {
-        ...rfqForm,
-        is_product: activeTab === "products"
-      });
+      const response = await axios.post(`${API}/rfq/submit`, { ...rfqForm, is_product: activeTab === "products" });
       toast.success(response.data.message);
       setRfqModalOpen(false);
-      setRfqForm({
-        product_description: "",
-        quantity: 1,
-        brand_name: "",
-        oem_part_number: "",
-        needed_by: "",
-        delivery_location: "",
-        supplier_name: "",
-        supplier_email: "",
-        request_type: "actual",
-        is_product: true
-      });
+      setRfqForm({ product_description: "", quantity: 1, brand_name: "", oem_part_number: "",
+                   needed_by: "", delivery_location: "", supplier_name: "", supplier_email: "",
+                   request_type: "actual", is_product: true });
     } catch (error) {
       toast.error("Failed to submit RFQ");
     }
@@ -150,10 +208,7 @@ const CatalogPage = () => {
     if (!selectedProduct) return;
     try {
       const response = await axios.post(`${API}/quotation/request`, {
-        product_id: selectedProduct.id,
-        product_name: selectedProduct.name,
-        quantity: 1,
-        notes: ""
+        product_id: selectedProduct.id, product_name: selectedProduct.name, quantity: 1, notes: ""
       });
       toast.success(response.data.message);
       setQuotationModalOpen(false);
@@ -162,117 +217,51 @@ const CatalogPage = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-
-  const NavItem = ({ icon: Icon, label, path, active }) => (
-    <button
-      onClick={() => navigate(path)}
-      className={`sidebar-nav-item w-full ${active ? 'active' : ''}`}
-      data-testid={`nav-${label.toLowerCase().replace(/\s/g, '-')}`}
-    >
-      <Icon className="w-5 h-5" />
-      <span>{label}</span>
-    </button>
-  );
+  const cartTotal = cart.reduce((sum, item) => sum + (item.total_price || 0), 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'w-64' : 'w-0'} bg-white border-r border-slate-200 flex-shrink-0 transition-all duration-300 overflow-hidden`}>
-        <div className="p-6 min-w-64">
-          {/* Logo */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-[#007CC3] rounded-lg flex items-center justify-center">
-              <Package className="w-6 h-6 text-white" />
-            </div>
-            <span className="font-bold text-lg text-slate-900" style={{ fontFamily: 'Manrope' }}>
-              OMNI<span className="text-[#007CC3]">Supply</span>
-            </span>
-          </div>
+    <div className="min-h-screen bg-[#F8FAFC] flex">
+      <Sidebar activePage="catalog" />
 
-          {/* User Info */}
-          <div className="mb-6 p-4 bg-slate-50 rounded-xl">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-[#007CC3]/10 rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-[#007CC3]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-slate-900 truncate">{user?.name}</p>
-                <p className="text-xs text-slate-500">{user?.country}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 mt-3">
-              <div className="infocoins-badge text-sm">
-                <Coins className="w-4 h-4" />
-                {user?.info_coins || 0}
-              </div>
-              <span className="text-xs text-slate-500">InfoCoins</span>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="space-y-1">
-            <NavItem icon={Search} label="Catalog" path="/catalog" active={true} />
-            <NavItem icon={History} label="Order History" path="/orders" />
-            <NavItem icon={RefreshCw} label="Repeat Orders" path="/repeat-orders" />
-            <NavItem icon={Upload} label="Bulk Upload" path="/bulk-upload" />
-            <NavItem icon={Award} label="InfoCoins" path="/rewards" />
-          </nav>
-
-          {/* Logout */}
-          <div className="mt-8 pt-6 border-t border-slate-200">
-            <button
-              onClick={handleLogout}
-              className="sidebar-nav-item w-full text-red-500 hover:bg-red-50"
-              data-testid="logout-btn"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Logout</span>
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
       <main className="flex-1 overflow-auto">
         {/* Top Bar */}
-        <header className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-40">
+        <header className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-40 backdrop-blur-xl">
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-slate-100 rounded-lg"
-              data-testid="toggle-sidebar-btn"
-            >
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 hover:bg-slate-100 rounded-lg lg:hidden">
               <Menu className="w-5 h-5 text-slate-600" />
             </button>
             
             {/* Search Bar */}
             <div className="flex-1 max-w-2xl">
-              <div className="search-bar">
+              <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden focus-within:border-[#007CC3] focus-within:ring-2 focus-within:ring-[#007CC3]/20 transition-all">
                 <Search className="w-5 h-5 text-slate-400 ml-4" />
                 <input
                   type="text"
-                  placeholder={`Search ${activeTab === 'products' ? '3M+ products' : '100K+ services'} by name, category, or brand...`}
+                  placeholder={`Search ${activeTab === 'products' ? '30M+ products' : '100K+ services'}...`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  className="flex-1 px-4 py-3 bg-transparent outline-none"
                   data-testid="search-input"
                 />
-                <Button 
-                  onClick={handleSearch}
-                  className="bg-[#007CC3] hover:bg-[#00629B] text-white"
-                  data-testid="search-btn"
-                >
+                <Button onClick={handleSearch} className="bg-[#007CC3] hover:bg-[#00629B] text-white rounded-none px-6 h-full" data-testid="search-btn">
                   Search
                 </Button>
               </div>
             </div>
 
+            {/* Cart Button */}
+            <Button variant="outline" className="relative" onClick={() => setCartOpen(true)} data-testid="cart-btn">
+              <ShoppingCart className="w-5 h-5" />
+              {cart.length > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 bg-[#FF6B00] text-white text-xs rounded-full flex items-center justify-center">
+                  {cart.length}
+                </span>
+              )}
+            </Button>
+
             {/* Currency Display */}
-            <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-lg">
+            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-lg border border-slate-200">
               <span className="text-sm text-slate-500">Currency:</span>
               <span className="font-semibold text-slate-900">{user?.currency?.code}</span>
             </div>
@@ -282,66 +271,75 @@ const CatalogPage = () => {
         {/* Content */}
         <div className="p-6">
           {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-            <TabsList className="tab-nav">
-              <TabsTrigger value="products" className="tab-item data-[state=active]:active" data-testid="products-tab">
-                <Package className="w-4 h-4 mr-2" />
-                Products (3M+)
-              </TabsTrigger>
-              <TabsTrigger value="services" className="tab-item data-[state=active]:active" data-testid="services-tab">
-                <Settings className="w-4 h-4 mr-2" />
-                Services (100K+)
-              </TabsTrigger>
-            </TabsList>
+          <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setSelectedCategory("all"); }} className="mb-6">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <TabsList className="bg-slate-100 p-1 rounded-xl">
+                <TabsTrigger value="products" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm" data-testid="products-tab">
+                  <Package className="w-4 h-4 mr-2" />
+                  Products
+                  <Badge className="ml-2 bg-[#007CC3]/10 text-[#007CC3]">30M+</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="services" className="rounded-lg px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm" data-testid="services-tab">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Services
+                  <Badge className="ml-2 bg-purple-100 text-purple-700">100K+</Badge>
+                </TabsTrigger>
+              </TabsList>
+
+              <Button variant="outline" onClick={() => setRfqModalOpen(true)} data-testid="submit-rfq-btn">
+                <FileText className="w-4 h-4 mr-2" />
+                Submit RFQ
+              </Button>
+            </div>
           </Tabs>
 
           {/* Filters */}
           <div className="flex flex-wrap gap-4 mb-6">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48" data-testid="category-filter">
+              <SelectTrigger className="w-56 bg-white" data-testid="category-filter">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {(activeTab === 'products' ? categories : serviceCategories).map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  <SelectItem key={cat.name} value={cat.name}>
+                    <span className="flex items-center gap-2">
+                      {cat.name}
+                      <span className="text-xs text-slate-400 font-mono">{cat.unspsc}</span>
+                    </span>
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
             {activeTab === 'products' && (
               <Select value={selectedBrand} onValueChange={setSelectedBrand}>
-                <SelectTrigger className="w-48" data-testid="brand-filter">
+                <SelectTrigger className="w-48 bg-white" data-testid="brand-filter">
                   <SelectValue placeholder="All Brands" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Brands</SelectItem>
                   {brands.map((brand) => (
-                    <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                    <SelectItem key={brand.name} value={brand.name}>
+                      <span className="flex items-center gap-2">
+                        {brand.logo && <img src={brand.logo} alt="" className="w-4 h-4 object-contain" onError={(e) => e.target.style.display = 'none'} />}
+                        {brand.name}
+                      </span>
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             )}
-
-            <Button 
-              variant="outline" 
-              onClick={() => setRfqModalOpen(true)}
-              className="ml-auto"
-              data-testid="submit-rfq-btn"
-            >
-              <FileText className="w-4 h-4 mr-2" />
-              Submit Free Text RFQ
-            </Button>
           </div>
 
           {/* Results */}
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg p-4 h-80">
-                  <div className="skeleton h-40 rounded-lg mb-4"></div>
-                  <div className="skeleton h-4 rounded w-3/4 mb-2"></div>
-                  <div className="skeleton h-4 rounded w-1/2"></div>
+                <div key={i} className="bg-white rounded-xl p-4 h-80 animate-pulse">
+                  <div className="bg-slate-200 h-40 rounded-lg mb-4"></div>
+                  <div className="bg-slate-200 h-4 rounded w-3/4 mb-2"></div>
+                  <div className="bg-slate-200 h-4 rounded w-1/2"></div>
                 </div>
               ))}
             </div>
@@ -351,11 +349,9 @@ const CatalogPage = () => {
                 <ProductCard
                   key={product.id}
                   product={product}
+                  onAddToCart={() => addToCart(product)}
                   onCheckInventory={() => checkInventory(product)}
-                  onRequestQuotation={() => {
-                    setSelectedProduct(product);
-                    setQuotationModalOpen(true);
-                  }}
+                  onRequestQuotation={() => { setSelectedProduct(product); setQuotationModalOpen(true); }}
                 />
               ))}
             </div>
@@ -365,154 +361,141 @@ const CatalogPage = () => {
                 <ServiceCard
                   key={service.id}
                   service={service}
-                  onRequestQuotation={() => {
-                    setSelectedProduct(service);
-                    setQuotationModalOpen(true);
-                  }}
-                  onSubmitRFQ={() => {
-                    setRfqForm(prev => ({
-                      ...prev,
-                      product_description: service.name,
-                      is_product: false
-                    }));
-                    setRfqModalOpen(true);
-                  }}
+                  onAddToCart={() => addToCart(service, true)}
+                  onRequestQuotation={() => { setSelectedProduct(service); setQuotationModalOpen(true); }}
+                  onSubmitRFQ={() => { setRfqForm(prev => ({ ...prev, product_description: service.name, is_product: false })); setRfqModalOpen(true); }}
                 />
               ))}
             </div>
           )}
-
-          {/* No Results - RFQ Prompt */}
-          {!loading && (activeTab === 'products' ? products : services).length === 0 && (
-            <div className="text-center py-16">
-              <XCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-slate-700 mb-2">No Results Found</h3>
-              <p className="text-slate-500 mb-6">
-                Can't find what you're looking for? Submit a Free Text RFQ
-              </p>
-              <Button 
-                onClick={() => setRfqModalOpen(true)}
-                className="bg-[#FF6B00] hover:bg-[#E65000] text-white"
-                data-testid="no-results-rfq-btn"
-              >
-                Submit Free Text RFQ <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </div>
-          )}
         </div>
       </main>
+
+      {/* Cart Drawer */}
+      <Dialog open={cartOpen} onOpenChange={setCartOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShoppingCart className="w-5 h-5" />
+              Shopping Cart ({cart.length} items)
+            </DialogTitle>
+          </DialogHeader>
+          
+          {cart.length === 0 ? (
+            <div className="text-center py-8">
+              <ShoppingCart className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <p className="text-slate-500">Your cart is empty</p>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-3 max-h-64 overflow-auto">
+                {cart.map((item) => (
+                  <div key={item.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{item.product_name}</p>
+                      <p className="text-xs text-slate-500 font-mono">UNSPSC: {item.unspsc_code}</p>
+                    </div>
+                    <p className="font-semibold text-sm">{user?.currency?.symbol}{item.total_price?.toFixed(2)}</p>
+                    <Button variant="ghost" size="sm" onClick={() => removeFromCart(item.id)}>
+                      <XCircle className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="border-t pt-4 mt-4">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="font-medium">Total:</span>
+                  <span className="text-xl font-bold text-[#007CC3]">{user?.currency?.symbol}{cartTotal.toFixed(2)}</span>
+                </div>
+                
+                <Button className="w-full bg-[#FF6B00] hover:bg-[#E65000]" onClick={() => { setCartOpen(false); setPunchoutModalOpen(true); }} data-testid="transfer-cart-btn">
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Transfer Cart via PunchOut
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* PunchOut Modal */}
+      <Dialog open={punchoutModalOpen} onOpenChange={(open) => { setPunchoutModalOpen(open); if (!open) setTransferSuccess(false); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Transfer Cart to ERP System</DialogTitle>
+            <DialogDescription>Select your procurement system for PunchOut transfer</DialogDescription>
+          </DialogHeader>
+          
+          {transferSuccess ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Transfer Successful!</h3>
+              <p className="text-slate-500 mb-2">Your cart has been transferred to {selectedPunchoutSystem?.name}</p>
+              <Badge className="bg-amber-100 text-amber-700">Status: Pending Customer PO</Badge>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-3 my-4">
+                {punchoutSystems.map((system) => (
+                  <button
+                    key={system.name}
+                    onClick={() => setSelectedPunchoutSystem(system)}
+                    className={`p-4 border-2 rounded-xl flex flex-col items-center gap-2 transition-all ${
+                      selectedPunchoutSystem?.name === system.name ? 'border-[#007CC3] bg-[#007CC3]/5' : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                    data-testid={`punchout-system-${system.name}`}
+                  >
+                    <img src={system.logo} alt={system.name} className="w-10 h-10 object-contain" onError={(e) => e.target.style.display = 'none'} />
+                    <span className="text-sm font-medium">{system.name}</span>
+                  </button>
+                ))}
+              </div>
+              
+              <Button className="w-full bg-[#007CC3] hover:bg-[#00629B]" onClick={transferCart} disabled={!selectedPunchoutSystem || transferring} data-testid="confirm-transfer-btn">
+                {transferring ? (
+                  <span className="flex items-center gap-2">
+                    <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+                    Transferring to {selectedPunchoutSystem?.name}...
+                  </span>
+                ) : (
+                  <>Transfer Cart</>
+                )}
+              </Button>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* RFQ Modal */}
       <Dialog open={rfqModalOpen} onOpenChange={setRfqModalOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Submit Free Text RFQ</DialogTitle>
-            <DialogDescription>
-              Describe what you need and we'll find the best suppliers for you
-            </DialogDescription>
+            <DialogDescription>Describe what you need and we'll find suppliers</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             <div>
-              <Label>Product/Service Description *</Label>
-              <Textarea
-                value={rfqForm.product_description}
-                onChange={(e) => setRfqForm({...rfqForm, product_description: e.target.value})}
-                placeholder="Describe what you're looking for..."
-                className="mt-1"
-                data-testid="rfq-description"
-              />
+              <Label>Description *</Label>
+              <Textarea value={rfqForm.product_description} onChange={(e) => setRfqForm({...rfqForm, product_description: e.target.value})} placeholder="Describe what you're looking for..." className="mt-1" data-testid="rfq-description" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Quantity *</Label>
-                <Input
-                  type="number"
-                  value={rfqForm.quantity}
-                  onChange={(e) => setRfqForm({...rfqForm, quantity: parseInt(e.target.value)})}
-                  className="mt-1"
-                  data-testid="rfq-quantity"
-                />
+                <Input type="number" value={rfqForm.quantity} onChange={(e) => setRfqForm({...rfqForm, quantity: parseInt(e.target.value)})} className="mt-1" data-testid="rfq-quantity" />
               </div>
               <div>
                 <Label>Brand Name</Label>
-                <Input
-                  value={rfqForm.brand_name}
-                  onChange={(e) => setRfqForm({...rfqForm, brand_name: e.target.value})}
-                  className="mt-1"
-                  data-testid="rfq-brand"
-                />
+                <Input value={rfqForm.brand_name} onChange={(e) => setRfqForm({...rfqForm, brand_name: e.target.value})} className="mt-1" />
               </div>
-            </div>
-            <div>
-              <Label>OEM Part Number</Label>
-              <Input
-                value={rfqForm.oem_part_number}
-                onChange={(e) => setRfqForm({...rfqForm, oem_part_number: e.target.value})}
-                className="mt-1"
-                data-testid="rfq-part-number"
-              />
             </div>
             <div>
               <Label>Delivery Location *</Label>
-              <Input
-                value={rfqForm.delivery_location}
-                onChange={(e) => setRfqForm({...rfqForm, delivery_location: e.target.value})}
-                placeholder="City, Country"
-                className="mt-1"
-                data-testid="rfq-location"
-              />
+              <Input value={rfqForm.delivery_location} onChange={(e) => setRfqForm({...rfqForm, delivery_location: e.target.value})} placeholder="City, Country" className="mt-1" data-testid="rfq-location" />
             </div>
-            <div>
-              <Label>When do you need it?</Label>
-              <Input
-                type="date"
-                value={rfqForm.needed_by}
-                onChange={(e) => setRfqForm({...rfqForm, needed_by: e.target.value})}
-                className="mt-1"
-                data-testid="rfq-date"
-              />
-            </div>
-            <div>
-              <Label>Request Type</Label>
-              <Select 
-                value={rfqForm.request_type} 
-                onValueChange={(v) => setRfqForm({...rfqForm, request_type: v})}
-              >
-                <SelectTrigger className="mt-1" data-testid="rfq-type">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="actual">Actual Product Required</SelectItem>
-                  <SelectItem value="pricing_only">Check Pricing Only</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Recommended Supplier Name</Label>
-                <Input
-                  value={rfqForm.supplier_name}
-                  onChange={(e) => setRfqForm({...rfqForm, supplier_name: e.target.value})}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label>Supplier Email</Label>
-                <Input
-                  type="email"
-                  value={rfqForm.supplier_email}
-                  onChange={(e) => setRfqForm({...rfqForm, supplier_email: e.target.value})}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-            <Button 
-              onClick={submitRFQ}
-              className="w-full bg-[#007CC3] hover:bg-[#00629B]"
-              data-testid="rfq-submit-btn"
-            >
-              Submit RFQ
-            </Button>
+            <Button onClick={submitRFQ} className="w-full bg-[#007CC3] hover:bg-[#00629B]" data-testid="rfq-submit-btn">Submit RFQ</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -522,25 +505,17 @@ const CatalogPage = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Request Instant Quotation</DialogTitle>
-            <DialogDescription>
-              We'll send your request to 100+ Infosys distributors for competitive quotes
-            </DialogDescription>
+            <DialogDescription>We'll get quotes from 100+ Infosys partners</DialogDescription>
           </DialogHeader>
           {selectedProduct && (
             <div className="mt-4 space-y-4">
               <div className="p-4 bg-slate-50 rounded-lg">
                 <h4 className="font-semibold">{selectedProduct.name}</h4>
                 <p className="text-sm text-slate-500 mt-1">{selectedProduct.category}</p>
+                <p className="text-xs text-slate-400 font-mono mt-1">UNSPSC: {selectedProduct.unspsc_code}</p>
               </div>
-              <p className="text-sm text-slate-600">
-                <Zap className="w-4 h-4 inline mr-1 text-[#FF6B00]" />
-                Expect responses within 4-8 hours
-              </p>
-              <Button 
-                onClick={requestQuotation}
-                className="w-full bg-[#FF6B00] hover:bg-[#E65000]"
-                data-testid="quotation-submit-btn"
-              >
+              <Button onClick={requestQuotation} className="w-full bg-[#FF6B00] hover:bg-[#E65000]" data-testid="quotation-submit-btn">
+                <Zap className="w-4 h-4 mr-2" />
                 Request Quotation
               </Button>
             </div>
@@ -552,9 +527,9 @@ const CatalogPage = () => {
       <Dialog open={inventoryModalOpen} onOpenChange={setInventoryModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Real-Time Inventory Availability</DialogTitle>
+            <DialogTitle>Real-Time Inventory</DialogTitle>
           </DialogHeader>
-          {selectedProduct && inventoryData && (
+          {inventoryData && (
             <div className="mt-4 space-y-4">
               <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                 <div className="flex items-center justify-between">
@@ -563,17 +538,13 @@ const CatalogPage = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <h4 className="font-medium text-slate-700">By Warehouse Location:</h4>
                 {inventoryData.warehouse_locations?.map((loc, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div key={idx} className="flex justify-between p-3 bg-slate-50 rounded-lg">
                     <span className="text-slate-600">{loc.location}</span>
                     <span className="font-semibold">{loc.quantity} units</span>
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-slate-500">
-                Last updated: {new Date(inventoryData.last_updated).toLocaleString()}
-              </p>
             </div>
           )}
         </DialogContent>
@@ -583,123 +554,100 @@ const CatalogPage = () => {
 };
 
 // Product Card Component
-const ProductCard = ({ product, onCheckInventory, onRequestQuotation }) => {
+const ProductCard = ({ product, onAddToCart, onCheckInventory, onRequestQuotation }) => {
   const [showAlternates, setShowAlternates] = useState(false);
 
   return (
-    <Card className="card-product product-card overflow-hidden" data-testid={`product-card-${product.id}`}>
+    <Card className={`overflow-hidden hover:shadow-xl transition-all group ${product.is_sponsored ? 'ring-2 ring-amber-200' : ''}`} data-testid={`product-card-${product.id}`}>
+      {/* Sponsored Badge */}
+      {product.is_sponsored && (
+        <div className="absolute top-3 right-3 z-10">
+          <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">
+            <Star className="w-3 h-3 mr-1 fill-amber-500" />
+            Sponsored
+          </Badge>
+        </div>
+      )}
+      
       <div className="relative">
-        <img 
-          src={product.image_url} 
-          alt={product.name}
-          className="w-full h-40 object-cover"
-          onError={(e) => {
-            e.target.src = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400";
-          }}
-        />
+        <img src={product.image_url} alt={product.name} className="w-full h-40 object-cover"
+             onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400"; }} />
         {product.result_type === "quotation_required" && (
-          <Badge className="absolute top-2 right-2 bg-[#FF6B00]">Quote Required</Badge>
+          <Badge className="absolute top-3 left-3 bg-[#FF6B00]">Quote Required</Badge>
         )}
       </div>
+      
       <CardContent className="p-4">
-        <div className="mb-2">
+        {/* Brand with logo */}
+        <div className="flex items-center gap-2 mb-2">
+          {product.brand_logo && (
+            <img src={product.brand_logo} alt="" className="w-4 h-4 object-contain" onError={(e) => e.target.style.display = 'none'} />
+          )}
           <Badge variant="outline" className="text-xs">{product.brand}</Badge>
         </div>
-        <h3 className="font-semibold text-slate-900 mb-1 line-clamp-2">{product.name}</h3>
-        <p className="text-xs text-slate-500 mb-3 line-clamp-2">{product.description}</p>
-        <p className="text-xs text-slate-400 font-mono mb-3">SKU: {product.sku}</p>
+        
+        <h3 className="font-semibold text-slate-900 mb-1 line-clamp-2 text-sm" style={{ fontFamily: 'Manrope' }}>{product.name}</h3>
+        
+        {/* UNSPSC Code */}
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded font-mono">UNSPSC: {product.unspsc_code}</span>
+        </div>
+        
+        <p className="text-xs text-slate-500 mb-3">{product.category}</p>
 
         {product.result_type === "with_partner" ? (
           <>
-            {/* Price & Lead Time */}
             <div className="flex items-center justify-between mb-3">
-              <div className="price-primary text-xl">
+              <span className="text-xl font-bold text-[#007CC3]" style={{ fontFamily: 'Manrope' }}>
                 {product.currency_symbol}{product.price?.toFixed(2)}
-              </div>
-              <div className="lead-time-badge">
+              </span>
+              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {product.lead_time_days} days
-              </div>
+                {product.lead_time_days}d
+              </span>
             </div>
 
-            {/* Delivery Partners */}
             {product.delivery_partners?.length > 1 && (
-              <div className="mb-3">
-                <p className="text-xs font-medium text-slate-600 mb-2">
-                  {product.delivery_partners.length} Delivery Options:
-                </p>
-                <div className="space-y-1">
-                  {product.delivery_partners.slice(0, 3).map((dp, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs p-2 bg-slate-50 rounded">
-                      <span>Partner {idx + 1}</span>
-                      <span className="font-medium">{product.currency_symbol}{dp.price?.toFixed(2)}</span>
-                      <span className="text-slate-500">{dp.lead_time_days}d</span>
-                    </div>
-                  ))}
-                </div>
+              <div className="mb-3 text-xs">
+                <span className="text-slate-500">{product.delivery_partners.length} delivery options available</span>
               </div>
             )}
 
-            {/* Alternate Products */}
             {product.alternate_products?.length > 0 && (
-              <div className="mb-3">
-                <button
-                  onClick={() => setShowAlternates(!showAlternates)}
-                  className="text-xs text-[#007CC3] flex items-center gap-1 hover:underline"
-                  data-testid="show-alternates-btn"
-                >
-                  <ChevronDown className={`w-3 h-3 transition-transform ${showAlternates ? 'rotate-180' : ''}`} />
-                  {product.alternate_products.length} Alternate(s) Available
-                </button>
-                {showAlternates && (
-                  <div className="mt-2 space-y-1">
-                    {product.alternate_products.map((alt, idx) => (
-                      <div key={idx} className="p-2 bg-green-50 rounded text-xs">
-                        <p className="font-medium text-green-700">{alt.brand}</p>
-                        <div className="flex justify-between mt-1">
-                          <span className="price-alternate">{product.currency_symbol}{alt.price?.toFixed(2)}</span>
-                          <span className="text-slate-500">{alt.lead_time_days}d</span>
-                        </div>
-                      </div>
-                    ))}
+              <button onClick={() => setShowAlternates(!showAlternates)} className="text-xs text-[#007CC3] flex items-center gap-1 mb-3 hover:underline">
+                <ChevronDown className={`w-3 h-3 transition-transform ${showAlternates ? 'rotate-180' : ''}`} />
+                {product.alternate_products.length} Alternate(s)
+              </button>
+            )}
+            
+            {showAlternates && (
+              <div className="space-y-1 mb-3">
+                {product.alternate_products.map((alt, idx) => (
+                  <div key={idx} className="p-2 bg-green-50 rounded text-xs flex justify-between">
+                    <span className="text-green-700">{alt.brand}</span>
+                    <span className="font-semibold text-green-700">{product.currency_symbol}{alt.price?.toFixed(2)}</span>
                   </div>
-                )}
+                ))}
               </div>
             )}
 
-            {/* Actions */}
             <div className="flex gap-2">
-              <Button 
-                onClick={onCheckInventory}
-                variant="outline" 
-                size="sm" 
-                className="flex-1 text-xs"
-                data-testid="check-inventory-btn"
-              >
-                <Boxes className="w-3 h-3 mr-1" />
+              <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={onCheckInventory} data-testid="check-inventory-btn">
                 Check Stock
               </Button>
-              <Button 
-                size="sm" 
-                className="flex-1 bg-[#007CC3] hover:bg-[#00629B] text-xs"
-                data-testid="add-to-cart-btn"
-              >
+              <Button size="sm" className="flex-1 bg-[#007CC3] hover:bg-[#00629B] text-xs" onClick={onAddToCart} data-testid="add-to-cart-btn">
                 <ShoppingCart className="w-3 h-3 mr-1" />
                 Add
               </Button>
             </div>
           </>
         ) : (
-          <div className="text-center py-4">
+          <div className="text-center py-3">
             <AlertCircle className="w-8 h-8 text-[#FF6B00] mx-auto mb-2" />
-            <p className="text-sm text-slate-600 mb-3">No delivery partner mapped</p>
-            <Button 
-              onClick={onRequestQuotation}
-              className="w-full bg-[#FF6B00] hover:bg-[#E65000] text-sm"
-              data-testid="request-quotation-btn"
-            >
+            <p className="text-sm text-slate-600 mb-3">No delivery partner</p>
+            <Button onClick={onRequestQuotation} className="w-full bg-[#FF6B00] hover:bg-[#E65000] text-sm" data-testid="request-quotation-btn">
               <Zap className="w-4 h-4 mr-2" />
-              Initiate Instant Quotation
+              Get Quote
             </Button>
           </div>
         )}
@@ -709,65 +657,64 @@ const ProductCard = ({ product, onCheckInventory, onRequestQuotation }) => {
 };
 
 // Service Card Component
-const ServiceCard = ({ service, onRequestQuotation, onSubmitRFQ }) => {
+const ServiceCard = ({ service, onAddToCart, onRequestQuotation, onSubmitRFQ }) => {
   return (
-    <Card className="card-product" data-testid={`service-card-${service.id}`}>
+    <Card className={`hover:shadow-xl transition-all ${service.is_sponsored ? 'ring-2 ring-amber-200' : ''}`} data-testid={`service-card-${service.id}`}>
+      {service.is_sponsored && (
+        <div className="absolute top-3 right-3 z-10">
+          <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs">
+            <Star className="w-3 h-3 mr-1 fill-amber-500" />
+            Sponsored
+          </Badge>
+        </div>
+      )}
+      
       <CardContent className="p-5">
         <Badge variant="outline" className="mb-3 text-xs">{service.category}</Badge>
-        <h3 className="font-semibold text-slate-900 mb-2">{service.name}</h3>
-        <p className="text-xs text-slate-500 mb-3">{service.unspsc_name}</p>
-        <p className="text-xs text-slate-400 font-mono mb-4">UNSPSC: {service.unspsc_code}</p>
+        <h3 className="font-semibold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>{service.name}</h3>
+        
+        {/* UNSPSC Code */}
+        <div className="mb-3">
+          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded font-mono">UNSPSC: {service.unspsc_code}</span>
+          <p className="text-xs text-slate-400 mt-1">{service.unspsc_name}</p>
+        </div>
 
         {service.result_type === "with_supplier" ? (
           <>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <span className="text-xs text-slate-500">Pricing Model:</span>
+                <span className="text-xs text-slate-500">Pricing:</span>
                 <p className="font-medium text-slate-700">{service.pricing_model}</p>
               </div>
               {service.price && (
-                <div className="price-primary text-xl">
-                  {service.currency_symbol}{service.price?.toFixed(2)}
-                </div>
+                <span className="text-xl font-bold text-[#007CC3]">{service.currency_symbol}{service.price?.toFixed(2)}</span>
               )}
             </div>
             {service.supplier_name && (
               <p className="text-xs text-slate-500 mb-3">
                 <CheckCircle className="w-3 h-3 inline mr-1 text-green-500" />
-                Supplier: {service.supplier_name}
+                Partner: {service.supplier_name}
               </p>
             )}
-            <Button 
-              className="w-full bg-[#007CC3] hover:bg-[#00629B]"
-              data-testid="request-service-btn"
-            >
-              Request Service
+            <Button className="w-full bg-[#007CC3] hover:bg-[#00629B]" onClick={onAddToCart} data-testid="add-service-btn">
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
             </Button>
           </>
         ) : service.result_type === "quotation_required" ? (
           <div className="text-center py-2">
             <p className="text-sm text-slate-600 mb-3">No supplier mapped</p>
-            <Button 
-              onClick={onRequestQuotation}
-              className="w-full bg-[#FF6B00] hover:bg-[#E65000]"
-              data-testid="service-quotation-btn"
-            >
+            <Button onClick={onRequestQuotation} className="w-full bg-[#FF6B00] hover:bg-[#E65000]" data-testid="service-quotation-btn">
               <Zap className="w-4 h-4 mr-2" />
-              Request Instant Quotation
+              Get Quote
             </Button>
           </div>
         ) : (
           <div className="text-center py-2">
-            <XCircle className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-            <p className="text-sm text-slate-600 mb-3">Service not found</p>
-            <Button 
-              onClick={onSubmitRFQ}
-              variant="outline"
-              className="w-full"
-              data-testid="service-rfq-btn"
-            >
+            <p className="text-sm text-slate-600 mb-3">Service not available</p>
+            <Button onClick={onSubmitRFQ} variant="outline" className="w-full" data-testid="service-rfq-btn">
               <FileText className="w-4 h-4 mr-2" />
-              Submit Free Text RFQ
+              Submit RFQ
             </Button>
           </div>
         )}
