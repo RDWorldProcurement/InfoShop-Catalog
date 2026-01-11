@@ -5,6 +5,19 @@ Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys L
 
 ## What's Been Implemented
 
+### ✅ Phase 10 - Category Icons & Product Comparison (January 11, 2026 - COMPLETED)
+- **Category Icons in Dropdown**:
+  - 32 unique icons mapped to product/service categories
+  - Icons include: Cog (Bearings), Lightbulb (Electrical), Wrench (Fasteners), Hammer (Hand Tools), Zap (Power Tools), Shield (Safety), Flask (Laboratory), Filter (Filtration), Printer (Industrial Coding), etc.
+  - Brand color dots in brand dropdown
+- **Product Comparison Feature**:
+  - Compare up to 4 products side-by-side
+  - Compare button on each product card (purple icon)
+  - "Compare (N)" button appears when products selected
+  - Comparison table includes: Brand, Price, Rating, Availability, Lead Time, Category, UNSPSC Code, SKU, and dynamic specifications
+  - Add to Cart directly from comparison modal
+  - Remove individual products or clear all
+
 ### ✅ Phase 9 - Watch Demo Feature (January 11, 2026 - COMPLETED)
 - **Interactive Demo Walkthrough Modal**:
   - 6-slide carousel with Previous/Next navigation
