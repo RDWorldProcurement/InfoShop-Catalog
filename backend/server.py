@@ -3120,6 +3120,671 @@ async def clear_partner_catalog(partner_id: str, catalog_type: str = "all"):
         "deleted_services": deleted_services
     }
 
+# ============================================
+# QUOTATION UPLOAD & AI ANALYSIS ENDPOINTS
+# ============================================
+
+class QuotationUploadRequest(BaseModel):
+    file_name: str
+    file_type: str
+    file_size: int
+    supplier_name: Optional[str] = None
+    supplier_email: Optional[str] = None
+    document_language: str = "en"
+    notes: Optional[str] = None
+
+class QuotationAnalysisResult(BaseModel):
+    quotation_id: str
+    status: str
+    extracted_data: Dict[str, Any]
+    price_benchmark: Dict[str, Any]
+    tax_analysis: Dict[str, Any]
+    flags: List[Dict[str, Any]]
+    recommendations: List[str]
+
+# Simulated AI extraction results for realistic demo
+def generate_ai_extraction(file_name: str, supplier_name: str = None):
+    """Generate realistic AI extraction results"""
+    categories = ["Office Supplies", "IT Equipment", "MRO Supplies", "Facilities Services", "Professional Services"]
+    suppliers = ["Grainger", "Staples", "Dell Technologies", "CDW", "Iron Mountain", "Cintas", supplier_name or "Unknown Supplier"]
+    
+    num_items = random.randint(3, 8)
+    items = []
+    total_amount = 0
+    
+    product_examples = [
+        {"name": "HP LaserJet Pro M404n Printer", "unit_price": 349.99, "category": "IT Equipment"},
+        {"name": "Ergonomic Office Chair - Mesh Back", "unit_price": 289.00, "category": "Office Supplies"},
+        {"name": "Industrial Safety Gloves (Box of 100)", "unit_price": 45.99, "category": "MRO Supplies"},
+        {"name": "Quarterly HVAC Maintenance Service", "unit_price": 1250.00, "category": "Facilities Services"},
+        {"name": "Dell 27\" UltraSharp Monitor U2722D", "unit_price": 449.99, "category": "IT Equipment"},
+        {"name": "Janitorial Supplies Bundle - Monthly", "unit_price": 389.00, "category": "MRO Supplies"},
+        {"name": "Network Security Assessment", "unit_price": 4500.00, "category": "Professional Services"},
+        {"name": "Bulk Copy Paper (10 Cases)", "unit_price": 289.99, "category": "Office Supplies"},
+        {"name": "Fire Extinguisher Inspection", "unit_price": 175.00, "category": "Facilities Services"},
+        {"name": "Cisco Meraki Access Point MR46", "unit_price": 795.00, "category": "IT Equipment"},
+    ]
+    
+    selected_products = random.sample(product_examples, min(num_items, len(product_examples)))
+    
+    for product in selected_products:
+        quantity = random.randint(1, 20)
+        line_total = round(product["unit_price"] * quantity, 2)
+        total_amount += line_total
+        items.append({
+            "line_number": len(items) + 1,
+            "description": product["name"],
+            "quantity": quantity,
+            "unit_price": product["unit_price"],
+            "unit": "EA",
+            "line_total": line_total,
+            "category": product["category"],
+            "unspsc_code": f"{random.randint(40, 50)}1{random.randint(10000, 99999)}"
+        })
+    
+    tax_rate = random.choice([0.0, 0.0625, 0.0725, 0.0825, 0.095])
+    tax_amount = round(total_amount * tax_rate, 2)
+    grand_total = round(total_amount + tax_amount, 2)
+    
+    return {
+        "supplier": {
+            "name": supplier_name or random.choice(suppliers),
+            "address": f"{random.randint(100, 9999)} Business Park Dr, Suite {random.randint(100, 500)}",
+            "city": random.choice(["Dallas, TX", "Chicago, IL", "Atlanta, GA", "Phoenix, AZ", "Denver, CO"]),
+            "tax_id": f"{random.randint(10, 99)}-{random.randint(1000000, 9999999)}",
+            "contact_email": f"sales@{(supplier_name or 'supplier').lower().replace(' ', '')}.com"
+        },
+        "quotation_details": {
+            "quotation_number": f"QT-{datetime.now().strftime('%Y%m%d')}-{random.randint(1000, 9999)}",
+            "quotation_date": datetime.now().strftime("%Y-%m-%d"),
+            "valid_until": (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d"),
+            "payment_terms": random.choice(["Net 30", "Net 45", "Net 60", "2% 10 Net 30"]),
+            "delivery_terms": random.choice(["FOB Destination", "FOB Origin", "DDP", "CIF"])
+        },
+        "line_items": items,
+        "totals": {
+            "subtotal": round(total_amount, 2),
+            "tax_rate": tax_rate,
+            "tax_amount": tax_amount,
+            "shipping": random.choice([0, 25.00, 49.99, 75.00]),
+            "grand_total": grand_total
+        },
+        "extraction_confidence": round(random.uniform(0.92, 0.99), 2),
+        "document_language": "English",
+        "pages_processed": random.randint(1, 4)
+    }
+
+def generate_price_benchmark(extracted_data: Dict):
+    """Generate price benchmarking analysis"""
+    benchmarks = []
+    total_potential_savings = 0
+    
+    for item in extracted_data.get("line_items", []):
+        market_price = round(item["unit_price"] * random.uniform(0.75, 1.15), 2)
+        variance = round(((item["unit_price"] - market_price) / market_price) * 100, 1)
+        potential_savings = max(0, round((item["unit_price"] - market_price) * item["quantity"], 2))
+        total_potential_savings += potential_savings
+        
+        benchmarks.append({
+            "item": item["description"],
+            "quoted_price": item["unit_price"],
+            "market_avg_price": market_price,
+            "variance_percent": variance,
+            "potential_savings": potential_savings,
+            "benchmark_status": "ABOVE_MARKET" if variance > 10 else "AT_MARKET" if variance > -5 else "BELOW_MARKET",
+            "data_sources": random.randint(3, 12)
+        })
+    
+    return {
+        "benchmarks": benchmarks,
+        "total_potential_savings": round(total_potential_savings, 2),
+        "overall_assessment": "NEGOTIATION_RECOMMENDED" if total_potential_savings > 500 else "COMPETITIVE_PRICING",
+        "market_data_date": datetime.now().strftime("%Y-%m-%d"),
+        "confidence_score": round(random.uniform(0.85, 0.95), 2)
+    }
+
+def generate_tax_analysis(extracted_data: Dict):
+    """Generate tax verification analysis"""
+    tax_amount = extracted_data.get("totals", {}).get("tax_amount", 0)
+    tax_rate = extracted_data.get("totals", {}).get("tax_rate", 0)
+    
+    issues = []
+    if tax_rate == 0 and random.random() > 0.7:
+        issues.append({
+            "type": "MISSING_TAX",
+            "severity": "HIGH",
+            "description": "No sales tax applied - verify tax exemption status"
+        })
+    elif tax_rate > 0.09:
+        issues.append({
+            "type": "HIGH_TAX_RATE",
+            "severity": "MEDIUM", 
+            "description": f"Tax rate of {tax_rate*100:.2f}% is higher than typical rates"
+        })
+    
+    exempt_items = random.randint(0, 2)
+    
+    return {
+        "tax_verified": len(issues) == 0,
+        "calculated_tax": round(extracted_data.get("totals", {}).get("subtotal", 0) * tax_rate, 2),
+        "quoted_tax": tax_amount,
+        "tax_variance": round(abs(tax_amount - extracted_data.get("totals", {}).get("subtotal", 0) * tax_rate), 2),
+        "jurisdiction": random.choice(["Texas", "California", "Illinois", "Florida", "New York"]),
+        "tax_exemptions_detected": exempt_items,
+        "avalara_verification": "VERIFIED" if random.random() > 0.2 else "PENDING",
+        "issues": issues
+    }
+
+def generate_flags_and_recommendations(extracted_data: Dict, benchmark: Dict, tax: Dict):
+    """Generate flags and recommendations"""
+    flags = []
+    recommendations = []
+    
+    # Check for high variance items
+    for b in benchmark.get("benchmarks", []):
+        if b["variance_percent"] > 15:
+            flags.append({
+                "type": "PRICE_FLAG",
+                "severity": "HIGH",
+                "item": b["item"],
+                "message": f"Price is {b['variance_percent']}% above market average"
+            })
+    
+    # Tax issues
+    for issue in tax.get("issues", []):
+        flags.append({
+            "type": "TAX_FLAG",
+            "severity": issue["severity"],
+            "message": issue["description"]
+        })
+    
+    # Recommendations
+    if benchmark.get("total_potential_savings", 0) > 500:
+        recommendations.append(f"Consider negotiation - potential savings of ${benchmark['total_potential_savings']:,.2f}")
+    
+    if len([b for b in benchmark.get("benchmarks", []) if b["benchmark_status"] == "ABOVE_MARKET"]) > 2:
+        recommendations.append("Multiple items priced above market - request volume discount")
+    
+    valid_until = extracted_data.get("quotation_details", {}).get("valid_until")
+    if valid_until:
+        days_valid = (datetime.strptime(valid_until, "%Y-%m-%d") - datetime.now()).days
+        if days_valid < 14:
+            recommendations.append(f"Quotation expires in {days_valid} days - expedite approval process")
+    
+    recommendations.append("Verify supplier's tax exemption certificates if applicable")
+    recommendations.append("Confirm delivery timeline aligns with project requirements")
+    
+    return flags, recommendations
+
+@api_router.post("/procurement/quotation/upload")
+async def upload_quotation(
+    file: UploadFile = File(...),
+    supplier_name: str = Form(None),
+    supplier_email: str = Form(None),
+    document_language: str = Form("en"),
+    notes: str = Form(None),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload a quotation document for AI-powered analysis"""
+    try:
+        # Read file content
+        file_content = await file.read()
+        file_size = len(file_content)
+        
+        # Generate unique quotation ID
+        quotation_id = f"QUP-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6].upper()}"
+        
+        # Simulate AI processing
+        extracted_data = generate_ai_extraction(file.filename, supplier_name)
+        price_benchmark = generate_price_benchmark(extracted_data)
+        tax_analysis = generate_tax_analysis(extracted_data)
+        flags, recommendations = generate_flags_and_recommendations(extracted_data, price_benchmark, tax_analysis)
+        
+        # Store in database
+        quotation_record = {
+            "quotation_id": quotation_id,
+            "user_id": current_user.get("email"),
+            "user_name": current_user.get("name"),
+            "file_name": file.filename,
+            "file_type": file.content_type,
+            "file_size": file_size,
+            "supplier_name": supplier_name or extracted_data["supplier"]["name"],
+            "supplier_email": supplier_email,
+            "document_language": document_language,
+            "notes": notes,
+            "status": "ANALYZED",
+            "extracted_data": extracted_data,
+            "price_benchmark": price_benchmark,
+            "tax_analysis": tax_analysis,
+            "flags": flags,
+            "recommendations": recommendations,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "escalated_for_negotiation": False,
+            "added_to_cart": False
+        }
+        
+        await db.quotation_uploads.insert_one(quotation_record)
+        
+        # Log the activity
+        await db.activity_logs.insert_one({
+            "user_id": current_user.get("email"),
+            "action": "QUOTATION_UPLOADED",
+            "quotation_id": quotation_id,
+            "file_name": file.filename,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {
+            "success": True,
+            "quotation_id": quotation_id,
+            "message": "Quotation uploaded and analyzed successfully",
+            "analysis": {
+                "extracted_data": extracted_data,
+                "price_benchmark": price_benchmark,
+                "tax_analysis": tax_analysis,
+                "flags": flags,
+                "recommendations": recommendations
+            }
+        }
+    except Exception as e:
+        logging.error(f"Quotation upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to process quotation: {str(e)}")
+
+@api_router.get("/procurement/quotation/history")
+async def get_quotation_history(
+    page: int = 1,
+    limit: int = 20,
+    status: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get user's quotation upload history"""
+    query = {"user_id": current_user.get("email")}
+    if status:
+        query["status"] = status
+    
+    total = await db.quotation_uploads.count_documents(query)
+    
+    quotations = await db.quotation_uploads.find(query).sort("created_at", -1).skip((page-1)*limit).limit(limit).to_list(limit)
+    
+    # Remove MongoDB _id and file content
+    for q in quotations:
+        q.pop("_id", None)
+        q.pop("file_content", None)
+    
+    return {
+        "quotations": quotations,
+        "total": total,
+        "page": page,
+        "pages": (total + limit - 1) // limit
+    }
+
+@api_router.get("/procurement/quotation/{quotation_id}")
+async def get_quotation_details(
+    quotation_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get detailed quotation analysis"""
+    quotation = await db.quotation_uploads.find_one({
+        "quotation_id": quotation_id,
+        "user_id": current_user.get("email")
+    })
+    
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    quotation.pop("_id", None)
+    return quotation
+
+@api_router.post("/procurement/quotation/{quotation_id}/escalate")
+async def escalate_for_negotiation(
+    quotation_id: str,
+    notes: str = Form(None),
+    current_user: dict = Depends(get_current_user)
+):
+    """Escalate quotation for Infosys negotiation support"""
+    result = await db.quotation_uploads.update_one(
+        {"quotation_id": quotation_id, "user_id": current_user.get("email")},
+        {
+            "$set": {
+                "status": "ESCALATED_FOR_NEGOTIATION",
+                "escalated_for_negotiation": True,
+                "escalation_notes": notes,
+                "escalated_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    await db.activity_logs.insert_one({
+        "user_id": current_user.get("email"),
+        "action": "QUOTATION_ESCALATED",
+        "quotation_id": quotation_id,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {
+        "success": True,
+        "message": "Quotation escalated to Infosys negotiation team",
+        "estimated_response": "24-48 hours"
+    }
+
+@api_router.post("/procurement/quotation/{quotation_id}/add-to-cart")
+async def add_quotation_to_cart(
+    quotation_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Add analyzed quotation items to cart"""
+    quotation = await db.quotation_uploads.find_one({
+        "quotation_id": quotation_id,
+        "user_id": current_user.get("email")
+    })
+    
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    # Add items to cart
+    items_added = 0
+    for item in quotation.get("extracted_data", {}).get("line_items", []):
+        cart_item = {
+            "user_id": current_user.get("email"),
+            "product_id": f"QUP-ITEM-{uuid.uuid4().hex[:8]}",
+            "product_name": item["description"],
+            "brand": quotation.get("supplier_name", "Unknown"),
+            "sku": f"QUP-{item['line_number']}",
+            "unspsc_code": item.get("unspsc_code", ""),
+            "category": item.get("category", "General"),
+            "quantity": item["quantity"],
+            "unit_price": item["unit_price"],
+            "total_price": item["line_total"],
+            "currency_code": "USD",
+            "is_service": False,
+            "source": "quotation_upload",
+            "quotation_id": quotation_id,
+            "added_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.carts.insert_one(cart_item)
+        items_added += 1
+    
+    await db.quotation_uploads.update_one(
+        {"quotation_id": quotation_id},
+        {"$set": {"added_to_cart": True, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {
+        "success": True,
+        "message": f"Added {items_added} items to cart",
+        "items_added": items_added
+    }
+
+# ============================================
+# END-TO-END SOURCING SUPPORT ENDPOINTS
+# ============================================
+
+class SourcingRequest(BaseModel):
+    request_title: str
+    category: str
+    description: str
+    estimated_budget: Optional[float] = None
+    budget_currency: str = "USD"
+    quantity: Optional[int] = None
+    required_by_date: Optional[str] = None
+    delivery_location: str
+    preferred_suppliers: Optional[List[str]] = None
+    technical_specifications: Optional[str] = None
+    payment_model: str = "infosys_limited"  # infosys_limited, propay, customer_direct
+    urgency: str = "standard"  # standard, urgent, critical
+    attachments_count: int = 0
+
+@api_router.post("/procurement/sourcing/request")
+async def submit_sourcing_request(
+    request: SourcingRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Submit a new end-to-end sourcing request"""
+    sourcing_id = f"SRC-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6].upper()}"
+    
+    # Simulate processing timeline based on urgency
+    processing_days = {"standard": 5, "urgent": 2, "critical": 1}
+    estimated_completion = datetime.now() + timedelta(days=processing_days.get(request.urgency, 5))
+    
+    sourcing_record = {
+        "sourcing_id": sourcing_id,
+        "user_id": current_user.get("email"),
+        "user_name": current_user.get("name"),
+        "request_title": request.request_title,
+        "category": request.category,
+        "description": request.description,
+        "estimated_budget": request.estimated_budget,
+        "budget_currency": request.budget_currency,
+        "quantity": request.quantity,
+        "required_by_date": request.required_by_date,
+        "delivery_location": request.delivery_location,
+        "preferred_suppliers": request.preferred_suppliers or [],
+        "technical_specifications": request.technical_specifications,
+        "payment_model": request.payment_model,
+        "urgency": request.urgency,
+        "status": "SUBMITTED",
+        "status_history": [
+            {
+                "status": "SUBMITTED",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "notes": "Request received and queued for processing"
+            }
+        ],
+        "assigned_specialist": None,
+        "suppliers_identified": [],
+        "rfq_sent_count": 0,
+        "quotations_received": [],
+        "recommended_supplier": None,
+        "estimated_completion": estimated_completion.strftime("%Y-%m-%d"),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.sourcing_requests.insert_one(sourcing_record)
+    
+    await db.activity_logs.insert_one({
+        "user_id": current_user.get("email"),
+        "action": "SOURCING_REQUEST_SUBMITTED",
+        "sourcing_id": sourcing_id,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {
+        "success": True,
+        "sourcing_id": sourcing_id,
+        "message": "Sourcing request submitted successfully",
+        "estimated_completion": estimated_completion.strftime("%Y-%m-%d"),
+        "next_steps": [
+            "Our procurement specialist will review your request within 24 hours",
+            "We will identify and qualify potential suppliers",
+            "RFQ will be sent to selected suppliers",
+            "You will receive analyzed quotations with our recommendations"
+        ]
+    }
+
+@api_router.get("/procurement/sourcing/history")
+async def get_sourcing_history(
+    page: int = 1,
+    limit: int = 20,
+    status: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get user's sourcing request history"""
+    query = {"user_id": current_user.get("email")}
+    if status:
+        query["status"] = status
+    
+    total = await db.sourcing_requests.count_documents(query)
+    
+    requests = await db.sourcing_requests.find(query).sort("created_at", -1).skip((page-1)*limit).limit(limit).to_list(limit)
+    
+    for r in requests:
+        r.pop("_id", None)
+    
+    return {
+        "requests": requests,
+        "total": total,
+        "page": page,
+        "pages": (total + limit - 1) // limit
+    }
+
+@api_router.get("/procurement/sourcing/{sourcing_id}")
+async def get_sourcing_details(
+    sourcing_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get detailed sourcing request status"""
+    request = await db.sourcing_requests.find_one({
+        "sourcing_id": sourcing_id,
+        "user_id": current_user.get("email")
+    })
+    
+    if not request:
+        raise HTTPException(status_code=404, detail="Sourcing request not found")
+    
+    request.pop("_id", None)
+    
+    # Simulate progress updates for demo
+    if request["status"] == "SUBMITTED":
+        # Auto-progress for demo
+        await db.sourcing_requests.update_one(
+            {"sourcing_id": sourcing_id},
+            {
+                "$set": {
+                    "status": "IN_PROGRESS",
+                    "assigned_specialist": {
+                        "name": random.choice(["Priya Sharma", "Rajesh Kumar", "Sarah Johnson", "Michael Chen"]),
+                        "email": "procurement@infosysbpm.com",
+                        "phone": "+1-800-INFOSYS"
+                    }
+                },
+                "$push": {
+                    "status_history": {
+                        "status": "IN_PROGRESS",
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "notes": "Assigned to procurement specialist"
+                    }
+                }
+            }
+        )
+        request["status"] = "IN_PROGRESS"
+    
+    return request
+
+@api_router.post("/procurement/sourcing/{sourcing_id}/cancel")
+async def cancel_sourcing_request(
+    sourcing_id: str,
+    reason: str = Form(None),
+    current_user: dict = Depends(get_current_user)
+):
+    """Cancel a sourcing request"""
+    result = await db.sourcing_requests.update_one(
+        {
+            "sourcing_id": sourcing_id,
+            "user_id": current_user.get("email"),
+            "status": {"$nin": ["COMPLETED", "CANCELLED"]}
+        },
+        {
+            "$set": {
+                "status": "CANCELLED",
+                "cancellation_reason": reason,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            },
+            "$push": {
+                "status_history": {
+                    "status": "CANCELLED",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "notes": reason or "Cancelled by user"
+                }
+            }
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="Cannot cancel this request")
+    
+    return {"success": True, "message": "Sourcing request cancelled"}
+
+# ============================================
+# USER PROFILE & ACTIVITY ENDPOINTS
+# ============================================
+
+@api_router.get("/user/profile")
+async def get_user_profile(current_user: dict = Depends(get_current_user)):
+    """Get user profile with activity summary"""
+    email = current_user.get("email")
+    
+    # Get activity counts
+    quotation_count = await db.quotation_uploads.count_documents({"user_id": email})
+    sourcing_count = await db.sourcing_requests.count_documents({"user_id": email})
+    order_count = await db.orders.count_documents({"user_id": email})
+    
+    # Get recent activity
+    recent_activity = await db.activity_logs.find({"user_id": email}).sort("timestamp", -1).limit(10).to_list(10)
+    for a in recent_activity:
+        a.pop("_id", None)
+    
+    return {
+        "user": {
+            "email": current_user.get("email"),
+            "name": current_user.get("name"),
+            "country": current_user.get("country"),
+            "info_coins": current_user.get("info_coins", 0),
+            "member_since": current_user.get("created_at", datetime.now(timezone.utc).isoformat())
+        },
+        "activity_summary": {
+            "quotations_uploaded": quotation_count,
+            "sourcing_requests": sourcing_count,
+            "orders_placed": order_count
+        },
+        "recent_activity": recent_activity
+    }
+
+@api_router.get("/procurement/dashboard")
+async def get_procurement_dashboard(current_user: dict = Depends(get_current_user)):
+    """Get procurement dashboard data"""
+    email = current_user.get("email")
+    
+    # Quotation stats
+    quotation_stats = {
+        "total": await db.quotation_uploads.count_documents({"user_id": email}),
+        "analyzed": await db.quotation_uploads.count_documents({"user_id": email, "status": "ANALYZED"}),
+        "escalated": await db.quotation_uploads.count_documents({"user_id": email, "escalated_for_negotiation": True}),
+        "added_to_cart": await db.quotation_uploads.count_documents({"user_id": email, "added_to_cart": True})
+    }
+    
+    # Sourcing stats
+    sourcing_stats = {
+        "total": await db.sourcing_requests.count_documents({"user_id": email}),
+        "in_progress": await db.sourcing_requests.count_documents({"user_id": email, "status": "IN_PROGRESS"}),
+        "completed": await db.sourcing_requests.count_documents({"user_id": email, "status": "COMPLETED"}),
+        "pending": await db.sourcing_requests.count_documents({"user_id": email, "status": "SUBMITTED"})
+    }
+    
+    # Recent quotations
+    recent_quotations = await db.quotation_uploads.find({"user_id": email}).sort("created_at", -1).limit(5).to_list(5)
+    for q in recent_quotations:
+        q.pop("_id", None)
+        q.pop("extracted_data", None)
+        q.pop("price_benchmark", None)
+    
+    # Recent sourcing
+    recent_sourcing = await db.sourcing_requests.find({"user_id": email}).sort("created_at", -1).limit(5).to_list(5)
+    for s in recent_sourcing:
+        s.pop("_id", None)
+    
+    return {
+        "quotation_stats": quotation_stats,
+        "sourcing_stats": sourcing_stats,
+        "recent_quotations": recent_quotations,
+        "recent_sourcing": recent_sourcing
+    }
+
 app.include_router(api_router)
 
 app.add_middleware(
