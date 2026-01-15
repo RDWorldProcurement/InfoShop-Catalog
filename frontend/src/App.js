@@ -147,6 +147,22 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/upload-quotation"
+                element={
+                  <ProtectedRoute>
+                    <UploadQuotationPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/sourcing-support"
+                element={
+                  <ProtectedRoute>
+                    <SourcingSupportPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/admin" element={<AdminPortalPage />} />
             </Routes>
             <ChatBot />
