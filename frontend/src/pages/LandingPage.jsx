@@ -554,9 +554,9 @@ const LandingPage = () => {
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
-            Seamless ERP Integration
+            {t.landing.erpIntegration}
           </h3>
-          <p className="text-slate-600 mb-8">Transfer approved purchases directly to your procurement system</p>
+          <p className="text-slate-600 mb-8">{t.landing.erpIntegrationDesc}</p>
           <div className="flex flex-wrap justify-center gap-6">
             {INTEGRATIONS.map((integration, idx) => (
               <div 
@@ -580,11 +580,10 @@ const LandingPage = () => {
       <section className="py-20 bg-gradient-to-br from-[#007CC3] to-[#00629B]">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6" style={{ fontFamily: 'Manrope' }}>
-            Ready to Transform Your Procurement?
+            {t.landing.readyToTransform}
           </h2>
           <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-            Join leading enterprises who trust Infosys for their sourcing and procurement transformation. 
-            Start saving today with AI-powered intelligence.
+            {t.landing.readyToTransformDesc}
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button 
@@ -592,7 +591,7 @@ const LandingPage = () => {
               className="bg-white text-[#007CC3] hover:bg-slate-100 px-8"
               onClick={() => navigate("/login")}
             >
-              Get Started Now <ArrowRight className="ml-2 w-5 h-5" />
+              {t.landing.getStarted} <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
             <Button 
               size="lg"
