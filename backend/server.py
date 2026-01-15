@@ -3472,6 +3472,55 @@ async def escalate_for_negotiation(
         "estimated_response": "24-48 hours"
     }
 
+@api_router.post("/procurement/quotation/{quotation_id}/engage-tactical-buyers")
+async def engage_tactical_buyers(
+    quotation_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Engage Infosys Tactical Buyers for the quotation"""
+    quotation = await db.quotation_uploads.find_one({
+        "quotation_id": quotation_id,
+        "user_id": current_user.get("email")
+    })
+    
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    # Create buying desk request record
+    buying_desk_request = {
+        "request_id": f"IBD-{uuid.uuid4().hex[:8].upper()}",
+        "quotation_id": quotation_id,
+        "user_id": current_user.get("email"),
+        "user_name": current_user.get("name", "User"),
+        "supplier_name": quotation.get("supplier_name", "Unknown"),
+        "total_amount": quotation.get("extracted_data", {}).get("totals", {}).get("grand_total", 0),
+        "potential_savings": quotation.get("price_benchmark", {}).get("total_potential_savings", 0),
+        "line_items_count": len(quotation.get("extracted_data", {}).get("line_items", [])),
+        "status": "submitted",
+        "assigned_to": "Infosys Tactical Buying Team",
+        "submitted_at": datetime.now(timezone.utc).isoformat(),
+        "expected_response_by": (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat()
+    }
+    
+    await db.buying_desk_requests.insert_one(buying_desk_request)
+    
+    # Update quotation status
+    await db.quotation_uploads.update_one(
+        {"quotation_id": quotation_id},
+        {"$set": {
+            "tactical_buyers_engaged": True,
+            "buying_desk_request_id": buying_desk_request["request_id"],
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {
+        "success": True,
+        "message": "Infosys Tactical Buying Team has been notified",
+        "request_id": buying_desk_request["request_id"],
+        "expected_response": "24 hours"
+    }
+
 @api_router.post("/procurement/quotation/{quotation_id}/add-to-cart")
 async def add_quotation_to_cart(
     quotation_id: str,
