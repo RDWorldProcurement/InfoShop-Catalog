@@ -51,7 +51,7 @@ const DEMO_SLIDES = [
     id: 3,
     title: "AI-Powered Analysis",
     subtitle: "Intelligent Document Processing",
-    description: "Our AI extracts data from quotations in 8 languages, automatically benchmarks prices against market data, and verifies tax compliance.",
+    description: "Our AI extracts data from quotations in 8 languages, automatically benchmarks prices for products and services against market data, and verifies tax compliance.",
     icon: Brain,
     color: "bg-purple-600",
     features: [
