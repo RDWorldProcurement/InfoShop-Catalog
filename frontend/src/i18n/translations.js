@@ -37,25 +37,80 @@ export const translations = {
       supplierIdentification: "Supplier identification",
       rfqManagement: "RFQ management",
       expertNegotiation: "Expert negotiation",
+      // Navigation
+      navFeatures: "Features",
+      navHowItWorks: "How It Works",
+      navPaymentOptions: "Payment Options",
+      // Card features
+      multiBrandComparison: "Multi-brand comparison",
+      realTimeInventory: "Real-time inventory",
+      punchOutToERP: "PunchOut to ERP",
+      // Stats section
+      platformStats: {
+        annualSpend: "Annual Spend Managed",
+        enterpriseClients: "Enterprise Clients",
+        averageSavings: "Average Savings",
+        languagesSupported: "Languages Supported"
+      },
       stats: {
         products: "Industrial Products",
         services: "Services Available",
         categories: "MRO Categories",
         brands: "Global Brands"
       },
+      // AI Features section
+      aiPowered: "AI-Powered",
+      aiProcurementIntelligence: "AI-Powered Procurement Intelligence",
+      aiProcurementDesc: "Leverage cutting-edge AI technology combined with Infosys procurement expertise",
+      aiDocumentAnalysis: "AI Document Analysis",
+      aiDocumentAnalysisDesc: "Automatically extract and validate data from quotations in multiple formats and languages",
+      priceBenchmarkingTitle: "Price Benchmarking",
+      priceBenchmarkingDesc: "Compare quoted prices against market data and historical purchases for products and services",
+      taxIntelligence: "Tax Intelligence",
+      taxIntelligenceDesc: "Verify tax calculations and ensure compliance with local regulations automatically",
+      tacticalSourcing: "Tactical Sourcing",
+      tacticalSourcingDesc: "Expert negotiation and supplier management by Infosys procurement specialists",
+      // Multi-language support
+      multiLanguageSupport: "Multi-Language Document Support",
+      multiLanguageSupportDesc: "Our AI processes quotations in 8 languages with exceptional accuracy",
+      // How it works
+      howItWorks: "How OMNISupply.io Works",
+      howItWorksDesc: "Simple steps to transform your procurement",
+      step1Title: "Browse or Upload",
+      step1Desc: "Search our catalog of 30M+ products or upload your existing quotation",
+      step2Title: "AI Analysis",
+      step2Desc: "Our AI extracts data, benchmarks prices, and identifies savings opportunities",
+      step3Title: "Expert Support",
+      step3Desc: "Engage our Buying Desk for negotiation and end-to-end procurement support",
+      step4Title: "Seamless Transfer",
+      step4Desc: "Transfer approved purchases directly to your ERP via PunchOut integration",
+      // Payment options
+      flexiblePaymentOptions: "Flexible Payment Options",
+      flexiblePaymentOptionsDesc: "Choose the payment model that works best for your organization",
+      oneVendorModel: "One Vendor Model",
+      paymentProcessingPartner: "Payment Processing Partner",
+      directPayment: "Direct Payment",
+      youPaySupplierDirectly: "You pay supplier directly after approval",
+      // ERP Integration
+      erpIntegration: "Seamless ERP Integration",
+      erpIntegrationDesc: "Transfer approved purchases directly to your procurement system",
+      // CTA
       cta: "Start Exploring",
       learnMore: "Watch Demo",
+      readyToTransform: "Ready to Transform Your Procurement?",
+      readyToTransformDesc: "Join leading enterprises who trust Infosys for their sourcing and procurement transformation. Start saving today with AI-powered intelligence.",
+      contactSales: "Contact Sales",
+      signIn: "Sign In",
+      // Footer
+      privacyPolicy: "Privacy Policy",
+      termsOfService: "Terms of Service",
+      contactUs: "Contact Us",
+      allRightsReserved: "All rights reserved.",
       trustedBrands: "Trusted products from industry-leading manufacturers",
       servicesTitle: "100K+ Rate Card Services",
       servicesSubtitle: "Professional services from vetted Infosys partners",
       integrationsTitle: "Seamless ERP Integrations",
-      integrationsSubtitle: "PunchOut enabled for all major procurement platforms",
-      howItWorks: "How OMNISupply.io Works",
-      erpIntegration: "Seamless ERP Integration",
-      erpIntegrationDesc: "Transfer approved purchases directly to your procurement system",
-      readyToTransform: "Ready to Transform Your Procurement?",
-      readyToTransformDesc: "Join leading enterprises who trust Infosys for their sourcing and procurement transformation. Start saving today with AI-powered intelligence.",
-      signIn: "Sign In"
+      integrationsSubtitle: "PunchOut enabled for all major procurement platforms"
     },
     catalog: {
       searchPlaceholder: "Search products by name, SKU, or brand...",
