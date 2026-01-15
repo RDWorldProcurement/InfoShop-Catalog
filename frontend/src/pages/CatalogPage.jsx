@@ -227,7 +227,7 @@ const CatalogPage = () => {
     }
   };
 
-  const addToCart = async (item, isService = false) => {
+  const addToCart = async (item, isService = false, navigateToTransfer = false) => {
     try {
       const cartItem = {
         product_id: item.id,
@@ -246,7 +246,12 @@ const CatalogPage = () => {
       
       await axios.post(`${API}/cart/add`, cartItem);
       toast.success("Added to cart!");
-      fetchCart();
+      await fetchCart();
+      
+      // Navigate to cart transfer screen after adding
+      if (navigateToTransfer) {
+        setPunchoutModalOpen(true);
+      }
     } catch (error) {
       toast.error("Failed to add to cart");
     }
