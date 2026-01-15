@@ -70,7 +70,7 @@ const DEMO_SLIDES = [
     color: "bg-amber-600",
     options: [
       { icon: Building2, title: "Infosys Limited", desc: "One vendor model - simplified invoicing" },
-      { icon: Globe, title: "ProPay.ai", desc: "Global payment processing partner" },
+      { icon: Globe, title: "ProPay World Wide Inc.", desc: "Global payment processing partner" },
       { icon: Receipt, title: "Direct Payment", desc: "You pay supplier directly after approval" }
     ]
   },
@@ -145,9 +145,9 @@ const PAYMENT_MODELS = [
     color: "#007CC3"
   },
   {
-    name: "ProPay.ai",
+    name: "ProPay World Wide Inc.",
     subtitle: "Payment Processing Partner",
-    description: "Customer issues PO to ProPay.ai, ProPay.ai issues PO to Supplier. Alternative payment processing with global coverage.",
+    description: "Customer issues PO to ProPay, ProPay issues PO to Supplier. Alternative payment processing with global coverage.",
     logo: "https://customer-assets.emergentagent.com/job_procure-ai-fusion/artifacts/tst2i955_ProPay.ai%20Logo%202.svg",
     color: "#10B981"
   },

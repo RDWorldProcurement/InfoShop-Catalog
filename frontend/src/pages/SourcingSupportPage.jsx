@@ -36,7 +36,7 @@ const SOURCING_CATEGORIES = [
 
 const INVOICE_HANDLING_OPTIONS = [
   { id: "infosys_limited", name: "Infosys Limited", description: "Consolidated invoicing through Infosys entity", logo: "https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png" },
-  { id: "propay", name: "ProPay.ai", description: "Third-party payment processing partner", logo: "https://customer-assets.emergentagent.com/job_procure-ai-fusion/artifacts/tst2i955_ProPay.ai%20Logo%202.svg" },
+  { id: "propay", name: "ProPay World Wide Inc.", description: "Third-party payment processing partner", logo: "https://customer-assets.emergentagent.com/job_procure-ai-fusion/artifacts/tst2i955_ProPay.ai%20Logo%202.svg" },
   { id: "customer_direct", name: "Customer Direct", description: "Direct invoicing from supplier to customer", logo: null }
 ];
 
