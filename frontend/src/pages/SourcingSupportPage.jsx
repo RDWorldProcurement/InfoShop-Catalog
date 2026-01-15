@@ -388,17 +388,20 @@ const SourcingSupportPage = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Payment Model */}
+                  {/* PO and Invoice Handling Entity */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Receipt className="w-5 h-5" />
-                        Payment Model
+                        PO and Invoice Handling Entity
                       </CardTitle>
+                      <CardDescription>
+                        Select which entity will handle purchase orders and invoices
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="grid md:grid-cols-3 gap-4">
-                        {PAYMENT_MODELS.map((model) => (
+                        {INVOICE_HANDLING_OPTIONS.map((model) => (
                           <div
                             key={model.id}
                             className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
