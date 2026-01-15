@@ -173,12 +173,15 @@ const SUPPORTED_LANGUAGES = [
 ];
 
 const INTEGRATIONS = [
-  { name: "Coupa", color: "#0070C0" },
-  { name: "SAP Ariba", color: "#F0AB00" },
-  { name: "SAP ERP", color: "#0077B5" },
-  { name: "Ivalua", color: "#00B2A9" },
-  { name: "Oracle", color: "#F80000" },
+  { name: "Coupa", color: "#0070C0", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/203af02878e8462b8b478e5a388300e13644b9c66a580240853a8c1b1b16421b.png" },
+  { name: "SAP Ariba", color: "#F0AB00", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/242c396695ed95e8c682ce4b9ab4fd164cefc30b4931d7acd112693b2b4be0bc.png" },
+  { name: "SAP ERP", color: "#0077B5", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/193fe369db8e5863b7e8cf1eef92e1169fc8cffa6c81ec14dc0438ca36ac2a22.png" },
+  { name: "Ivalua", color: "#00B2A9", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/16910d5da96ec608f2ab781af7b863dc269065f5f64d1996288d24be5423b5f1.png" },
+  { name: "Oracle", color: "#F80000", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/68bc01c43c6ce5e440fa07f6f3139ab989a0401f81edca69eb86dafb4a1b0870.png" },
 ];
+
+// OMNISupply.io Logo
+const OMNISUPPLY_LOGO = "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/902ecaee78bc1951aaa083101af66d6ddeca4586e965574d7720cd3fa6f03138.png";
 
 const LandingPage = () => {
   const navigate = useNavigate();
