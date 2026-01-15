@@ -136,6 +136,7 @@ export default function AdminPortalPage() {
         setIsLoggedIn(true);
         localStorage.setItem('adminToken', response.data.token);
         loadData();
+        loadBuyingDeskData(); // Auto-load buying desk data after login
       }
     } catch (error) {
       setLoginError(error.response?.data?.detail || 'Invalid credentials');
