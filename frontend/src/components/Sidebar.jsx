@@ -111,6 +111,16 @@ const Sidebar = ({ activePage }) => {
               badge="Buying Desk"
               badgeColor="bg-orange-100 text-orange-700"
             />
+            <NavItem 
+              icon={Building2} 
+              label="Buying Desk Tracker" 
+              path="/buying-desk" 
+              id="buying-desk" 
+              activePage={activePage} 
+              navigate={navigate}
+              badge="Track"
+              badgeColor="bg-[#007CC3]/10 text-[#007CC3]"
+            />
           </div>
 
           <div className="py-3">
