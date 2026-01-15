@@ -329,7 +329,7 @@ const UploadQuotationPage = () => {
                     <Brain className="w-10 h-10 text-purple-600 mb-4" />
                     <h3 className="font-bold text-slate-900 mb-2">AI-Powered Analysis</h3>
                     <p className="text-sm text-slate-600 mb-4">
-                      Our AI will automatically extract data, benchmark prices, and verify tax compliance.
+                      Our AI will automatically extract data, benchmark prices for products and services, and verify tax compliance.
                     </p>
                     <ul className="space-y-2 text-sm">
                       <li className="flex items-center gap-2 text-slate-700">
