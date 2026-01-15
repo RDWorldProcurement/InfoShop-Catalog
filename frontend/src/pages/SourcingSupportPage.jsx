@@ -173,9 +173,9 @@ const SourcingSupportPage = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope' }}>
-                  End-to-End Sourcing Support
+                  Managed Services / Buying Desk
                 </h1>
-                <p className="text-slate-600">Let Infosys handle your procurement needs</p>
+                <p className="text-slate-600">Let our expert team handle your end-to-end procurement needs</p>
               </div>
             </div>
           </div>
