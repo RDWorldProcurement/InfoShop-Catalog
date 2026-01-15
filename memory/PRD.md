@@ -8,6 +8,29 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 
 ## What's Been Implemented
 
+### ✅ Phase 13 - UI Labeling & PO/Invoice Entity Options (January 15, 2026 - COMPLETED)
+**Landing Page Option Labels:**
+- "Upload Quotation" renamed to "**One-Off Purchases**" - Clearer description: "Upload your quotation for AI-powered analysis & processing"
+- "Sourcing Support" renamed to "**Managed Services**" - Description: "Let our Buying Desk handle end-to-end sourcing for you"
+- Button updated to "Request Buying Desk"
+
+**Sidebar Navigation Updates:**
+- "Upload Quotation" → "**One-Off Purchases**" with "AI" badge
+- "Sourcing Support" → "**Managed Services**" with "Buying Desk" badge
+
+**Page Title Updates:**
+- Upload Quotation page header: "**One-Off Purchases**"
+- Sourcing Support page header: "**Managed Services / Buying Desk**"
+
+**PO and Invoice Handling Entity Feature:**
+- Renamed "Payment Model" to "**PO and Invoice Handling Entity**" on Managed Services page
+- Added description: "Select which entity will handle purchase orders and invoices"
+- **NEW:** Added same section to One-Off Purchases page (after quotation analysis)
+- Three options:
+  - Infosys Limited - "Consolidated invoicing through Infosys entity"
+  - ProPay World Wide Inc - "Third-party payment processing partner"
+  - Customer Direct - "Direct invoicing from supplier to customer"
+
 ### ✅ Phase 12 - Engage Tactical Buyers & Cart Navigation Fix (January 15, 2026 - COMPLETED)
 **Engage Infosys Tactical Buyers Button:**
 - New prominent CTA on Upload Quotation page after analysis completes
