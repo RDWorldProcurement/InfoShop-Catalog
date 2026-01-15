@@ -8,6 +8,27 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 
 ## What's Been Implemented
 
+### ✅ Phase 12 - Engage Tactical Buyers & Cart Navigation Fix (January 15, 2026 - COMPLETED)
+**Engage Infosys Tactical Buyers Button:**
+- New prominent CTA on Upload Quotation page after analysis completes
+- Positioned before Potential Savings section
+- Blue button "Engage Tactical Buyers" with Handshake icon
+- On click: Shows "Infosys Notified!" with green checkmark
+- Success message: "Your request has been submitted to the Infosys Buying Desk Dashboard. Expected response within 24 hours."
+- "Request Submitted" badge replaces button after submission
+- Toast notification confirms team notification
+
+**Backend - New Endpoint:**
+- POST /api/procurement/quotation/{id}/engage-tactical-buyers
+- Creates buying_desk_request record with: request_id, quotation_id, user info, amounts, potential_savings, timestamps
+- Updates quotation with tactical_buyers_engaged flag
+
+**Add to Cart Navigation Fix:**
+- Clicking "Add to Cart" on Catalog page now opens PunchOut modal directly
+- Shows "Transfer Cart via PunchOut" with 5 system options: Coupa, SAP Ariba, SAP ERP, Ivalua, Oracle
+- Add to Cart from Upload Quotation page navigates to Catalog with openCart=true param
+- Seamless cart transfer flow implemented
+
 ### ✅ Phase 11 - Unified Platform Merge (January 15, 2026 - COMPLETED)
 **Landing Page Redesign:**
 - New hero section with 3 procurement options (Browse Catalog, Upload Quotation, Sourcing Support)
