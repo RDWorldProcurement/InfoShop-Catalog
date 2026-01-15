@@ -3,11 +3,12 @@ import { useAuth } from "../App";
 import { useLanguage } from "../i18n/LanguageContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import {
-  Package, Search, History, RefreshCw, Upload, Award, LogOut, User, Coins, Languages
+  Package, Search, History, RefreshCw, Upload, Award, LogOut, User, Coins, Languages,
+  FileUp, Handshake
 } from "lucide-react";
 
 // NavItem component moved outside Sidebar to prevent re-creation on each render
-const NavItem = ({ icon: Icon, label, path, id, activePage, navigate }) => {
+const NavItem = ({ icon: Icon, label, path, id, activePage, navigate, badge, badgeColor }) => {
   const isActive = activePage === id;
   return (
     <button
@@ -20,7 +21,12 @@ const NavItem = ({ icon: Icon, label, path, id, activePage, navigate }) => {
       data-testid={`nav-${id}`}
     >
       <Icon className="w-5 h-5" />
-      <span>{label}</span>
+      <span className="flex-1 text-left">{label}</span>
+      {badge && (
+        <span className={`text-xs px-2 py-0.5 rounded-full ${badgeColor || 'bg-[#007CC3]/10 text-[#007CC3]'}`}>
+          {badge}
+        </span>
+      )}
     </button>
   );
 };
@@ -78,13 +84,46 @@ const Sidebar = ({ activePage }) => {
           </div>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - Main */}
         <nav className="space-y-1 flex-1">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Catalog</p>
           <NavItem icon={Search} label={t.nav.catalog} path="/catalog" id="catalog" activePage={activePage} navigate={navigate} />
-          <NavItem icon={History} label={t.nav.orders} path="/orders" id="orders" activePage={activePage} navigate={navigate} />
-          <NavItem icon={RefreshCw} label={t.nav.repeatOrders} path="/repeat-orders" id="repeat-orders" activePage={activePage} navigate={navigate} />
-          <NavItem icon={Upload} label={t.nav.bulkUpload} path="/bulk-upload" id="bulk-upload" activePage={activePage} navigate={navigate} />
-          <NavItem icon={Award} label={t.nav.rewards} path="/rewards" id="rewards" activePage={activePage} navigate={navigate} />
+          
+          <div className="py-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Procurement</p>
+            <NavItem 
+              icon={FileUp} 
+              label="Upload Quotation" 
+              path="/upload-quotation" 
+              id="upload-quotation" 
+              activePage={activePage} 
+              navigate={navigate}
+              badge="AI"
+              badgeColor="bg-purple-100 text-purple-700"
+            />
+            <NavItem 
+              icon={Handshake} 
+              label="Sourcing Support" 
+              path="/sourcing-support" 
+              id="sourcing-support" 
+              activePage={activePage} 
+              navigate={navigate}
+              badge="E2E"
+              badgeColor="bg-orange-100 text-orange-700"
+            />
+          </div>
+
+          <div className="py-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Orders</p>
+            <NavItem icon={History} label={t.nav.orders} path="/orders" id="orders" activePage={activePage} navigate={navigate} />
+            <NavItem icon={RefreshCw} label={t.nav.repeatOrders} path="/repeat-orders" id="repeat-orders" activePage={activePage} navigate={navigate} />
+            <NavItem icon={Upload} label={t.nav.bulkUpload} path="/bulk-upload" id="bulk-upload" activePage={activePage} navigate={navigate} />
+          </div>
+
+          <div className="py-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Rewards</p>
+            <NavItem icon={Award} label={t.nav.rewards} path="/rewards" id="rewards" activePage={activePage} navigate={navigate} />
+          </div>
         </nav>
 
         {/* Language Selector */}
