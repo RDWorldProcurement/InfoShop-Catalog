@@ -26,7 +26,7 @@ import {
   Eye
 } from "lucide-react";
 
-const API = process.env.REACT_APP_BACKEND_URL;
+const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 // Stage definitions for tracking
 const STAGES = [
