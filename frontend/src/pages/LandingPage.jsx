@@ -258,15 +258,14 @@ const LandingPage = () => {
           {/* Hero Header */}
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-[#007CC3]/10 text-[#007CC3] border-[#007CC3]/20 px-4 py-1">
-              Powered by Infosys BPM
+              {t.landing.poweredBy}
             </Badge>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6" style={{ fontFamily: 'Manrope' }}>
-              Intelligent Procurement<br />
-              <span className="text-[#007CC3]">Powered by AI</span>
+              {t.landing.heroTitle}<br />
+              <span className="text-[#007CC3]">{t.landing.heroTitleHighlight}</span>
             </h1>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-              Transform your procurement with AI-enabled document processing, intelligent price benchmarking, 
-              and expert sourcing support. Access 30M+ products or let us handle it for you.
+              {t.landing.heroSubtitle}
             </p>
             <div className="flex justify-center gap-4 mb-8">
               <Button 
@@ -275,13 +274,13 @@ const LandingPage = () => {
                 onClick={() => { setCurrentSlide(0); setDemoModalOpen(true); }}
                 data-testid="watch-demo-btn"
               >
-                <Play className="w-4 h-4" /> Watch Demo
+                <Play className="w-4 h-4" /> {t.landing.watchDemo}
               </Button>
               <Button 
                 className="bg-[#007CC3] hover:bg-[#00629B] gap-2"
                 onClick={() => navigate("/login")}
               >
-                Get Started <ArrowRight className="w-4 h-4" />
+                {t.landing.getStarted} <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -296,10 +295,10 @@ const LandingPage = () => {
                   <Search className="w-7 h-7 text-[#007CC3]" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
-                  Browse Catalog
+                  {t.landing.browseCatalog}
                 </h3>
                 <p className="text-slate-600 mb-4 text-sm">
-                  Access 30M+ MRO Products & 100K+ Services with Infosys preferred pricing
+                  {t.landing.browseCatalogDesc}
                 </p>
                 <ul className="space-y-2 mb-6 text-sm">
                   <li className="flex items-center gap-2 text-slate-600">
