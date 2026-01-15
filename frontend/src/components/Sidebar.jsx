@@ -55,9 +55,11 @@ const Sidebar = ({ activePage }) => {
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => navigate("/")}
           >
-            <div className="w-10 h-10 bg-[#007CC3] rounded-xl flex items-center justify-center">
-              <Package className="w-6 h-6 text-white" />
-            </div>
+            <img 
+              src="https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/902ecaee78bc1951aaa083101af66d6ddeca4586e965574d7720cd3fa6f03138.png"
+              alt="OMNISupply.io"
+              className="w-10 h-10 object-contain"
+            />
             <span className="font-bold text-lg text-slate-900" style={{ fontFamily: 'Manrope' }}>
               OMNI<span className="text-[#007CC3]">Supply</span>.io
             </span>
