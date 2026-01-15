@@ -31,20 +31,17 @@ const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
+  const [authState, setAuthState] = useState(() => {
     const storedToken = localStorage.getItem("omnisupply_token");
     const storedUser = localStorage.getItem("omnisupply_user");
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
       axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+      return { user: JSON.parse(storedUser), token: storedToken, loading: false };
     }
-    setLoading(false);
-  }, []);
+    return { user: null, token: null, loading: false };
+  });
+
+  const { user, token, loading } = authState;
 
   const login = async (email, password, country) => {
     const response = await axios.post(`${API}/auth/login`, { email, password, country });
@@ -52,8 +49,7 @@ const AuthProvider = ({ children }) => {
     localStorage.setItem("omnisupply_token", userData.token);
     localStorage.setItem("omnisupply_user", JSON.stringify(userData));
     axios.defaults.headers.common["Authorization"] = `Bearer ${userData.token}`;
-    setToken(userData.token);
-    setUser(userData);
+    setAuthState({ user: userData, token: userData.token, loading: false });
     return userData;
   };
 
@@ -61,14 +57,13 @@ const AuthProvider = ({ children }) => {
     localStorage.removeItem("omnisupply_token");
     localStorage.removeItem("omnisupply_user");
     delete axios.defaults.headers.common["Authorization"];
-    setToken(null);
-    setUser(null);
+    setAuthState({ user: null, token: null, loading: false });
   };
 
   const updateCoins = (newBalance) => {
     if (user) {
       const updatedUser = { ...user, info_coins: newBalance };
-      setUser(updatedUser);
+      setAuthState(prev => ({ ...prev, user: updatedUser }));
       localStorage.setItem("omnisupply_user", JSON.stringify(updatedUser));
     }
   };
