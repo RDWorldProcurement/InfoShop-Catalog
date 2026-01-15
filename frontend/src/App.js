@@ -12,6 +12,8 @@ import RepeatOrdersPage from "./pages/RepeatOrdersPage";
 import BulkUploadPage from "./pages/BulkUploadPage";
 import InfoCoinsPage from "./pages/InfoCoinsPage";
 import AdminPortalPage from "./pages/AdminPortalPage";
+import UploadQuotationPage from "./pages/UploadQuotationPage";
+import SourcingSupportPage from "./pages/SourcingSupportPage";
 
 // Components
 import ChatBot from "./components/ChatBot";
@@ -30,14 +32,16 @@ export const useAuth = () => useContext(AuthContext);
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("omnisupply_token");
+    const storedToken = localStorage.getItem("omnisupply_token");
     const storedUser = localStorage.getItem("omnisupply_user");
-    if (token && storedUser) {
+    if (storedToken && storedUser) {
+      setToken(storedToken);
       setUser(JSON.parse(storedUser));
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
     }
     setLoading(false);
   }, []);
@@ -48,6 +52,7 @@ const AuthProvider = ({ children }) => {
     localStorage.setItem("omnisupply_token", userData.token);
     localStorage.setItem("omnisupply_user", JSON.stringify(userData));
     axios.defaults.headers.common["Authorization"] = `Bearer ${userData.token}`;
+    setToken(userData.token);
     setUser(userData);
     return userData;
   };
@@ -56,6 +61,7 @@ const AuthProvider = ({ children }) => {
     localStorage.removeItem("omnisupply_token");
     localStorage.removeItem("omnisupply_user");
     delete axios.defaults.headers.common["Authorization"];
+    setToken(null);
     setUser(null);
   };
 
@@ -68,7 +74,7 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, updateCoins }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading, updateCoins }}>
       {children}
     </AuthContext.Provider>
   );
