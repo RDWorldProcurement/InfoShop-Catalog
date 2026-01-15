@@ -148,7 +148,7 @@ const PAYMENT_MODELS = [
     name: "ProPay.ai",
     subtitle: "Payment Processing Partner",
     description: "Customer issues PO to ProPay.ai, ProPay.ai issues PO to Supplier. Alternative payment processing with global coverage.",
-    logo: "https://customer-assets.emergentagent.com/job_procure-ai-fusion/artifacts/7n1zm9zf_ProPay.ai%20Logo.png",
+    logo: "https://customer-assets.emergentagent.com/job_procure-ai-fusion/artifacts/tst2i955_ProPay.ai%20Logo%202.svg",
     color: "#10B981"
   },
   {
