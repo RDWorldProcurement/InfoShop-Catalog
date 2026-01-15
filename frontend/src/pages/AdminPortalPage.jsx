@@ -80,6 +80,7 @@ export default function AdminPortalPage() {
       setAdminToken(savedToken);
       setIsLoggedIn(true);
       loadData();
+      loadBuyingDeskData(); // Auto-load buying desk data on login
     }
   }, []);
 
