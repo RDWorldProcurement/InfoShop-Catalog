@@ -46,6 +46,8 @@ const UploadQuotationPage = () => {
   const [showDetails, setShowDetails] = useState({});
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
   const [escalateNotes, setEscalateNotes] = useState("");
+  const [engagingBuyers, setEngagingBuyers] = useState(false);
+  const [buyersEngaged, setBuyersEngaged] = useState(false);
 
   const handleFileDrop = useCallback((e) => {
     e.preventDefault();
