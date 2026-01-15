@@ -75,6 +75,7 @@ const getCategoryIcon = (categoryName) => {
 
 const CatalogPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
