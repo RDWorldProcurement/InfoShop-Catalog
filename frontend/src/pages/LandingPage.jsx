@@ -302,13 +302,13 @@ const LandingPage = () => {
                 </p>
                 <ul className="space-y-2 mb-6 text-sm">
                   <li className="flex items-center gap-2 text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Multi-brand comparison
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.multiBrandComparison}
                   </li>
                   <li className="flex items-center gap-2 text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Real-time inventory
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.realTimeInventory}
                   </li>
                   <li className="flex items-center gap-2 text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> PunchOut to ERP
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.punchOutToERP}
                   </li>
                 </ul>
                 <Button 
