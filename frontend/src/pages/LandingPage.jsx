@@ -202,11 +202,11 @@ const LandingPage = () => {
                 className="h-8"
               />
               <div className="h-6 w-px bg-slate-300"></div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <img 
                   src={OMNISUPPLY_LOGO}
                   alt="OMNISupply.io"
-                  className="h-10 w-10 object-contain"
+                  className="h-12 w-12 object-contain"
                 />
                 <span className="font-bold text-xl text-slate-900" style={{ fontFamily: 'Manrope' }}>
                   OMNI<span className="text-[#007CC3]">Supply</span>.io
@@ -218,6 +218,25 @@ const LandingPage = () => {
               <a href="#features" className="text-slate-600 hover:text-[#007CC3] font-medium">Features</a>
               <a href="#how-it-works" className="text-slate-600 hover:text-[#007CC3] font-medium">How It Works</a>
               <a href="#payment" className="text-slate-600 hover:text-[#007CC3] font-medium">Payment Options</a>
+              
+              {/* Language Selector */}
+              <Select value={language} onValueChange={changeLanguage}>
+                <SelectTrigger className="w-[130px] border-slate-200">
+                  <Globe className="w-4 h-4 mr-2 text-slate-500" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {languageOptions.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      <span className="flex items-center gap-2">
+                        <span>{lang.flag}</span>
+                        <span>{lang.name}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
               <Button 
                 variant="outline" 
                 className="border-[#007CC3] text-[#007CC3] hover:bg-[#007CC3] hover:text-white"
