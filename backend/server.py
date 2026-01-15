@@ -3153,33 +3153,37 @@ async def admin_get_all_buying_desk_requests(
     limit: int = 50
 ):
     """Get all tactical buying desk requests (admin only)"""
-    query = {}
-    if status:
-        query["current_stage"] = status
-    
-    total = await db.buying_desk_requests.count_documents(query)
-    requests = await db.buying_desk_requests.find(
-        query, {"_id": 0}
-    ).sort("submitted_at", -1).skip((page-1)*limit).limit(limit).to_list(limit)
-    
-    # Get stats
-    stats = {
-        "total": total,
-        "submitted": await db.buying_desk_requests.count_documents({"current_stage": "submitted"}),
-        "supplier_identification": await db.buying_desk_requests.count_documents({"current_stage": "supplier_identification"}),
-        "rfq_sent": await db.buying_desk_requests.count_documents({"current_stage": "rfq_sent"}),
-        "quotes_received": await db.buying_desk_requests.count_documents({"current_stage": "quotes_received"}),
-        "negotiating": await db.buying_desk_requests.count_documents({"current_stage": "negotiating"}),
-        "po_ready": await db.buying_desk_requests.count_documents({"current_stage": "po_ready"})
-    }
-    
-    return {
-        "requests": requests,
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "stats": stats
-    }
+    try:
+        query = {}
+        if status:
+            query["current_stage"] = status
+        
+        total = await db.buying_desk_requests.count_documents(query)
+        requests = await db.buying_desk_requests.find(
+            query, {"_id": 0}
+        ).sort("submitted_at", -1).skip((page-1)*limit).limit(limit).to_list(limit)
+        
+        # Get stats with error handling
+        stats = {
+            "total": total,
+            "submitted": await db.buying_desk_requests.count_documents({"current_stage": "submitted"}),
+            "supplier_identification": await db.buying_desk_requests.count_documents({"current_stage": "supplier_identification"}),
+            "rfq_sent": await db.buying_desk_requests.count_documents({"current_stage": "rfq_sent"}),
+            "quotes_received": await db.buying_desk_requests.count_documents({"current_stage": "quotes_received"}),
+            "negotiating": await db.buying_desk_requests.count_documents({"current_stage": "negotiating"}),
+            "po_ready": await db.buying_desk_requests.count_documents({"current_stage": "po_ready"})
+        }
+        
+        return {
+            "requests": requests,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "stats": stats
+        }
+    except Exception as e:
+        logger.error(f"Error fetching buying desk requests: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch requests")
 
 @api_router.get("/admin/buying-desk/request/{request_id}")
 async def admin_get_buying_desk_request(request_id: str):
