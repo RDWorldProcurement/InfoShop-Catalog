@@ -627,9 +627,9 @@ const LandingPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-6 text-slate-400 text-sm">
-              <a href="#" className="hover:text-white">{t.landing.privacyPolicy}</a>
-              <a href="#" className="hover:text-white">{t.landing.termsOfService}</a>
-              <a href="#" className="hover:text-white">{t.landing.contactUs}</a>
+              <a href="https://www.infosys.com/privacy-statement.html" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t.landing.privacyPolicy}</a>
+              <a href="https://www.infosys.com/terms-of-use.html" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t.landing.termsOfService}</a>
+              <a href="https://www.infosysbpm.com/contact.html" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t.landing.contactUs}</a>
             </div>
             <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Infosys BPM Limited. {t.landing.allRightsReserved}</p>
           </div>
