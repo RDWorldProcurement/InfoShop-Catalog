@@ -159,6 +159,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/buying-desk"
+                element={
+                  <ProtectedRoute>
+                    <BuyingDeskDashboardPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/admin" element={<AdminPortalPage />} />
             </Routes>
             <ChatBot />
