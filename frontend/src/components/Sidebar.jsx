@@ -56,9 +56,9 @@ const Sidebar = ({ activePage }) => {
             onClick={() => navigate("/")}
           >
             <img 
-              src="https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/902ecaee78bc1951aaa083101af66d6ddeca4586e965574d7720cd3fa6f03138.png"
+              src="https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/5544120fa58b5db3f9b4ad8c6dafa2c32057f9ac5ad4be02779d98746bd4131d.png"
               alt="OMNISupply.io"
-              className="w-10 h-10 object-contain"
+              className="w-12 h-12 object-contain"
             />
             <span className="font-bold text-lg text-slate-900" style={{ fontFamily: 'Manrope' }}>
               OMNI<span className="text-[#007CC3]">Supply</span>.io
