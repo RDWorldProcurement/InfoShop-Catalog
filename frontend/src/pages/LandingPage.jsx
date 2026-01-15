@@ -539,20 +539,19 @@ const LandingPage = () => {
             Seamless ERP Integration
           </h3>
           <p className="text-slate-600 mb-8">Transfer approved purchases directly to your procurement system</p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-6">
             {INTEGRATIONS.map((integration, idx) => (
               <div 
                 key={idx} 
-                className="flex items-center gap-3 px-6 py-4 bg-white border-2 rounded-xl hover:shadow-lg transition-all"
+                className="flex flex-col items-center gap-3 px-6 py-5 bg-white border-2 rounded-xl hover:shadow-lg transition-all min-w-[140px]"
                 style={{ borderColor: integration.color }}
               >
-                <div 
-                  className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white"
-                  style={{ backgroundColor: integration.color }}
-                >
-                  {integration.name.charAt(0)}
-                </div>
-                <span className="font-semibold text-slate-700">{integration.name}</span>
+                <img 
+                  src={integration.logo}
+                  alt={integration.name}
+                  className="w-16 h-16 object-contain"
+                />
+                <span className="font-semibold text-slate-700 text-sm">{integration.name}</span>
               </div>
             ))}
           </div>
