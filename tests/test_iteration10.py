@@ -26,8 +26,8 @@ class TestAuthentication:
         assert response.status_code == 200, f"Login failed: {response.text}"
         data = response.json()
         assert "token" in data, "Token not in response"
-        assert data.get("success") == True, "Login not successful"
-        return data["token"]
+        assert data.get("email") == "demo@infosys.com", "Email not in response"
+        print(f"Login successful for {data.get('email')}")
 
 
 class TestQuotationUpload:
@@ -156,12 +156,12 @@ class TestCatalogAndCart:
             return response.json().get("token")
         pytest.skip("Authentication failed")
     
-    def test_product_search(self):
+    def test_product_search(self, auth_token):
         """Test product search endpoint"""
         response = requests.get(f"{BASE_URL}/api/products/search", params={
             "q": "",
             "limit": 10
-        })
+        }, headers={"Authorization": f"Bearer {auth_token}"})
         
         assert response.status_code == 200, f"Search failed: {response.text}"
         data = response.json()
@@ -172,15 +172,15 @@ class TestCatalogAndCart:
         product = data["results"][0]
         assert "id" in product, "id not in product"
         assert "name" in product, "name not in product"
-        return product
+        print(f"Found {len(data['results'])} products")
     
-    def test_add_to_cart(self):
+    def test_add_to_cart(self, auth_token):
         """Test adding item to cart"""
         # First get a product
         search_response = requests.get(f"{BASE_URL}/api/products/search", params={
             "q": "",
             "limit": 1
-        })
+        }, headers={"Authorization": f"Bearer {auth_token}"})
         
         assert search_response.status_code == 200
         products = search_response.json().get("results", [])
@@ -204,23 +204,23 @@ class TestCatalogAndCart:
             "is_service": False
         }
         
-        response = requests.post(f"{BASE_URL}/api/cart/add", json=cart_item)
+        response = requests.post(f"{BASE_URL}/api/cart/add", json=cart_item, 
+                                headers={"Authorization": f"Bearer {auth_token}"})
         
         assert response.status_code == 200, f"Add to cart failed: {response.text}"
         data = response.json()
         assert data.get("success") == True, "Add to cart not successful"
-        
-        return data
+        print(f"Added {product['name'][:30]}... to cart")
     
-    def test_get_cart(self):
+    def test_get_cart(self, auth_token):
         """Test getting cart contents"""
-        response = requests.get(f"{BASE_URL}/api/cart")
+        response = requests.get(f"{BASE_URL}/api/cart", 
+                               headers={"Authorization": f"Bearer {auth_token}"})
         
         assert response.status_code == 200, f"Get cart failed: {response.text}"
         data = response.json()
         assert "items" in data, "items not in response"
-        
-        return data
+        print(f"Cart has {len(data['items'])} items")
     
     def test_punchout_systems(self):
         """Test getting punchout systems list"""
