@@ -119,8 +119,28 @@ const UploadQuotationPage = () => {
       });
       
       toast.success(`${response.data.items_added} items added to cart!`);
+      // Navigate to catalog page with cart open
+      navigate("/catalog?openCart=true");
     } catch (error) {
       toast.error("Failed to add items to cart");
+    }
+  };
+
+  const handleEngageTacticalBuyers = async () => {
+    setEngagingBuyers(true);
+    try {
+      const response = await axios.post(`${API}/procurement/quotation/${analysisResult.quotation_id}/engage-tactical-buyers`, {}, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      
+      if (response.data.success) {
+        setBuyersEngaged(true);
+        toast.success("Infosys Tactical Buying Team has been notified!");
+      }
+    } catch (error) {
+      toast.error("Failed to engage tactical buyers");
+    } finally {
+      setEngagingBuyers(false);
     }
   };
 
