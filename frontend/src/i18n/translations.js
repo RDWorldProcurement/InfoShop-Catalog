@@ -556,25 +556,80 @@ export const translations = {
       supplierIdentification: "Identificazione fornitori",
       rfqManagement: "Gestione RFQ",
       expertNegotiation: "Negoziazione esperta",
+      // Navigation
+      navFeatures: "Funzionalità",
+      navHowItWorks: "Come Funziona",
+      navPaymentOptions: "Opzioni di Pagamento",
+      // Card features
+      multiBrandComparison: "Confronto multi-marca",
+      realTimeInventory: "Inventario in tempo reale",
+      punchOutToERP: "PunchOut a ERP",
+      // Stats section
+      platformStats: {
+        annualSpend: "Spesa Annuale Gestita",
+        enterpriseClients: "Clienti Enterprise",
+        averageSavings: "Risparmi Medi",
+        languagesSupported: "Lingue Supportate"
+      },
       stats: {
         products: "Prodotti Industriali",
         services: "Servizi Disponibili",
         categories: "Categorie MRO",
         brands: "Marchi Globali"
       },
+      // AI Features section
+      aiPowered: "Alimentato dall'IA",
+      aiProcurementIntelligence: "Intelligenza di Approvvigionamento Alimentata dall'IA",
+      aiProcurementDesc: "Sfrutta la tecnologia IA all'avanguardia combinata con l'esperienza di approvvigionamento di Infosys",
+      aiDocumentAnalysis: "Analisi Documenti IA",
+      aiDocumentAnalysisDesc: "Estrai e valida automaticamente i dati dai preventivi in più formati e lingue",
+      priceBenchmarkingTitle: "Benchmarking Prezzi",
+      priceBenchmarkingDesc: "Confronta i prezzi quotati con i dati di mercato e gli acquisti storici per prodotti e servizi",
+      taxIntelligence: "Intelligenza Fiscale",
+      taxIntelligenceDesc: "Verifica automaticamente i calcoli fiscali e garantisci la conformità alle normative locali",
+      tacticalSourcing: "Approvvigionamento Tattico",
+      tacticalSourcingDesc: "Negoziazione esperta e gestione fornitori da parte degli specialisti Infosys",
+      // Multi-language support
+      multiLanguageSupport: "Supporto Documenti Multilingue",
+      multiLanguageSupportDesc: "La nostra IA elabora preventivi in 8 lingue con precisione eccezionale",
+      // How it works
+      howItWorks: "Come Funziona OMNISupply.io",
+      howItWorksDesc: "Semplici passi per trasformare il tuo approvvigionamento",
+      step1Title: "Sfoglia o Carica",
+      step1Desc: "Cerca nel nostro catalogo di 30M+ prodotti o carica il tuo preventivo esistente",
+      step2Title: "Analisi IA",
+      step2Desc: "La nostra IA estrae dati, confronta prezzi e identifica opportunità di risparmio",
+      step3Title: "Supporto Esperto",
+      step3Desc: "Coinvolgi il nostro Buying Desk per negoziazione e supporto completo",
+      step4Title: "Trasferimento Senza Soluzione di Continuità",
+      step4Desc: "Trasferisci gli acquisti approvati direttamente al tuo ERP tramite integrazione PunchOut",
+      // Payment options
+      flexiblePaymentOptions: "Opzioni di Pagamento Flessibili",
+      flexiblePaymentOptionsDesc: "Scegli il modello di pagamento più adatto alla tua organizzazione",
+      oneVendorModel: "Modello Fornitore Unico",
+      paymentProcessingPartner: "Partner di Elaborazione Pagamenti",
+      directPayment: "Pagamento Diretto",
+      youPaySupplierDirectly: "Paghi il fornitore direttamente dopo l'approvazione",
+      // ERP Integration
+      erpIntegration: "Integrazione ERP Senza Soluzione di Continuità",
+      erpIntegrationDesc: "Trasferisci gli acquisti approvati direttamente al tuo sistema di approvvigionamento",
+      // CTA
       cta: "Inizia ad Esplorare",
       learnMore: "Guarda la Demo",
+      readyToTransform: "Pronto a Trasformare il Tuo Approvvigionamento?",
+      readyToTransformDesc: "Unisciti alle aziende leader che si affidano a Infosys per la loro trasformazione degli acquisti. Inizia a risparmiare oggi con l'intelligenza alimentata dall'IA.",
+      contactSales: "Contatta le Vendite",
+      signIn: "Accedi",
+      // Footer
+      privacyPolicy: "Informativa sulla Privacy",
+      termsOfService: "Termini di Servizio",
+      contactUs: "Contattaci",
+      allRightsReserved: "Tutti i diritti riservati.",
       trustedBrands: "Prodotti affidabili dai principali produttori",
       servicesTitle: "100K+ Servizi a Tariffa Fissa",
       servicesSubtitle: "Servizi professionali da partner Infosys verificati",
       integrationsTitle: "Integrazioni ERP Senza Soluzione di Continuità",
-      integrationsSubtitle: "PunchOut abilitato per tutte le principali piattaforme",
-      howItWorks: "Come Funziona OMNISupply.io",
-      erpIntegration: "Integrazione ERP Senza Soluzione di Continuità",
-      erpIntegrationDesc: "Trasferisci gli acquisti approvati direttamente al tuo sistema di approvvigionamento",
-      readyToTransform: "Pronto a Trasformare il Tuo Approvvigionamento?",
-      readyToTransformDesc: "Unisciti alle aziende leader che si affidano a Infosys per la loro trasformazione degli acquisti. Inizia a risparmiare oggi con l'intelligenza alimentata dall'IA.",
-      signIn: "Accedi"
+      integrationsSubtitle: "PunchOut abilitato per tutte le principali piattaforme"
     },
     catalog: {
       searchPlaceholder: "Cerca prodotti per nome, SKU o marca...",
