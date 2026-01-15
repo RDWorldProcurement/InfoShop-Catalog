@@ -405,7 +405,7 @@ const LandingPage = () => {
                   <stat.icon className="w-6 h-6 text-white" />
                 </div>
                 <p className="text-3xl md:text-4xl font-bold text-white mb-1" style={{ fontFamily: 'Manrope' }}>{stat.value}</p>
-                <p className="text-white/80 text-sm">{stat.label}</p>
+                <p className="text-white/80 text-sm">{t.landing.platformStats[stat.labelKey]}</p>
               </div>
             ))}
           </div>
@@ -416,12 +416,12 @@ const LandingPage = () => {
       <section id="features" className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <Badge className="mb-4 bg-purple-100 text-purple-700 border-purple-200">AI-Powered</Badge>
+            <Badge className="mb-4 bg-purple-100 text-purple-700 border-purple-200">{t.landing.aiPowered}</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4" style={{ fontFamily: 'Manrope' }}>
-              AI-Powered Procurement Intelligence
+              {t.landing.aiProcurementIntelligence}
             </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Leverage cutting-edge AI technology combined with Infosys procurement expertise
+              {t.landing.aiProcurementDesc}
             </p>
           </div>
 
@@ -431,7 +431,7 @@ const LandingPage = () => {
                 <div className="h-40 overflow-hidden">
                   <img 
                     src={feature.image} 
-                    alt={feature.title}
+                    alt={t.landing[feature.titleKey]}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -440,9 +440,9 @@ const LandingPage = () => {
                     <div className="w-10 h-10 bg-[#007CC3]/10 rounded-lg flex items-center justify-center">
                       <feature.icon className="w-5 h-5 text-[#007CC3]" />
                     </div>
-                    <h3 className="font-bold text-slate-900">{feature.title}</h3>
+                    <h3 className="font-bold text-slate-900">{t.landing[feature.titleKey]}</h3>
                   </div>
-                  <p className="text-sm text-slate-600">{feature.description}</p>
+                  <p className="text-sm text-slate-600">{t.landing[feature.descKey]}</p>
                 </CardContent>
               </Card>
             ))}
@@ -455,10 +455,10 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-8">
             <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
-              Multi-Language Document Support
+              {t.landing.multiLanguageSupport}
             </h3>
             <p className="text-slate-600">
-              Our AI processes quotations in 8 languages with exceptional accuracy
+              {t.landing.multiLanguageSupportDesc}
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
@@ -479,12 +479,12 @@ const LandingPage = () => {
       <section id="how-it-works" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <Badge className="mb-4 bg-green-100 text-green-700 border-green-200">Simple Process</Badge>
+            <Badge className="mb-4 bg-green-100 text-green-700 border-green-200">{t.landing.howItWorks}</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4" style={{ fontFamily: 'Manrope' }}>
-              How It Works
+              {t.landing.howItWorks}
             </h2>
             <p className="text-lg text-slate-600">
-              Simple, intelligent, and efficient procurement process
+              {t.landing.howItWorksDesc}
             </p>
           </div>
 
@@ -500,8 +500,8 @@ const LandingPage = () => {
                 <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <step.icon className="w-6 h-6 text-[#007CC3]" />
                 </div>
-                <h3 className="font-bold text-slate-900 mb-2">{step.title}</h3>
-                <p className="text-sm text-slate-600">{step.desc}</p>
+                <h3 className="font-bold text-slate-900 mb-2">{t.landing[step.titleKey]}</h3>
+                <p className="text-sm text-slate-600">{t.landing[step.descKey]}</p>
               </div>
             ))}
           </div>
