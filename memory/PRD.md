@@ -1,122 +1,140 @@
 # OMNISupply.io - Product Requirements Document
 
 ## Original Problem Statement
-Build an enterprise-grade e-commerce platform called OMNISupply.io for Infosys Limited customers, offering 30M+ Industrial MRO Products, OEM Spare Parts, and 100K+ Professional Services with Infosys Preferred Pricing.
+Build an enterprise-grade unified procurement platform called OMNISupply.io for Infosys Limited customers, combining:
+1. **Product & Service Catalogs** - 30M+ Industrial MRO Products and 100K+ Professional Services
+2. **AI-Powered Quotation Analysis** - Upload quotations for AI extraction, price benchmarking, and tax verification
+3. **End-to-End Sourcing Support** - Full procurement services handled by Infosys specialists
 
 ## What's Been Implemented
 
-### ✅ Phase 10 - Category Icons & Product Comparison (January 11, 2026 - COMPLETED)
-- **Category Icons in Dropdown**:
-  - 32 unique icons mapped to product/service categories
-  - Icons include: Cog (Bearings), Lightbulb (Electrical), Wrench (Fasteners), Hammer (Hand Tools), Zap (Power Tools), Shield (Safety), Flask (Laboratory), Filter (Filtration), Printer (Industrial Coding), etc.
-  - Brand color dots in brand dropdown
-- **Product Comparison Feature**:
-  - Compare up to 4 products side-by-side
-  - Compare button on each product card (purple icon)
-  - "Compare (N)" button appears when products selected
-  - Comparison table includes: Brand, Price, Rating, Availability, Lead Time, Category, UNSPSC Code, SKU, and dynamic specifications
-  - Add to Cart directly from comparison modal
-  - Remove individual products or clear all
+### ✅ Phase 11 - Unified Platform Merge (January 15, 2026 - COMPLETED)
+**Landing Page Redesign:**
+- New hero section with 3 procurement options (Browse Catalog, Upload Quotation, Sourcing Support)
+- Stats bar: $2B+ Annual Spend, 500+ Clients, 35% Savings, 8 Languages
+- AI-Powered Procurement Intelligence section (4 feature cards)
+- Multi-Language Document Support banner (8 languages)
+- How It Works process (4 steps)
+- Flexible Payment Options (Infosys Limited, ProPay, Customer Direct)
+- ERP Integrations section (Coupa, SAP Ariba, SAP ERP, Ivalua, Oracle)
 
-### ✅ Phase 9 - Watch Demo Feature (January 11, 2026 - COMPLETED)
-- **Interactive Demo Walkthrough Modal**:
-  - 6-slide carousel with Previous/Next navigation
-  - Slide indicators for direct navigation
-  - "Get Started" CTA on final slide
-- **Demo Slides Content**:
-  1. Welcome to OMNISupply.io - Platform overview
-  2. Getting Started - 3-step onboarding process
-  3. Smart eCatalog - Search & filter features
-  4. Flexible Ordering - 4 ordering methods
-  5. InfoCoins Rewards - Reward categories
-  6. Enterprise Integration - ERP connectivity (Coupa, SAP, Oracle)
+**Upload Quotation Feature (NEW):**
+- Drag & drop file upload (PDF, Images, Excel, Word)
+- Supplier info capture (name, email)
+- 8 language support for document processing
+- AI-powered analysis results:
+  - Data extraction with confidence score
+  - Line item parsing with UNSPSC codes
+  - Price benchmarking vs market average
+  - Tax verification with Avalara status
+  - Flags for above-market pricing
+  - Recommendations for negotiation
+- Actions: Add to Cart, Request Negotiation Support
 
-### ✅ Phase 8 - UI Polish & New Vendor Products (January 11, 2026 - COMPLETED)
-- **Login Page Enhancements**:
-  - Prominent Infosys BPM logo in glassy card (bg-white/10 backdrop-blur-sm)
-  - Admin Portal Access section with credentials (admin@omnisupply.io / admin123)
-- **Catalog Page UI Fixes**:
-  - "Add to Cart" button: Full-width, Amazon orange (#FF9900), stacked layout
-  - "Check Stock" button: Below Add to Cart as outlined button
-  - "Submit RFQ" button: Amazon orange with "Can't find a product or service?" helper text
-- **New Vendor Products (12 total)**:
-  - **Donaldson (4 products)**: PowerCore Air Filter, Hydraulic Filter Assembly, Torit Dust Collector, Fuel Filter Kit
-  - **Avantor (4 products)**: J.T.Baker Reagent Chemicals Kit, VWR Borosilicate Glassware Set, Laboratory PPE Safety Kit, Chromatography Column Kit
-  - **Markem-Imaje (4 products)**: 9450 Continuous Inkjet Printer, SmartLase C350 Laser Coder, 2200 Print & Apply Labeler, 5800 High-Resolution Inkjet
-- **New Categories**: Filtration (UNSPSC: 40161500), Industrial Coding (UNSPSC: 44100000)
-- **New Brands**: Donaldson (#003B73), Avantor (#6D2077), Markem-Imaje (#E4002B)
-- **All images hosted on Emergent CDN** (static.prod-images.emergentagent.com)
+**End-to-End Sourcing Support (NEW):**
+- Request form: Title, Category, Description, Tech Specs
+- Budget & Quantity fields with currency selection
+- Delivery location and required-by date
+- Preferred suppliers input
+- Payment model selection (3 options)
+- Urgency levels: Standard (5-7 days), Urgent (2-3 days), Critical (24-48 hrs)
+- Request history with status tracking
+- Assigned specialist display
 
-### ✅ Phase 7 - Emergent LLM Deep Language Translation (COMPLETED)
-- **Real-time Translation**: Product/service names, descriptions, and specifications translated via Emergent LLM (GPT-4o-mini)
-- **Supported Languages**: English, French, German, Italian, Dutch
-- **Translation Caching**: Translations cached in MongoDB `translations_cache` collection
-- **Frontend Integration**: Language selector in sidebar triggers API calls with `lang` parameter
+**Backend APIs (NEW):**
+- POST /api/procurement/quotation/upload - File upload with AI analysis
+- GET /api/procurement/quotation/history - User's quotation history
+- GET /api/procurement/quotation/{id} - Quotation details
+- POST /api/procurement/quotation/{id}/escalate - Request negotiation
+- POST /api/procurement/quotation/{id}/add-to-cart - Add items to cart
+- POST /api/procurement/sourcing/request - Submit sourcing request
+- GET /api/procurement/sourcing/history - User's sourcing history
+- GET /api/procurement/sourcing/{id} - Sourcing request details
+- POST /api/procurement/sourcing/{id}/cancel - Cancel request
+- GET /api/user/profile - User profile with activity summary
+- GET /api/procurement/dashboard - Procurement dashboard stats
 
-### ✅ Phase 6 - Admin Portal & Updated Stats (COMPLETED)
-- **Updated Stats**: 78 Categories, 511+ Global Brands
-- **Admin Portal** (`/admin`): Complete vendor catalog management system
-  - Admin login (admin@omnisupply.io / admin123 OR admin / admin123)
-  - 8 Delivery Partners: Grainger, Motion Industries, Fastenal, BDI, MSC Industrial, McMaster-Carr, Zoro, Uline
-  - CSV/Excel file upload for Products and Services
-  - Catalog summary by delivery partner
-- **InfoCoin Rewards Images**: 6 rewards with Emergent CDN images
+**MongoDB Collections (NEW):**
+- quotation_uploads - Stores uploaded quotations and AI analysis
+- sourcing_requests - Stores E2E sourcing requests
+- activity_logs - User activity tracking
 
-### ✅ Phase 5 - Expanded Catalog & Order Management (COMPLETED)
-- **Extended Product Catalog**: 40+ IT products, MRO products, and new vendor products
-- **Extended Services Catalog**: 15+ services across multiple categories
-- **5 Order Statuses**: Pending, Confirmed, Processing, Shipped, Delivered
-- **Order Status Timeline UI**: 5-step visual progress tracker
+**Updated Sidebar:**
+- Organized sections: Catalog, Procurement, Orders, Rewards
+- "Upload Quotation" with AI badge
+- "Sourcing Support" with E2E badge
+
+### Previous Phases (Completed)
+- Phase 10: Category Icons & Product Comparison
+- Phase 9: Watch Demo Feature
+- Phase 8: UI Polish & New Vendor Products (Donaldson, Avantor, Markem-Imaje)
+- Phase 7: Deep Language Translation (Emergent LLM)
+- Phase 6: Admin Portal & Updated Stats
+- Phase 5: Extended Catalog & 5-Stage Order Tracking
 
 ## Technology Stack
-- **Backend**: FastAPI, MongoDB, JWT, Emergent LLM (GPT-4o-mini for translations)
+- **Backend**: FastAPI, MongoDB (motor), JWT, Emergent LLM
 - **Frontend**: React, Tailwind CSS, Shadcn UI
-- **Images**: Emergent CDN (static.prod-images.emergentagent.com)
-- **Branding**: Infosys BPM colors (#007CC3, #FF6B00, #FF9900)
-- **i18n**: Real-time LLM translation with MongoDB caching
+- **Images**: Emergent CDN
+- **Branding**: Infosys BPM (#007CC3, #FF6B00, #FF9900)
+- **File Processing**: Simulated AI extraction (production-ready structure)
+- **i18n**: Real-time LLM translation + 8-language document support
 
 ## Test Credentials
-- **Demo User**: demo@infosys.com / demo123 (select country: USA, France, Germany, Italy, Netherlands)
-- **Admin User**: admin@omnisupply.io / admin123 OR admin / admin123
+- **Demo User**: demo@infosys.com / demo123
+- **Admin User**: admin@omnisupply.io / admin123
 
-## Test Reports
-- `/app/test_reports/iteration_8.json` - 10 tests passed (100%) - UI polish & new vendor products
-- `/app/test_reports/iteration_7.json` - 12 tests passed (100%) - Translation feature
-- `/app/test_reports/iteration_6.json` - 17 tests passed (100%) - Admin Portal
-- `/app/test_reports/iteration_5.json` - 45 tests passed (100%) - Expanded catalog
+## Key API Endpoints
+### Authentication
+- POST /api/auth/login - User authentication
+
+### Catalog
+- GET /api/products/search - Product search with translation
+- GET /api/services/search - Service search with translation
+- GET /api/products/categories - 32 categories
+- GET /api/products/brands - 33 brands
+
+### Procurement (NEW)
+- POST /api/procurement/quotation/upload - Upload & analyze quotation
+- GET /api/procurement/quotation/history - Quotation history
+- POST /api/procurement/sourcing/request - Submit sourcing request
+- GET /api/procurement/sourcing/history - Sourcing history
+- GET /api/procurement/dashboard - Dashboard stats
+
+### Orders & Cart
+- POST /api/cart/add - Add to cart
+- GET /api/orders - Order history
+- POST /api/rfq/submit - Submit RFQ
+
+### Admin
+- POST /api/admin/login - Admin authentication
+- POST /api/admin/upload-catalog - Vendor catalog upload
 
 ## Prioritized Backlog
 
 ### P1 (High Priority)
+- [ ] Real AI/ML document extraction integration
 - [ ] Schedule Repeat Orders backend logic
 - [ ] Bulk Submission via Excel upload
-- [ ] InfoCoins redemption with shipping address form
 
 ### P2 (Medium Priority)
-- [ ] Enhance InfoConnect chatbot with LLM capabilities
-- [ ] Real vendor API integration for catalog sync (Grainger API)
-- [ ] Advanced search filters (price range slider)
+- [ ] Enhance InfoConnect chatbot with LLM
+- [ ] Real vendor API integration (Grainger)
+- [ ] Email notifications for sourcing updates
 
 ### P3 (Low Priority)
-- [ ] Advanced search filters (price range, availability)
-- [ ] Product comparison feature
-- [ ] Wishlist functionality
-- [ ] Dashboard with analytics
+- [ ] Advanced analytics dashboard
+- [ ] Supplier rating system
+- [ ] Audit trail export
 
 ## MOCKED Features
-- **PunchOut Transfer**: Simulates transfer to ERP systems (Coupa, SAP Ariba, etc.)
-- **Schedule Repeat Orders**: UI placeholder exists, backend not connected
-- **Bulk Submission**: UI placeholder exists, Excel parsing not implemented
-- **InfoConnect Chatbot**: UI placeholder, not connected to LLM
+- **AI Document Extraction**: Generates realistic but simulated extraction results
+- **Price Benchmarking**: Simulated market price comparison
+- **Tax Verification**: Simulated Avalara integration
+- **Sourcing Specialist Assignment**: Auto-assigned for demo
+- **PunchOut Transfer**: Simulates ERP transfer
 
-## Key API Endpoints
-- `POST /api/auth/login` - User authentication
-- `POST /api/admin/login` - Admin authentication
-- `GET /api/products/search?q=&category=&brand=&lang=` - Product search with translation
-- `GET /api/services/search?q=&category=&lang=` - Service search with translation
-- `GET /api/products/categories` - Category list (32 categories)
-- `GET /api/products/brands` - Brand list (33 brands)
-- `POST /api/cart/add` - Add item to cart
-- `GET /api/orders` - Order history
-- `POST /api/rfq/submit` - Submit RFQ
-- `POST /api/admin/upload-catalog` - Upload vendor catalog (admin)
+## 3rd Party Integrations
+- **Emergent LLM** - Deep language translation
+- **Avalara** (Mocked) - Tax verification
+- **ERP Systems** (Mocked) - PunchOut support for Coupa, SAP Ariba, etc.
