@@ -390,7 +390,7 @@ export const translations = {
       oneOffPurchases: "Einmalkäufe",
       oneOffPurchasesDesc: "Laden Sie Ihr Angebot für KI-gestützte Analyse hoch",
       aiIntelligentBuying: "Infosys KI-gestützter Intelligenter Einkauf",
-      managedServices: "Managed Services",
+      managedServices: "Verwaltete Dienste",
       managedServicesDesc: "Lassen Sie unseren Einkaufsservice die End-to-End-Beschaffung für Sie übernehmen",
       requestBuyingDesk: "Einkaufsservice Anfragen",
       uploadQuotation: "Angebot Hochladen",
