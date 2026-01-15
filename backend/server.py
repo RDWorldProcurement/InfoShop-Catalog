@@ -3121,6 +3121,366 @@ async def clear_partner_catalog(partner_id: str, catalog_type: str = "all"):
     }
 
 # ============================================
+# ADMIN BUYING DESK MANAGEMENT ENDPOINTS
+# ============================================
+
+# Pydantic models for admin operations
+class AdminStatusUpdate(BaseModel):
+    status: str
+    notes: Optional[str] = None
+
+class AdminAssignSpecialist(BaseModel):
+    specialist_name: str
+    specialist_email: str
+
+class AdminAddNote(BaseModel):
+    note: str
+    author: str = "Admin"
+
+# Specialist roster for assignment
+BUYING_DESK_SPECIALISTS = [
+    {"name": "Rajesh Kumar", "email": "rajesh.kumar@infosys.com", "specialty": "IT & Electronics"},
+    {"name": "Priya Sharma", "email": "priya.sharma@infosys.com", "specialty": "MRO & Industrial"},
+    {"name": "Amit Patel", "email": "amit.patel@infosys.com", "specialty": "Office Supplies"},
+    {"name": "Sneha Reddy", "email": "sneha.reddy@infosys.com", "specialty": "Professional Services"},
+    {"name": "Vikram Singh", "email": "vikram.singh@infosys.com", "specialty": "Facilities & Maintenance"},
+]
+
+@api_router.get("/admin/buying-desk/requests")
+async def admin_get_all_buying_desk_requests(
+    status: Optional[str] = None,
+    page: int = 1,
+    limit: int = 50
+):
+    """Get all tactical buying desk requests (admin only)"""
+    query = {}
+    if status:
+        query["current_stage"] = status
+    
+    total = await db.buying_desk_requests.count_documents(query)
+    requests = await db.buying_desk_requests.find(
+        query, {"_id": 0}
+    ).sort("submitted_at", -1).skip((page-1)*limit).limit(limit).to_list(limit)
+    
+    # Get stats
+    stats = {
+        "total": total,
+        "submitted": await db.buying_desk_requests.count_documents({"current_stage": "submitted"}),
+        "supplier_identification": await db.buying_desk_requests.count_documents({"current_stage": "supplier_identification"}),
+        "rfq_sent": await db.buying_desk_requests.count_documents({"current_stage": "rfq_sent"}),
+        "quotes_received": await db.buying_desk_requests.count_documents({"current_stage": "quotes_received"}),
+        "negotiating": await db.buying_desk_requests.count_documents({"current_stage": "negotiating"}),
+        "po_ready": await db.buying_desk_requests.count_documents({"current_stage": "po_ready"})
+    }
+    
+    return {
+        "requests": requests,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "stats": stats
+    }
+
+@api_router.get("/admin/buying-desk/request/{request_id}")
+async def admin_get_buying_desk_request(request_id: str):
+    """Get details of a specific buying desk request (admin only)"""
+    request = await db.buying_desk_requests.find_one(
+        {"request_id": request_id}, {"_id": 0}
+    )
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    return request
+
+@api_router.put("/admin/buying-desk/request/{request_id}/status")
+async def admin_update_buying_desk_status(request_id: str, update: AdminStatusUpdate):
+    """Update the status/stage of a buying desk request (admin only)"""
+    request = await db.buying_desk_requests.find_one({"request_id": request_id})
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    # Valid stages
+    valid_stages = ["submitted", "supplier_identification", "rfq_sent", "quotes_received", "negotiating", "po_ready"]
+    if update.status not in valid_stages:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_stages}")
+    
+    # Update stages array
+    stages = request.get("stages", [])
+    stage_index = valid_stages.index(update.status)
+    
+    for i, stage in enumerate(stages):
+        if i <= stage_index:
+            stage["completed"] = True
+            if not stage.get("completed_at"):
+                stage["completed_at"] = datetime.now(timezone.utc).isoformat()
+        else:
+            stage["completed"] = False
+            stage["completed_at"] = None
+    
+    # Add note if provided
+    notes = request.get("notes", [])
+    if update.notes:
+        notes.append({
+            "text": update.notes,
+            "author": "Admin",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "action": f"Status updated to {update.status}"
+        })
+    
+    await db.buying_desk_requests.update_one(
+        {"request_id": request_id},
+        {"$set": {
+            "current_stage": update.status,
+            "status": update.status,
+            "stages": stages,
+            "notes": notes,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"success": True, "message": f"Status updated to {update.status}"}
+
+@api_router.put("/admin/buying-desk/request/{request_id}/assign")
+async def admin_assign_specialist(request_id: str, assignment: AdminAssignSpecialist):
+    """Assign a specialist to a buying desk request (admin only)"""
+    request = await db.buying_desk_requests.find_one({"request_id": request_id})
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    notes = request.get("notes", [])
+    notes.append({
+        "text": f"Assigned to {assignment.specialist_name} ({assignment.specialist_email})",
+        "author": "Admin",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "action": "Specialist assigned"
+    })
+    
+    await db.buying_desk_requests.update_one(
+        {"request_id": request_id},
+        {"$set": {
+            "assigned_to": assignment.specialist_name,
+            "assigned_specialist": {
+                "name": assignment.specialist_name,
+                "email": assignment.specialist_email
+            },
+            "notes": notes,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"success": True, "message": f"Assigned to {assignment.specialist_name}"}
+
+@api_router.post("/admin/buying-desk/request/{request_id}/note")
+async def admin_add_note(request_id: str, note_data: AdminAddNote):
+    """Add a note to a buying desk request (admin only)"""
+    request = await db.buying_desk_requests.find_one({"request_id": request_id})
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    notes = request.get("notes", [])
+    notes.append({
+        "text": note_data.note,
+        "author": note_data.author,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "action": "Note added"
+    })
+    
+    await db.buying_desk_requests.update_one(
+        {"request_id": request_id},
+        {"$set": {"notes": notes, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"success": True, "message": "Note added"}
+
+@api_router.get("/admin/buying-desk/specialists")
+async def get_specialists():
+    """Get list of available buying desk specialists"""
+    return {"specialists": BUYING_DESK_SPECIALISTS}
+
+# ============================================
+# ADMIN SOURCING REQUESTS MANAGEMENT
+# ============================================
+
+@api_router.get("/admin/sourcing/requests")
+async def admin_get_all_sourcing_requests(
+    status: Optional[str] = None,
+    urgency: Optional[str] = None,
+    page: int = 1,
+    limit: int = 50
+):
+    """Get all sourcing/managed services requests (admin only)"""
+    query = {}
+    if status:
+        query["status"] = status
+    if urgency:
+        query["urgency"] = urgency
+    
+    total = await db.sourcing_requests.count_documents(query)
+    requests = await db.sourcing_requests.find(
+        query, {"_id": 0}
+    ).sort("created_at", -1).skip((page-1)*limit).limit(limit).to_list(limit)
+    
+    # Get stats
+    stats = {
+        "total": total,
+        "submitted": await db.sourcing_requests.count_documents({"status": "SUBMITTED"}),
+        "in_progress": await db.sourcing_requests.count_documents({"status": "IN_PROGRESS"}),
+        "rfq_sent": await db.sourcing_requests.count_documents({"status": "RFQ_SENT"}),
+        "quotes_received": await db.sourcing_requests.count_documents({"status": "QUOTES_RECEIVED"}),
+        "completed": await db.sourcing_requests.count_documents({"status": "COMPLETED"}),
+        "cancelled": await db.sourcing_requests.count_documents({"status": "CANCELLED"}),
+        "urgent": await db.sourcing_requests.count_documents({"urgency": "urgent"}),
+        "critical": await db.sourcing_requests.count_documents({"urgency": "critical"})
+    }
+    
+    return {
+        "requests": requests,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "stats": stats
+    }
+
+@api_router.get("/admin/sourcing/request/{sourcing_id}")
+async def admin_get_sourcing_request(sourcing_id: str):
+    """Get details of a specific sourcing request (admin only)"""
+    request = await db.sourcing_requests.find_one(
+        {"sourcing_id": sourcing_id}, {"_id": 0}
+    )
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    return request
+
+@api_router.put("/admin/sourcing/request/{sourcing_id}/status")
+async def admin_update_sourcing_status(sourcing_id: str, update: AdminStatusUpdate):
+    """Update the status of a sourcing request (admin only)"""
+    request = await db.sourcing_requests.find_one({"sourcing_id": sourcing_id})
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    valid_statuses = ["SUBMITTED", "IN_PROGRESS", "RFQ_SENT", "QUOTES_RECEIVED", "COMPLETED", "CANCELLED"]
+    if update.status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Invalid status. Must be one of: {valid_statuses}")
+    
+    update_data = {
+        "status": update.status,
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Add note if provided
+    if update.notes:
+        notes = request.get("admin_notes", [])
+        notes.append({
+            "text": update.notes,
+            "author": "Admin",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "action": f"Status updated to {update.status}"
+        })
+        update_data["admin_notes"] = notes
+    
+    await db.sourcing_requests.update_one(
+        {"sourcing_id": sourcing_id},
+        {"$set": update_data}
+    )
+    
+    return {"success": True, "message": f"Status updated to {update.status}"}
+
+@api_router.put("/admin/sourcing/request/{sourcing_id}/assign")
+async def admin_assign_sourcing_specialist(sourcing_id: str, assignment: AdminAssignSpecialist):
+    """Assign a specialist to a sourcing request (admin only)"""
+    request = await db.sourcing_requests.find_one({"sourcing_id": sourcing_id})
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    notes = request.get("admin_notes", [])
+    notes.append({
+        "text": f"Assigned to {assignment.specialist_name} ({assignment.specialist_email})",
+        "author": "Admin",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "action": "Specialist assigned"
+    })
+    
+    await db.sourcing_requests.update_one(
+        {"sourcing_id": sourcing_id},
+        {"$set": {
+            "assigned_specialist": {
+                "name": assignment.specialist_name,
+                "email": assignment.specialist_email
+            },
+            "admin_notes": notes,
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    return {"success": True, "message": f"Assigned to {assignment.specialist_name}"}
+
+@api_router.post("/admin/sourcing/request/{sourcing_id}/note")
+async def admin_add_sourcing_note(sourcing_id: str, note_data: AdminAddNote):
+    """Add a note to a sourcing request (admin only)"""
+    request = await db.sourcing_requests.find_one({"sourcing_id": sourcing_id})
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    notes = request.get("admin_notes", [])
+    notes.append({
+        "text": note_data.note,
+        "author": note_data.author,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "action": "Note added"
+    })
+    
+    await db.sourcing_requests.update_one(
+        {"sourcing_id": sourcing_id},
+        {"$set": {"admin_notes": notes, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    return {"success": True, "message": "Note added"}
+
+@api_router.get("/admin/buying-desk/dashboard-stats")
+async def admin_buying_desk_dashboard_stats():
+    """Get comprehensive dashboard statistics for admin"""
+    # Tactical buying stats
+    tactical_total = await db.buying_desk_requests.count_documents({})
+    tactical_pending = await db.buying_desk_requests.count_documents({"current_stage": {"$nin": ["po_ready"]}})
+    tactical_completed = await db.buying_desk_requests.count_documents({"current_stage": "po_ready"})
+    
+    # Sourcing stats
+    sourcing_total = await db.sourcing_requests.count_documents({})
+    sourcing_pending = await db.sourcing_requests.count_documents({"status": {"$nin": ["COMPLETED", "CANCELLED"]}})
+    sourcing_completed = await db.sourcing_requests.count_documents({"status": "COMPLETED"})
+    sourcing_urgent = await db.sourcing_requests.count_documents({"urgency": {"$in": ["urgent", "critical"]}})
+    
+    # Calculate potential value
+    tactical_pipeline = await db.buying_desk_requests.aggregate([
+        {"$group": {"_id": None, "total_value": {"$sum": "$total_amount"}, "total_savings": {"$sum": "$potential_savings"}}}
+    ]).to_list(1)
+    
+    sourcing_pipeline = await db.sourcing_requests.aggregate([
+        {"$group": {"_id": None, "total_value": {"$sum": "$estimated_budget"}}}
+    ]).to_list(1)
+    
+    return {
+        "tactical_buying": {
+            "total": tactical_total,
+            "pending": tactical_pending,
+            "completed": tactical_completed,
+            "total_value": tactical_pipeline[0]["total_value"] if tactical_pipeline else 0,
+            "potential_savings": tactical_pipeline[0]["total_savings"] if tactical_pipeline else 0
+        },
+        "sourcing": {
+            "total": sourcing_total,
+            "pending": sourcing_pending,
+            "completed": sourcing_completed,
+            "urgent_critical": sourcing_urgent,
+            "total_value": sourcing_pipeline[0]["total_value"] if sourcing_pipeline else 0
+        },
+        "combined": {
+            "total_requests": tactical_total + sourcing_total,
+            "pending_requests": tactical_pending + sourcing_pending,
+            "completed_requests": tactical_completed + sourcing_completed
+        }
+    }
+
+# ============================================
 # QUOTATION UPLOAD & AI ANALYSIS ENDPOINTS
 # ============================================
 
