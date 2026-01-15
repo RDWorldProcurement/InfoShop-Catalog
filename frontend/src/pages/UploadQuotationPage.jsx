@@ -201,17 +201,20 @@ const UploadQuotationPage = () => {
                           <p className="text-sm text-slate-500 mb-4">
                             Supports PDF, Images, Excel, and Word documents
                           </p>
-                          <label className="cursor-pointer">
-                            <input
-                              type="file"
-                              className="hidden"
-                              accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.doc,.docx"
-                              onChange={handleFileDrop}
-                            />
-                            <Button variant="outline" as="span">
-                              Browse Files
-                            </Button>
-                          </label>
+                          <input
+                            type="file"
+                            id="quotation-file-input"
+                            className="hidden"
+                            accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.doc,.docx"
+                            onChange={handleFileDrop}
+                          />
+                          <Button 
+                            variant="outline" 
+                            onClick={() => document.getElementById('quotation-file-input').click()}
+                            data-testid="browse-files-btn"
+                          >
+                            Browse Files
+                          </Button>
                         </>
                       )}
                     </div>
