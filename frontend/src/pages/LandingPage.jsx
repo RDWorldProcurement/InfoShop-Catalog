@@ -91,70 +91,70 @@ const DEMO_SLIDES = [
   }
 ];
 
-// Stats data
+// Stats data - labels will be translated dynamically
 const PLATFORM_STATS = [
-  { value: "$2B+", label: "Annual Spend Managed", icon: TrendingUp },
-  { value: "500+", label: "Enterprise Clients", icon: Building2 },
-  { value: "35%", label: "Average Savings", icon: DollarSign },
-  { value: "8", label: "Languages Supported", icon: Languages }
+  { value: "$2B+", labelKey: "annualSpend", icon: TrendingUp },
+  { value: "500+", labelKey: "enterpriseClients", icon: Building2 },
+  { value: "35%", labelKey: "averageSavings", icon: DollarSign },
+  { value: "8", labelKey: "languagesSupported", icon: Languages }
 ];
 
-// AI Features
+// AI Features - titles and descriptions will be translated dynamically
 const AI_FEATURES = [
   {
-    title: "AI Document Analysis",
-    description: "Advanced AI extracts data from quotations in 8 languages with exceptional accuracy",
+    titleKey: "aiDocumentAnalysis",
+    descKey: "aiDocumentAnalysisDesc",
     icon: Brain,
     image: "https://static.prod-images.emergentagent.com/jobs/79f5bbcd-e8f5-438b-a126-c907b5b0d5c1/images/346c9a436d1d66f5e8563a435f94959de02b5c5bf41115e3286cdcecccd3c5f3.png"
   },
   {
-    title: "Price Benchmarking",
-    description: "Deep market research ensures competitive pricing for products and services",
+    titleKey: "priceBenchmarkingTitle",
+    descKey: "priceBenchmarkingDesc",
     icon: Scale,
     image: "https://static.prod-images.emergentagent.com/jobs/79f5bbcd-e8f5-438b-a126-c907b5b0d5c1/images/306c05101cbe4df4c393745673f3a071a7c5f341ca6318db849abe2d96aa3f93.png"
   },
   {
-    title: "Tax Intelligence",
-    description: "Automated tax verification and exemption detection powered by Avalara",
+    titleKey: "taxIntelligence",
+    descKey: "taxIntelligenceDesc",
     icon: Calculator,
     image: "https://static.prod-images.emergentagent.com/jobs/79f5bbcd-e8f5-438b-a126-c907b5b0d5c1/images/5db023814a718c6cca4ec68ea7e3bf6cd7ecd290fe6f51ccacd05a17d5766afa.png"
   },
   {
-    title: "Tactical Sourcing",
-    description: "Expert negotiation and supplier management by Infosys procurement specialists",
+    titleKey: "tacticalSourcing",
+    descKey: "tacticalSourcingDesc",
     icon: Handshake,
     image: "https://static.prod-images.emergentagent.com/jobs/79f5bbcd-e8f5-438b-a126-c907b5b0d5c1/images/7286e691789ed3cbf5871823fda4bb78123907ed075f04cb2d047cedad39f046.png"
   }
 ];
 
-// How it works steps
+// How it works steps - titles and descriptions will be translated dynamically
 const PROCESS_STEPS = [
-  { step: "1", title: "Upload or Request", desc: "Upload your quotation or submit a sourcing request", icon: Upload },
-  { step: "2", title: "AI Analysis", desc: "AI extracts data, verifies tax, benchmarks prices", icon: Brain },
-  { step: "3", title: "Review & Negotiate", desc: "Review flags, request negotiations if needed", icon: Flag },
-  { step: "4", title: "Add to Cart", desc: "Approve and transfer to your ERP system", icon: ShoppingCart }
+  { step: "1", titleKey: "step1Title", descKey: "step1Desc", icon: Upload },
+  { step: "2", titleKey: "step2Title", descKey: "step2Desc", icon: Brain },
+  { step: "3", titleKey: "step3Title", descKey: "step3Desc", icon: Flag },
+  { step: "4", titleKey: "step4Title", descKey: "step4Desc", icon: ShoppingCart }
 ];
 
-// Payment models
+// Payment models - will be translated dynamically using keys
 const PAYMENT_MODELS = [
   {
-    name: "Infosys Limited",
-    subtitle: "One Vendor Model",
-    description: "Customer issues PO to Infosys, Infosys issues PO to Supplier. Simplified vendor management and consolidated invoicing.",
+    nameKey: "infosysLimited",
+    subtitleKey: "oneVendorModel",
+    descKey: "infosysLimitedDesc",
     logo: "https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png",
     color: "#007CC3"
   },
   {
-    name: "ProPay World Wide Inc.",
-    subtitle: "Payment Processing Partner",
-    description: "Customer issues PO to ProPay, ProPay issues PO to Supplier. Alternative payment processing with global coverage.",
+    nameKey: "propayWorldwide",
+    subtitleKey: "paymentProcessingPartner",
+    descKey: "propayDesc",
     logo: "https://customer-assets.emergentagent.com/job_procure-ai-fusion/artifacts/tst2i955_ProPay.ai%20Logo%202.svg",
     color: "#10B981"
   },
   {
-    name: "Customer Direct Payment",
-    subtitle: "Infosys Sourcing, You Pay Directly",
-    description: "Infosys provides full sourcing, negotiation, and AI-powered intelligence. Customer pays Supplier directly after approval.",
+    nameKey: "customerDirectPayment",
+    subtitleKey: "directPayment",
+    descKey: "customerDirectDesc",
     logo: null,
     color: "#F59E0B"
   }
