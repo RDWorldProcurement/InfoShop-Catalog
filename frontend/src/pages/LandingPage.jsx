@@ -379,7 +379,7 @@ const LandingPage = () => {
                     <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.rfqManagement}
                   </li>
                   <li className="flex items-center gap-2 text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Expert negotiation
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.expertNegotiation}
                   </li>
                 </ul>
                 <Button 
@@ -387,7 +387,7 @@ const LandingPage = () => {
                   onClick={() => navigate("/login?redirect=sourcing-support")}
                   data-testid="sourcing-support-btn"
                 >
-                  <Handshake className="w-4 h-4 mr-2" /> Request Buying Desk
+                  <Handshake className="w-4 h-4 mr-2" /> {t.landing.requestBuyingDesk}
                 </Button>
               </CardContent>
             </Card>
