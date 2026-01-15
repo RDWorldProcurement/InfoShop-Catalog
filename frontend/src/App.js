@@ -177,6 +177,7 @@ function App() {
         </AuthProvider>
       </LanguageProvider>
     </BrowserRouter>
+  </ErrorBoundary>
   );
 }
 
