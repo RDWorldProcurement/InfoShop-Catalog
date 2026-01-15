@@ -14,6 +14,7 @@ import InfoCoinsPage from "./pages/InfoCoinsPage";
 import AdminPortalPage from "./pages/AdminPortalPage";
 import UploadQuotationPage from "./pages/UploadQuotationPage";
 import SourcingSupportPage from "./pages/SourcingSupportPage";
+import BuyingDeskDashboardPage from "./pages/BuyingDeskDashboardPage";
 
 // Components
 import ChatBot from "./components/ChatBot";
