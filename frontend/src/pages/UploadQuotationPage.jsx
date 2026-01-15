@@ -184,7 +184,7 @@ const UploadQuotationPage = () => {
                 <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'Manrope' }}>
                   One-Off Purchases
                 </h1>
-                <p className="text-slate-600">Upload quotation for AI-powered analysis with price benchmarking</p>
+                <p className="text-slate-600">Upload quotation for AI-powered analysis with price benchmarking for products and services</p>
               </div>
             </div>
           </div>
