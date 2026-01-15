@@ -180,8 +180,8 @@ const INTEGRATIONS = [
   { name: "Oracle", color: "#F80000", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/68bc01c43c6ce5e440fa07f6f3139ab989a0401f81edca69eb86dafb4a1b0870.png" },
 ];
 
-// OMNISupply.io Logo
-const OMNISUPPLY_LOGO = "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/902ecaee78bc1951aaa083101af66d6ddeca4586e965574d7720cd3fa6f03138.png";
+// OMNISupply.io Logo (Icon Only - No Text)
+const OMNISUPPLY_LOGO = "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/5544120fa58b5db3f9b4ad8c6dafa2c32057f9ac5ad4be02779d98746bd4131d.png";
 
 const LandingPage = () => {
   const navigate = useNavigate();
