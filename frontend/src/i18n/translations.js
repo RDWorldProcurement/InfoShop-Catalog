@@ -190,7 +190,7 @@ export const translations = {
     landing: {
       heroTitle: "Approvisionnement Intelligent",
       heroTitleHighlight: "Propulsé par l'IA",
-      heroSubtitle: "Réalisez 15-30% d'économies avec l'intelligence d'approvisionnement pilotée par l'IA. De l'analyse instantanée des devis à l'approvisionnement géré par des experts, nous transformons la façon dont les entreprises achètent — décisions plus rapides, négociations plus intelligentes, intégration ERP transparente. Une plateforme. Des possibilités illimitées.",
+      heroSubtitle: "Réalisez 15-30% d'économies avec l'intelligence d'approvisionnement pilotée par l'IA. De l'analyse instantanée des devis à l'approvisionnement géré par des experts — décisions plus rapides, négociations plus intelligentes, intégration ERP transparente. Une plateforme. Des possibilités illimitées.",
       poweredBy: "Propulsé par Infosys BPM",
       watchDemo: "Voir la Démo",
       getStarted: "Commencer",
@@ -210,25 +210,80 @@ export const translations = {
       supplierIdentification: "Identification des fournisseurs",
       rfqManagement: "Gestion des appels d'offres",
       expertNegotiation: "Négociation experte",
+      // Navigation
+      navFeatures: "Fonctionnalités",
+      navHowItWorks: "Comment ça Marche",
+      navPaymentOptions: "Options de Paiement",
+      // Card features
+      multiBrandComparison: "Comparaison multi-marques",
+      realTimeInventory: "Inventaire en temps réel",
+      punchOutToERP: "PunchOut vers ERP",
+      // Stats section
+      platformStats: {
+        annualSpend: "Dépenses Annuelles Gérées",
+        enterpriseClients: "Clients Entreprise",
+        averageSavings: "Économies Moyennes",
+        languagesSupported: "Langues Supportées"
+      },
       stats: {
         products: "Produits Industriels",
         services: "Services Disponibles",
         categories: "Catégories MRO",
         brands: "Marques Mondiales"
       },
+      // AI Features section
+      aiPowered: "Alimenté par l'IA",
+      aiProcurementIntelligence: "Intelligence d'Approvisionnement Alimentée par l'IA",
+      aiProcurementDesc: "Tirez parti de la technologie IA de pointe combinée à l'expertise d'approvisionnement d'Infosys",
+      aiDocumentAnalysis: "Analyse de Documents IA",
+      aiDocumentAnalysisDesc: "Extrayez et validez automatiquement les données des devis dans plusieurs formats et langues",
+      priceBenchmarkingTitle: "Benchmarking des Prix",
+      priceBenchmarkingDesc: "Comparez les prix cotés aux données du marché et aux achats historiques pour les produits et services",
+      taxIntelligence: "Intelligence Fiscale",
+      taxIntelligenceDesc: "Vérifiez automatiquement les calculs fiscaux et assurez la conformité aux réglementations locales",
+      tacticalSourcing: "Approvisionnement Tactique",
+      tacticalSourcingDesc: "Négociation experte et gestion des fournisseurs par les spécialistes d'Infosys",
+      // Multi-language support
+      multiLanguageSupport: "Support Multilingue des Documents",
+      multiLanguageSupportDesc: "Notre IA traite les devis dans 8 langues avec une précision exceptionnelle",
+      // How it works
+      howItWorks: "Comment OMNISupply.io Fonctionne",
+      howItWorksDesc: "Des étapes simples pour transformer votre approvisionnement",
+      step1Title: "Parcourir ou Télécharger",
+      step1Desc: "Recherchez dans notre catalogue de 30M+ produits ou téléchargez votre devis existant",
+      step2Title: "Analyse IA",
+      step2Desc: "Notre IA extrait les données, benchmark les prix et identifie les opportunités d'économies",
+      step3Title: "Support Expert",
+      step3Desc: "Engagez notre Bureau d'Achat pour la négociation et le support d'approvisionnement complet",
+      step4Title: "Transfert Transparent",
+      step4Desc: "Transférez les achats approuvés directement vers votre ERP via l'intégration PunchOut",
+      // Payment options
+      flexiblePaymentOptions: "Options de Paiement Flexibles",
+      flexiblePaymentOptionsDesc: "Choisissez le modèle de paiement qui convient le mieux à votre organisation",
+      oneVendorModel: "Modèle Fournisseur Unique",
+      paymentProcessingPartner: "Partenaire de Traitement des Paiements",
+      directPayment: "Paiement Direct",
+      youPaySupplierDirectly: "Vous payez le fournisseur directement après approbation",
+      // ERP Integration
+      erpIntegration: "Intégration ERP Transparente",
+      erpIntegrationDesc: "Transférez les achats approuvés directement vers votre système d'approvisionnement",
+      // CTA
       cta: "Commencer l'Exploration",
       learnMore: "Voir la Démo",
+      readyToTransform: "Prêt à Transformer Votre Approvisionnement?",
+      readyToTransformDesc: "Rejoignez les entreprises leaders qui font confiance à Infosys pour leur transformation d'approvisionnement. Commencez à économiser dès aujourd'hui avec l'intelligence IA.",
+      contactSales: "Contacter les Ventes",
+      signIn: "Se Connecter",
+      // Footer
+      privacyPolicy: "Politique de Confidentialité",
+      termsOfService: "Conditions d'Utilisation",
+      contactUs: "Nous Contacter",
+      allRightsReserved: "Tous droits réservés.",
       trustedBrands: "Produits de confiance des fabricants leaders",
       servicesTitle: "100K+ Services à Tarifs Fixés",
       servicesSubtitle: "Services professionnels de partenaires Infosys agréés",
       integrationsTitle: "Intégrations ERP Transparentes",
-      integrationsSubtitle: "PunchOut activé pour toutes les principales plateformes",
-      howItWorks: "Comment OMNISupply.io Fonctionne",
-      erpIntegration: "Intégration ERP Transparente",
-      erpIntegrationDesc: "Transférez les achats approuvés directement vers votre système d'approvisionnement",
-      readyToTransform: "Prêt à Transformer Votre Approvisionnement?",
-      readyToTransformDesc: "Rejoignez les entreprises leaders qui font confiance à Infosys pour leur transformation d'approvisionnement. Commencez à économiser dès aujourd'hui avec l'intelligence IA.",
-      signIn: "Se Connecter"
+      integrationsSubtitle: "PunchOut activé pour toutes les principales plateformes"
     },
     catalog: {
       searchPlaceholder: "Rechercher des produits par nom, SKU ou marque...",
