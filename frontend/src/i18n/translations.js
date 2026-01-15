@@ -637,6 +637,15 @@ export const translations = {
       paymentProcessingPartner: "Partner di Elaborazione Pagamenti",
       directPayment: "Pagamento Diretto",
       youPaySupplierDirectly: "Paghi il fornitore direttamente dopo l'approvazione",
+      // Payment models
+      paymentModels: {
+        infosysLimited: "Infosys Limited",
+        propayWorldwide: "ProPay World Wide Inc.",
+        customerDirectPayment: "Pagamento Diretto Cliente",
+        infosysLimitedDesc: "Il cliente emette l'ordine a Infosys, Infosys emette l'ordine al fornitore. Gestione semplificata dei fornitori e fatturazione consolidata.",
+        propayDesc: "Il cliente emette l'ordine a ProPay, ProPay emette l'ordine al fornitore. Elaborazione pagamenti alternativa con copertura globale.",
+        customerDirectDesc: "Infosys fornisce approvvigionamento completo, negoziazione e intelligenza IA. Il cliente paga il fornitore direttamente dopo l'approvazione."
+      },
       // ERP Integration
       erpIntegration: "Integrazione ERP Senza Soluzione di Continuità",
       erpIntegrationDesc: "Trasferisci gli acquisti approvati direttamente al tuo sistema di approvvigionamento",
