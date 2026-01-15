@@ -174,6 +174,12 @@ const UploadQuotationPage = () => {
       
       <main className="flex-1 p-6 lg:p-8 overflow-auto">
         <div className="max-w-6xl mx-auto">
+          {/* Infosys AI Banner */}
+          <div className="mb-6 bg-gradient-to-r from-[#007CC3] to-[#00629B] text-white px-6 py-3 rounded-xl flex items-center gap-3">
+            <Brain className="w-6 h-6" />
+            <span className="font-semibold text-lg" style={{ fontFamily: 'Manrope' }}>Infosys AI Enabled Intelligent Buying</span>
+          </div>
+
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">

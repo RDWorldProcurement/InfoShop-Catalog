@@ -306,6 +306,9 @@ const LandingPage = () => {
                 <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
                   One-Off Purchases
                 </h3>
+                <p className="text-[#007CC3] font-semibold text-sm mb-2 flex items-center gap-1">
+                  <Brain className="w-4 h-4" /> Infosys AI Enabled Intelligent Buying
+                </p>
                 <p className="text-slate-600 mb-4 text-sm">
                   Upload your quotation for AI-powered analysis & processing
                 </p>
