@@ -215,9 +215,9 @@ const LandingPage = () => {
             </div>
             
             <div className="hidden md:flex items-center gap-6">
-              <a href="#features" className="text-slate-600 hover:text-[#007CC3] font-medium">Features</a>
-              <a href="#how-it-works" className="text-slate-600 hover:text-[#007CC3] font-medium">How It Works</a>
-              <a href="#payment" className="text-slate-600 hover:text-[#007CC3] font-medium">Payment Options</a>
+              <a href="#features" className="text-slate-600 hover:text-[#007CC3] font-medium">{t.landing.navFeatures}</a>
+              <a href="#how-it-works" className="text-slate-600 hover:text-[#007CC3] font-medium">{t.landing.navHowItWorks}</a>
+              <a href="#payment" className="text-slate-600 hover:text-[#007CC3] font-medium">{t.landing.navPaymentOptions}</a>
               
               {/* Language Selector */}
               <Select value={language} onValueChange={changeLanguage}>
