@@ -383,25 +383,80 @@ export const translations = {
       supplierIdentification: "Lieferantenidentifikation",
       rfqManagement: "Angebotsanfragen-Management",
       expertNegotiation: "Expertenverhandlung",
+      // Navigation
+      navFeatures: "Funktionen",
+      navHowItWorks: "So funktioniert es",
+      navPaymentOptions: "Zahlungsoptionen",
+      // Card features
+      multiBrandComparison: "Multi-Marken-Vergleich",
+      realTimeInventory: "Echtzeit-Bestand",
+      punchOutToERP: "PunchOut zu ERP",
+      // Stats section
+      platformStats: {
+        annualSpend: "Jährliche Ausgaben Verwaltet",
+        enterpriseClients: "Unternehmenskunden",
+        averageSavings: "Durchschnittliche Einsparungen",
+        languagesSupported: "Unterstützte Sprachen"
+      },
       stats: {
         products: "Industrieprodukte",
         services: "Verfügbare Dienste",
         categories: "MRO-Kategorien",
         brands: "Globale Marken"
       },
+      // AI Features section
+      aiPowered: "KI-gestützt",
+      aiProcurementIntelligence: "KI-gestützte Beschaffungsintelligenz",
+      aiProcurementDesc: "Nutzen Sie modernste KI-Technologie kombiniert mit Infosys Beschaffungsexpertise",
+      aiDocumentAnalysis: "KI-Dokumentenanalyse",
+      aiDocumentAnalysisDesc: "Extrahieren und validieren Sie automatisch Daten aus Angeboten in mehreren Formaten und Sprachen",
+      priceBenchmarkingTitle: "Preis-Benchmarking",
+      priceBenchmarkingDesc: "Vergleichen Sie angebotene Preise mit Marktdaten und historischen Einkäufen für Produkte und Dienstleistungen",
+      taxIntelligence: "Steuerintelligenz",
+      taxIntelligenceDesc: "Überprüfen Sie automatisch Steuerberechnungen und stellen Sie die Einhaltung lokaler Vorschriften sicher",
+      tacticalSourcing: "Taktische Beschaffung",
+      tacticalSourcingDesc: "Expertenverhandlung und Lieferantenmanagement durch Infosys-Beschaffungsspezialisten",
+      // Multi-language support
+      multiLanguageSupport: "Mehrsprachige Dokumentenunterstützung",
+      multiLanguageSupportDesc: "Unsere KI verarbeitet Angebote in 8 Sprachen mit außergewöhnlicher Genauigkeit",
+      // How it works
+      howItWorks: "So funktioniert OMNISupply.io",
+      howItWorksDesc: "Einfache Schritte zur Transformation Ihrer Beschaffung",
+      step1Title: "Durchsuchen oder Hochladen",
+      step1Desc: "Durchsuchen Sie unseren Katalog mit 30M+ Produkten oder laden Sie Ihr bestehendes Angebot hoch",
+      step2Title: "KI-Analyse",
+      step2Desc: "Unsere KI extrahiert Daten, benchmarkt Preise und identifiziert Einsparmöglichkeiten",
+      step3Title: "Expertenunterstützung",
+      step3Desc: "Beauftragen Sie unseren Einkaufsservice für Verhandlung und umfassende Beschaffungsunterstützung",
+      step4Title: "Nahtloser Transfer",
+      step4Desc: "Übertragen Sie genehmigte Einkäufe direkt in Ihr ERP über PunchOut-Integration",
+      // Payment options
+      flexiblePaymentOptions: "Flexible Zahlungsoptionen",
+      flexiblePaymentOptionsDesc: "Wählen Sie das Zahlungsmodell, das am besten zu Ihrer Organisation passt",
+      oneVendorModel: "Ein-Anbieter-Modell",
+      paymentProcessingPartner: "Zahlungsabwicklungspartner",
+      directPayment: "Direktzahlung",
+      youPaySupplierDirectly: "Sie zahlen den Lieferanten direkt nach Genehmigung",
+      // ERP Integration
+      erpIntegration: "Nahtlose ERP-Integration",
+      erpIntegrationDesc: "Übertragen Sie genehmigte Einkäufe direkt in Ihr Beschaffungssystem",
+      // CTA
       cta: "Jetzt Entdecken",
       learnMore: "Demo Ansehen",
+      readyToTransform: "Bereit, Ihre Beschaffung zu Transformieren?",
+      readyToTransformDesc: "Schließen Sie sich führenden Unternehmen an, die Infosys für ihre Beschaffungstransformation vertrauen. Starten Sie noch heute mit KI-gestützter Intelligenz.",
+      contactSales: "Vertrieb Kontaktieren",
+      signIn: "Anmelden",
+      // Footer
+      privacyPolicy: "Datenschutzrichtlinie",
+      termsOfService: "Nutzungsbedingungen",
+      contactUs: "Kontakt",
+      allRightsReserved: "Alle Rechte vorbehalten.",
       trustedBrands: "Vertrauenswürdige Produkte führender Hersteller",
       servicesTitle: "100K+ Tarifbasierte Dienstleistungen",
       servicesSubtitle: "Professionelle Dienste von geprüften Infosys-Partnern",
       integrationsTitle: "Nahtlose ERP-Integrationen",
-      integrationsSubtitle: "PunchOut für alle wichtigen Beschaffungsplattformen",
-      howItWorks: "So funktioniert OMNISupply.io",
-      erpIntegration: "Nahtlose ERP-Integration",
-      erpIntegrationDesc: "Übertragen Sie genehmigte Einkäufe direkt in Ihr Beschaffungssystem",
-      readyToTransform: "Bereit, Ihre Beschaffung zu Transformieren?",
-      readyToTransformDesc: "Schließen Sie sich führenden Unternehmen an, die Infosys für ihre Beschaffungstransformation vertrauen. Starten Sie noch heute mit KI-gestützter Intelligenz.",
-      signIn: "Anmelden"
+      integrationsSubtitle: "PunchOut für alle wichtigen Beschaffungsplattformen"
     },
     catalog: {
       searchPlaceholder: "Produkte nach Name, SKU oder Marke suchen...",
