@@ -664,6 +664,49 @@ const UploadQuotationPage = () => {
                 )}
               </Card>
 
+              {/* PO and Invoice Handling Entity */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Receipt className="w-5 h-5" />
+                    PO and Invoice Handling Entity
+                  </CardTitle>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Select which entity will handle purchase orders and invoices for this quotation
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {INVOICE_HANDLING_OPTIONS.map((option) => (
+                      <div
+                        key={option.id}
+                        className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                          invoiceHandlingEntity === option.id
+                            ? 'border-[#007CC3] bg-[#007CC3]/5'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                        onClick={() => setInvoiceHandlingEntity(option.id)}
+                        data-testid={`invoice-entity-${option.id}`}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                            invoiceHandlingEntity === option.id
+                              ? 'border-[#007CC3] bg-[#007CC3]'
+                              : 'border-slate-300'
+                          }`}>
+                            {invoiceHandlingEntity === option.id && (
+                              <CheckCircle className="w-3 h-3 text-white" />
+                            )}
+                          </div>
+                          <span className="font-semibold text-sm">{option.name}</span>
+                        </div>
+                        <p className="text-xs text-slate-500">{option.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
