@@ -118,6 +118,7 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 ### Procurement (NEW)
 - POST /api/procurement/quotation/upload - Upload & analyze quotation
 - GET /api/procurement/quotation/history - Quotation history
+- POST /api/procurement/quotation/{id}/engage-tactical-buyers - Notify Infosys Buying Desk (NEW)
 - POST /api/procurement/sourcing/request - Submit sourcing request
 - GET /api/procurement/sourcing/history - Sourcing history
 - GET /api/procurement/dashboard - Dashboard stats
