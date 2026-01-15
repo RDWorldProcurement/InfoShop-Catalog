@@ -17,7 +17,7 @@ export const translations = {
     landing: {
       heroTitle: "Intelligent Procurement",
       heroTitleHighlight: "Powered by AI",
-      heroSubtitle: "Transform your procurement with AI-enabled document processing, intelligent price benchmarking, and expert sourcing support. Access 30M+ products or let us handle it for you.",
+      heroSubtitle: "Unlock 15-30% cost savings with AI-driven procurement intelligence. From instant quotation analysis to expert-managed sourcing, we transform how enterprises buy — faster decisions, smarter negotiations, seamless ERP integration. One platform. Unlimited possibilities.",
       poweredBy: "Powered by Infosys BPM",
       watchDemo: "Watch Demo",
       getStarted: "Get Started",
