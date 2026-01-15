@@ -8,6 +8,41 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 
 ## What's Been Implemented
 
+### ✅ Phase 14 - ProPay.ai Logo & Buying Desk Tracker (January 15, 2026 - COMPLETED)
+**ProPay.ai Logo Integration:**
+- Updated ProPay.ai logo across all screens using official logo asset
+- Landing Page: Payment Options section shows ProPay.ai with logo
+- One-Off Purchases: PO and Invoice Handling Entity section displays logo
+- Managed Services: PO and Invoice Handling Entity section displays logo
+- Renamed "ProPay World Wide Inc" → "ProPay.ai"
+
+**AI Capability Text Updates:**
+- Price benchmarking now mentions "products and services" explicitly
+- Updated in Landing Page, One-Off Purchases page descriptions
+
+**Buying Desk Dashboard (NEW PAGE):**
+- Route: `/buying-desk`
+- Visual progress tracker with 6 stages:
+  1. Submitted
+  2. Supplier Identification
+  3. RFQ Sent
+  4. Quotes Received
+  5. Negotiating
+  6. PO Ready
+- Stats cards: Total Requests, In Progress, Completed, Potential Savings
+- Request cards with:
+  - Request ID and status badge
+  - Supplier name and total amount
+  - Potential savings indicator
+  - Visual progress bar showing stage completion
+  - Expandable details with timestamps
+- Sidebar link: "Buying Desk Tracker" with "Track" badge
+
+**Backend Enhancements:**
+- New endpoint: GET /api/procurement/buying-desk/requests
+- New endpoint: GET /api/procurement/buying-desk/request/{id}
+- Updated buying_desk_requests schema with stages array and current_stage
+
 ### ✅ Phase 13 - UI Labeling & PO/Invoice Entity Options (January 15, 2026 - COMPLETED)
 **Landing Page Option Labels:**
 - "Upload Quotation" renamed to "**One-Off Purchases**" - Clearer description: "Upload your quotation for AI-powered analysis & processing"
