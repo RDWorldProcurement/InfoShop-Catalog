@@ -201,7 +201,7 @@ const BuyingDeskDashboardPage = () => {
                 </div>
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">No Requests Yet</h3>
                 <p className="text-slate-600 mb-6 max-w-md mx-auto">
-                  You haven't submitted any Buying Desk requests yet. Upload a quotation and engage our tactical buyers to get started.
+                  You have not submitted any Buying Desk requests yet. Upload a quotation and engage our tactical buyers to get started.
                 </p>
                 <div className="flex gap-4 justify-center">
                   <Button onClick={() => navigate("/upload-quotation")} className="bg-purple-600 hover:bg-purple-700">
