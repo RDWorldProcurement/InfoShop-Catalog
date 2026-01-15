@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../App";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -29,6 +29,7 @@ const COUNTRIES = [
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,7 +49,14 @@ const LoginPage = () => {
     try {
       await login(email, password, country);
       toast.success("Welcome to OMNISupply.io!");
-      navigate("/catalog");
+      
+      // Check for redirect parameter
+      const redirectTo = searchParams.get("redirect");
+      if (redirectTo) {
+        navigate(`/${redirectTo}`);
+      } else {
+        navigate("/catalog");
+      }
     } catch (error) {
       toast.error(error.response?.data?.detail || "Login failed");
     } finally {
