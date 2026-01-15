@@ -8,6 +8,46 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 
 ## What's Been Implemented
 
+### ✅ Phase 16 - Admin Buying Desk Management System (January 15, 2026 - COMPLETED)
+**Admin Portal - Buying Desk Management:**
+- **Tactical Buying Tab** (formerly "Upload Catalog" was the default):
+  - Stats cards: Total Requests, Pending Action, RFQ Sent, Negotiating, PO Ready
+  - Request list showing: Request ID, Customer, Supplier, Amount, Potential Savings, Progress bar
+  - Expandable panel with:
+    - Update Status buttons (Submitted → Supplier ID → RFQ Sent → Quotes Received → Negotiating → PO Ready)
+    - Assign Specialist dropdown (Rajesh Kumar, Priya Sharma, Amit Patel, Sneha Reddy, Vikram Singh)
+    - Add Note functionality with notes history
+  - Filter by status dropdown
+  - Refresh button to reload data
+
+- **Managed Services Tab** (for Sourcing Requests):
+  - Stats cards: Total Requests, Urgent/Critical, In Progress, RFQ Sent, Completed
+  - Request list showing: Sourcing ID, Title, Description, Category, Budget, Delivery Location, Urgency badge
+  - Expandable panel with:
+    - Update Status buttons (Submitted → In Progress → RFQ Sent → Quotes Received → Completed/Cancelled)
+    - Assign Specialist dropdown
+    - Full Request Details view
+    - Add Note functionality
+
+**Backend Endpoints Added:**
+- GET /api/admin/buying-desk/requests - Get all tactical buying requests with stats
+- GET /api/admin/buying-desk/request/{id} - Get single tactical request
+- PUT /api/admin/buying-desk/request/{id}/status - Update status
+- PUT /api/admin/buying-desk/request/{id}/assign - Assign specialist
+- POST /api/admin/buying-desk/request/{id}/note - Add note
+- GET /api/admin/buying-desk/specialists - Get specialist roster
+- GET /api/admin/buying-desk/dashboard-stats - Get combined stats
+- GET /api/admin/sourcing/requests - Get all sourcing requests with stats
+- GET /api/admin/sourcing/request/{id} - Get single sourcing request
+- PUT /api/admin/sourcing/request/{id}/status - Update status
+- PUT /api/admin/sourcing/request/{id}/assign - Assign specialist
+- POST /api/admin/sourcing/request/{id}/note - Add note
+
+**Footer Links Updated:**
+- Privacy Policy → https://www.infosys.com/privacy-statement.html
+- Terms of Service → https://www.infosys.com/terms-of-use.html
+- Contact Us → https://www.infosysbpm.com/contact.html
+
 ### ✅ Phase 15 - Multi-Language Translation Fix & Logo Enhancement (December 2025 - COMPLETED)
 **Landing Page Translation - Complete i18n Implementation:**
 - Fixed comprehensive multi-language support for all 5 languages: English, French, German, Italian, Dutch
