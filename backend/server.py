@@ -4241,6 +4241,67 @@ app.add_middleware(
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# ============================================
+# HEALTH CHECK ENDPOINT
+# ============================================
+
+@app.get("/api/health")
+async def health_check():
+    """Comprehensive health check endpoint for deployment monitoring"""
+    health_status = {
+        "status": "healthy",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "version": "2.0.0",
+        "service": "OMNISupply.io API",
+        "checks": {}
+    }
+    
+    # Check MongoDB connection
+    try:
+        await db.command("ping")
+        health_status["checks"]["database"] = {"status": "healthy", "type": "mongodb"}
+    except Exception as e:
+        health_status["checks"]["database"] = {"status": "unhealthy", "error": str(e)}
+        health_status["status"] = "degraded"
+    
+    # Check collections
+    try:
+        collections = await db.list_collection_names()
+        health_status["checks"]["collections"] = {
+            "status": "healthy",
+            "count": len(collections),
+            "names": collections[:10]  # First 10 collections
+        }
+    except Exception as e:
+        health_status["checks"]["collections"] = {"status": "unhealthy", "error": str(e)}
+    
+    # Check key data counts
+    try:
+        health_status["checks"]["data"] = {
+            "buying_desk_requests": await db.buying_desk_requests.count_documents({}),
+            "sourcing_requests": await db.sourcing_requests.count_documents({}),
+            "users": await db.users.count_documents({}),
+            "quotation_uploads": await db.quotation_uploads.count_documents({})
+        }
+    except Exception as e:
+        health_status["checks"]["data"] = {"status": "error", "error": str(e)}
+    
+    return health_status
+
+@app.get("/api/ready")
+async def readiness_check():
+    """Readiness probe for Kubernetes"""
+    try:
+        await db.command("ping")
+        return {"ready": True}
+    except Exception:
+        return {"ready": False}
+
+@app.get("/api/live")
+async def liveness_check():
+    """Liveness probe for Kubernetes"""
+    return {"alive": True, "timestamp": datetime.now(timezone.utc).isoformat()}
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
