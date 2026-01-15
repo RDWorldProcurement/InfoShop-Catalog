@@ -296,7 +296,7 @@ const LandingPage = () => {
               </CardContent>
             </Card>
 
-            {/* Option 2: Upload Quotation */}
+            {/* Option 2: Upload Quotation - One Off Purchases */}
             <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-purple-500">
               <div className="absolute top-0 left-0 right-0 h-2 bg-purple-500"></div>
               <CardContent className="p-6">
@@ -304,10 +304,10 @@ const LandingPage = () => {
                   <FileUp className="w-7 h-7 text-purple-600" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
-                  Upload Quotation
+                  One-Off Purchases
                 </h3>
                 <p className="text-slate-600 mb-4 text-sm">
-                  Already have a quotation? Upload for AI-powered analysis
+                  Upload your quotation for AI-powered analysis & processing
                 </p>
                 <ul className="space-y-2 mb-6 text-sm">
                   <li className="flex items-center gap-2 text-slate-600">
@@ -330,7 +330,7 @@ const LandingPage = () => {
               </CardContent>
             </Card>
 
-            {/* Option 3: Sourcing Support */}
+            {/* Option 3: Managed Services / Buying Desk */}
             <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-[#FF6B00]">
               <div className="absolute top-0 left-0 right-0 h-2 bg-[#FF6B00]"></div>
               <CardContent className="p-6">
@@ -338,10 +338,10 @@ const LandingPage = () => {
                   <Handshake className="w-7 h-7 text-[#FF6B00]" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
-                  Sourcing Support
+                  Managed Services
                 </h3>
                 <p className="text-slate-600 mb-4 text-sm">
-                  Let Infosys handle end-to-end sourcing for you
+                  Let our Buying Desk handle end-to-end sourcing for you
                 </p>
                 <ul className="space-y-2 mb-6 text-sm">
                   <li className="flex items-center gap-2 text-slate-600">
@@ -359,7 +359,7 @@ const LandingPage = () => {
                   onClick={() => navigate("/login?redirect=sourcing-support")}
                   data-testid="sourcing-support-btn"
                 >
-                  <Handshake className="w-4 h-4 mr-2" /> Request Support
+                  <Handshake className="w-4 h-4 mr-2" /> Request Buying Desk
                 </Button>
               </CardContent>
             </Card>

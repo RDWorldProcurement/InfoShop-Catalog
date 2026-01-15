@@ -93,7 +93,7 @@ const Sidebar = ({ activePage }) => {
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Procurement</p>
             <NavItem 
               icon={FileUp} 
-              label="Upload Quotation" 
+              label="One-Off Purchases" 
               path="/upload-quotation" 
               id="upload-quotation" 
               activePage={activePage} 
@@ -103,12 +103,12 @@ const Sidebar = ({ activePage }) => {
             />
             <NavItem 
               icon={Handshake} 
-              label="Sourcing Support" 
+              label="Managed Services" 
               path="/sourcing-support" 
               id="sourcing-support" 
               activePage={activePage} 
               navigate={navigate}
-              badge="E2E"
+              badge="Buying Desk"
               badgeColor="bg-orange-100 text-orange-700"
             />
           </div>
