@@ -27,6 +27,28 @@ import { LanguageProvider } from "./i18n/LanguageContext";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
 
+// Configure axios defaults and interceptors
+axios.defaults.timeout = 30000; // 30 second timeout
+
+// Response interceptor for global error handling
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network error:', error.message);
+    }
+    // Handle specific status codes
+    if (error.response?.status === 401) {
+      // Token expired or invalid - clear auth state
+      localStorage.removeItem("omnisupply_token");
+      localStorage.removeItem("omnisupply_user");
+      delete axios.defaults.headers.common["Authorization"];
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Auth Context
 const AuthContext = createContext(null);
 
