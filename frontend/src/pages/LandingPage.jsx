@@ -512,12 +512,12 @@ const LandingPage = () => {
       <section id="payment" className="py-20 bg-slate-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <Badge className="mb-4 bg-amber-100 text-amber-700 border-amber-200">Flexible Options</Badge>
+            <Badge className="mb-4 bg-amber-100 text-amber-700 border-amber-200">{t.landing.flexiblePaymentOptions}</Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4" style={{ fontFamily: 'Manrope' }}>
-              Flexible Payment Options
+              {t.landing.flexiblePaymentOptions}
             </h2>
             <p className="text-lg text-slate-600">
-              Choose the paying agent model that works best for your organization
+              {t.landing.flexiblePaymentOptionsDesc}
             </p>
           </div>
 
@@ -528,21 +528,21 @@ const LandingPage = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     {model.logo ? (
-                      <img src={model.logo} alt={model.name} className="h-8" />
+                      <img src={model.logo} alt={t.landing.paymentModels?.[model.nameKey] || model.nameKey} className="h-8" />
                     ) : (
                       <div 
                         className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
                         style={{ backgroundColor: model.color }}
                       >
-                        {model.name.charAt(0)}
+                        {(t.landing.paymentModels?.[model.nameKey] || "C").charAt(0)}
                       </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-slate-900">{model.name}</h3>
-                      <p className="text-sm text-slate-500">{model.subtitle}</p>
+                      <h3 className="font-bold text-slate-900">{t.landing.paymentModels?.[model.nameKey] || model.nameKey}</h3>
+                      <p className="text-sm text-slate-500">{t.landing[model.subtitleKey]}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-slate-600">{model.description}</p>
+                  <p className="text-sm text-slate-600">{t.landing.paymentModels?.[model.descKey] || model.descKey}</p>
                 </CardContent>
               </Card>
             ))}
@@ -598,7 +598,7 @@ const LandingPage = () => {
               variant="outline"
               className="border-white text-white hover:bg-white/10 px-8"
             >
-              <Phone className="mr-2 w-5 h-5" /> Contact Sales
+              <Phone className="mr-2 w-5 h-5" /> {t.landing.contactSales}
             </Button>
           </div>
         </div>
@@ -627,11 +627,11 @@ const LandingPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-6 text-slate-400 text-sm">
-              <a href="#" className="hover:text-white">Privacy Policy</a>
-              <a href="#" className="hover:text-white">Terms of Service</a>
-              <a href="#" className="hover:text-white">Contact Us</a>
+              <a href="#" className="hover:text-white">{t.landing.privacyPolicy}</a>
+              <a href="#" className="hover:text-white">{t.landing.termsOfService}</a>
+              <a href="#" className="hover:text-white">{t.landing.contactUs}</a>
             </div>
-            <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Infosys BPM Limited. All rights reserved.</p>
+            <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Infosys BPM Limited. {t.landing.allRightsReserved}</p>
           </div>
         </div>
       </footer>
