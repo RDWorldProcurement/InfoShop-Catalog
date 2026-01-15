@@ -19,6 +19,7 @@ import BuyingDeskDashboardPage from "./pages/BuyingDeskDashboardPage";
 // Components
 import ChatBot from "./components/ChatBot";
 import { Toaster } from "./components/ui/sonner";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Language
 import { LanguageProvider } from "./i18n/LanguageContext";
