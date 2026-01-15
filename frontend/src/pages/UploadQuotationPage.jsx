@@ -688,18 +688,38 @@ const UploadQuotationPage = () => {
                         onClick={() => setInvoiceHandlingEntity(option.id)}
                         data-testid={`invoice-entity-${option.id}`}
                       >
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                            invoiceHandlingEntity === option.id
-                              ? 'border-[#007CC3] bg-[#007CC3]'
-                              : 'border-slate-300'
-                          }`}>
-                            {invoiceHandlingEntity === option.id && (
-                              <CheckCircle className="w-3 h-3 text-white" />
-                            )}
+                        {option.logo ? (
+                          <div className="flex items-center gap-3 mb-3">
+                            <img 
+                              src={option.logo} 
+                              alt={option.name}
+                              className="h-8 object-contain"
+                            />
+                            <div className={`w-4 h-4 rounded-full border-2 ml-auto ${
+                              invoiceHandlingEntity === option.id
+                                ? 'border-[#007CC3] bg-[#007CC3]'
+                                : 'border-slate-300'
+                            }`}>
+                              {invoiceHandlingEntity === option.id && (
+                                <CheckCircle className="w-3 h-3 text-white" />
+                              )}
+                            </div>
                           </div>
-                          <span className="font-semibold text-sm">{option.name}</span>
-                        </div>
+                        ) : (
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                              invoiceHandlingEntity === option.id
+                                ? 'border-[#007CC3] bg-[#007CC3]'
+                                : 'border-slate-300'
+                            }`}>
+                              {invoiceHandlingEntity === option.id && (
+                                <CheckCircle className="w-3 h-3 text-white" />
+                              )}
+                            </div>
+                            <span className="font-semibold text-sm">{option.name}</span>
+                          </div>
+                        )}
+                        {option.logo && <span className="font-semibold text-sm block mb-1">{option.name}</span>}
                         <p className="text-xs text-slate-500">{option.description}</p>
                       </div>
                     ))}
