@@ -242,7 +242,7 @@ const LandingPage = () => {
                 className="border-[#007CC3] text-[#007CC3] hover:bg-[#007CC3] hover:text-white"
                 onClick={() => navigate("/login")}
               >
-                Sign In
+                {t.landing.signIn}
               </Button>
             </div>
           </div>
