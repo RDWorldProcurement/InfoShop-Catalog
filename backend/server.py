@@ -3312,37 +3312,41 @@ async def admin_get_all_sourcing_requests(
     limit: int = 50
 ):
     """Get all sourcing/managed services requests (admin only)"""
-    query = {}
-    if status:
-        query["status"] = status
-    if urgency:
-        query["urgency"] = urgency
-    
-    total = await db.sourcing_requests.count_documents(query)
-    requests = await db.sourcing_requests.find(
-        query, {"_id": 0}
-    ).sort("created_at", -1).skip((page-1)*limit).limit(limit).to_list(limit)
-    
-    # Get stats
-    stats = {
-        "total": total,
-        "submitted": await db.sourcing_requests.count_documents({"status": "SUBMITTED"}),
-        "in_progress": await db.sourcing_requests.count_documents({"status": "IN_PROGRESS"}),
-        "rfq_sent": await db.sourcing_requests.count_documents({"status": "RFQ_SENT"}),
-        "quotes_received": await db.sourcing_requests.count_documents({"status": "QUOTES_RECEIVED"}),
-        "completed": await db.sourcing_requests.count_documents({"status": "COMPLETED"}),
-        "cancelled": await db.sourcing_requests.count_documents({"status": "CANCELLED"}),
-        "urgent": await db.sourcing_requests.count_documents({"urgency": "urgent"}),
-        "critical": await db.sourcing_requests.count_documents({"urgency": "critical"})
-    }
-    
-    return {
-        "requests": requests,
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "stats": stats
-    }
+    try:
+        query = {}
+        if status:
+            query["status"] = status
+        if urgency:
+            query["urgency"] = urgency
+        
+        total = await db.sourcing_requests.count_documents(query)
+        requests = await db.sourcing_requests.find(
+            query, {"_id": 0}
+        ).sort("created_at", -1).skip((page-1)*limit).limit(limit).to_list(limit)
+        
+        # Get stats with error handling
+        stats = {
+            "total": total,
+            "submitted": await db.sourcing_requests.count_documents({"status": "SUBMITTED"}),
+            "in_progress": await db.sourcing_requests.count_documents({"status": "IN_PROGRESS"}),
+            "rfq_sent": await db.sourcing_requests.count_documents({"status": "RFQ_SENT"}),
+            "quotes_received": await db.sourcing_requests.count_documents({"status": "QUOTES_RECEIVED"}),
+            "completed": await db.sourcing_requests.count_documents({"status": "COMPLETED"}),
+            "cancelled": await db.sourcing_requests.count_documents({"status": "CANCELLED"}),
+            "urgent": await db.sourcing_requests.count_documents({"urgency": "urgent"}),
+            "critical": await db.sourcing_requests.count_documents({"urgency": "critical"})
+        }
+        
+        return {
+            "requests": requests,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "stats": stats
+        }
+    except Exception as e:
+        logger.error(f"Error fetching sourcing requests: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch requests")
 
 @api_router.get("/admin/sourcing/request/{sourcing_id}")
 async def admin_get_sourcing_request(sourcing_id: str):
