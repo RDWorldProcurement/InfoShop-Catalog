@@ -379,6 +379,61 @@ const UploadQuotationPage = () => {
                 </CardContent>
               </Card>
 
+              {/* Engage Infosys Tactical Buyers - Before Potential Savings */}
+              <Card className={`border-2 ${buyersEngaged ? 'border-green-400 bg-green-50' : 'border-[#007CC3] bg-[#007CC3]/5'}`}>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${buyersEngaged ? 'bg-green-100' : 'bg-[#007CC3]/10'}`}>
+                        {buyersEngaged ? (
+                          <CheckCircle className="w-7 h-7 text-green-600" />
+                        ) : (
+                          <Building2 className="w-7 h-7 text-[#007CC3]" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg text-slate-900" style={{ fontFamily: 'Manrope' }}>
+                          {buyersEngaged ? 'Infosys Notified!' : 'Engage Infosys Tactical Buyers'}
+                        </h3>
+                        <p className="text-sm text-slate-600">
+                          {buyersEngaged 
+                            ? 'Your request has been submitted to the Infosys Buying Desk Dashboard. Expected response within 24 hours.'
+                            : 'Let our expert buying team negotiate better rates and terms on your behalf'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    {!buyersEngaged && (
+                      <Button
+                        size="lg"
+                        className="bg-[#007CC3] hover:bg-[#00629B] text-white px-8 py-6 text-base font-semibold shadow-lg"
+                        onClick={handleEngageTacticalBuyers}
+                        disabled={engagingBuyers}
+                        data-testid="engage-tactical-buyers-btn"
+                      >
+                        {engagingBuyers ? (
+                          <>
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            Notifying Team...
+                          </>
+                        ) : (
+                          <>
+                            <Handshake className="w-5 h-5 mr-2" />
+                            Engage Tactical Buyers
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    {buyersEngaged && (
+                      <Badge className="bg-green-100 text-green-700 px-4 py-2 text-sm">
+                        <CheckCircle className="w-4 h-4 mr-1 inline" />
+                        Request Submitted
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Quick Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card>
