@@ -34,10 +34,10 @@ const SOURCING_CATEGORIES = [
   "Other"
 ];
 
-const PAYMENT_MODELS = [
-  { id: "infosys_limited", name: "Infosys Limited", description: "One vendor model - simplified invoicing" },
-  { id: "propay", name: "ProPay World Wide Inc", description: "Alternative payment processing partner" },
-  { id: "customer_direct", name: "Customer Direct Payment", description: "You pay supplier directly after approval" }
+const INVOICE_HANDLING_OPTIONS = [
+  { id: "infosys_limited", name: "Infosys Limited", description: "Consolidated invoicing through Infosys entity" },
+  { id: "propay", name: "ProPay World Wide Inc", description: "Third-party payment processing partner" },
+  { id: "customer_direct", name: "Customer Direct", description: "Direct invoicing from supplier to customer" }
 ];
 
 const URGENCY_LEVELS = [
