@@ -411,18 +411,38 @@ const SourcingSupportPage = () => {
                             }`}
                             onClick={() => handleInputChange("payment_model", model.id)}
                           >
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className={`w-4 h-4 rounded-full border-2 ${
-                                formData.payment_model === model.id
-                                  ? 'border-[#007CC3] bg-[#007CC3]'
-                                  : 'border-slate-300'
-                              }`}>
-                                {formData.payment_model === model.id && (
-                                  <CheckCircle className="w-3 h-3 text-white" />
-                                )}
+                            {model.logo ? (
+                              <div className="flex items-center gap-3 mb-3">
+                                <img 
+                                  src={model.logo} 
+                                  alt={model.name}
+                                  className="h-8 object-contain"
+                                />
+                                <div className={`w-4 h-4 rounded-full border-2 ml-auto ${
+                                  formData.payment_model === model.id
+                                    ? 'border-[#007CC3] bg-[#007CC3]'
+                                    : 'border-slate-300'
+                                }`}>
+                                  {formData.payment_model === model.id && (
+                                    <CheckCircle className="w-3 h-3 text-white" />
+                                  )}
+                                </div>
                               </div>
-                              <span className="font-semibold text-sm">{model.name}</span>
-                            </div>
+                            ) : (
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className={`w-4 h-4 rounded-full border-2 ${
+                                  formData.payment_model === model.id
+                                    ? 'border-[#007CC3] bg-[#007CC3]'
+                                    : 'border-slate-300'
+                                }`}>
+                                  {formData.payment_model === model.id && (
+                                    <CheckCircle className="w-3 h-3 text-white" />
+                                  )}
+                                </div>
+                                <span className="font-semibold text-sm">{model.name}</span>
+                              </div>
+                            )}
+                            {model.logo && <span className="font-semibold text-sm block mb-1">{model.name}</span>}
                             <p className="text-xs text-slate-500">{model.description}</p>
                           </div>
                         ))}
