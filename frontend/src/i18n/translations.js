@@ -729,25 +729,80 @@ export const translations = {
       supplierIdentification: "Leveranciersidentificatie",
       rfqManagement: "RFQ-beheer",
       expertNegotiation: "Expertonderhandeling",
+      // Navigation
+      navFeatures: "Functies",
+      navHowItWorks: "Hoe het Werkt",
+      navPaymentOptions: "Betalingsopties",
+      // Card features
+      multiBrandComparison: "Multi-merk vergelijking",
+      realTimeInventory: "Realtime voorraad",
+      punchOutToERP: "PunchOut naar ERP",
+      // Stats section
+      platformStats: {
+        annualSpend: "Jaarlijkse Uitgaven Beheerd",
+        enterpriseClients: "Enterprise Klanten",
+        averageSavings: "Gemiddelde Besparingen",
+        languagesSupported: "Ondersteunde Talen"
+      },
       stats: {
         products: "Industriële Producten",
         services: "Beschikbare Diensten",
         categories: "MRO Categorieën",
         brands: "Wereldwijde Merken"
       },
+      // AI Features section
+      aiPowered: "AI-aangedreven",
+      aiProcurementIntelligence: "AI-aangedreven Inkoop Intelligentie",
+      aiProcurementDesc: "Benut geavanceerde AI-technologie gecombineerd met Infosys inkoop-expertise",
+      aiDocumentAnalysis: "AI Documentanalyse",
+      aiDocumentAnalysisDesc: "Extraheer en valideer automatisch gegevens uit offertes in meerdere formaten en talen",
+      priceBenchmarkingTitle: "Prijs-benchmarking",
+      priceBenchmarkingDesc: "Vergelijk geoffreerde prijzen met marktgegevens en historische aankopen voor producten en diensten",
+      taxIntelligence: "Belasting Intelligentie",
+      taxIntelligenceDesc: "Verifieer automatisch belastingberekeningen en zorg voor naleving van lokale regelgeving",
+      tacticalSourcing: "Tactische Inkoop",
+      tacticalSourcingDesc: "Expertonderhandeling en leveranciersbeheer door Infosys inkoopspecialisten",
+      // Multi-language support
+      multiLanguageSupport: "Meertalige Documentondersteuning",
+      multiLanguageSupportDesc: "Onze AI verwerkt offertes in 8 talen met uitzonderlijke nauwkeurigheid",
+      // How it works
+      howItWorks: "Hoe OMNISupply.io Werkt",
+      howItWorksDesc: "Eenvoudige stappen om uw inkoop te transformeren",
+      step1Title: "Bladeren of Uploaden",
+      step1Desc: "Zoek in onze catalogus van 30M+ producten of upload uw bestaande offerte",
+      step2Title: "AI-analyse",
+      step2Desc: "Onze AI extraheert gegevens, benchmarkt prijzen en identificeert besparingsmogelijkheden",
+      step3Title: "Expert Ondersteuning",
+      step3Desc: "Schakel onze Inkoopafdeling in voor onderhandeling en volledige ondersteuning",
+      step4Title: "Naadloze Overdracht",
+      step4Desc: "Draag goedgekeurde aankopen direct over naar uw ERP via PunchOut-integratie",
+      // Payment options
+      flexiblePaymentOptions: "Flexibele Betalingsopties",
+      flexiblePaymentOptionsDesc: "Kies het betalingsmodel dat het beste bij uw organisatie past",
+      oneVendorModel: "Eén Leverancier Model",
+      paymentProcessingPartner: "Betalingsverwerkingspartner",
+      directPayment: "Directe Betaling",
+      youPaySupplierDirectly: "U betaalt de leverancier direct na goedkeuring",
+      // ERP Integration
+      erpIntegration: "Naadloze ERP-Integratie",
+      erpIntegrationDesc: "Breng goedgekeurde aankopen rechtstreeks over naar uw inkoopsysteem",
+      // CTA
       cta: "Begin met Verkennen",
       learnMore: "Demo Bekijken",
+      readyToTransform: "Klaar om Uw Inkoop te Transformeren?",
+      readyToTransformDesc: "Sluit u aan bij toonaangevende bedrijven die Infosys vertrouwen voor hun inkooptransformatie. Begin vandaag met besparen met AI-gestuurde intelligentie.",
+      contactSales: "Contact Verkoop",
+      signIn: "Inloggen",
+      // Footer
+      privacyPolicy: "Privacybeleid",
+      termsOfService: "Servicevoorwaarden",
+      contactUs: "Contact",
+      allRightsReserved: "Alle rechten voorbehouden.",
       trustedBrands: "Betrouwbare producten van toonaangevende fabrikanten",
       servicesTitle: "100K+ Tariefkaart Diensten",
       servicesSubtitle: "Professionele diensten van goedgekeurde Infosys-partners",
       integrationsTitle: "Naadloze ERP-Integraties",
-      integrationsSubtitle: "PunchOut ingeschakeld voor alle belangrijke platforms",
-      howItWorks: "Hoe OMNISupply.io Werkt",
-      erpIntegration: "Naadloze ERP-Integratie",
-      erpIntegrationDesc: "Breng goedgekeurde aankopen rechtstreeks over naar uw inkoopsysteem",
-      readyToTransform: "Klaar om Uw Inkoop te Transformeren?",
-      readyToTransformDesc: "Sluit u aan bij toonaangevende bedrijven die Infosys vertrouwen voor hun inkooptransformatie. Begin vandaag met besparen met AI-gestuurde intelligentie.",
-      signIn: "Inloggen"
+      integrationsSubtitle: "PunchOut ingeschakeld voor alle belangrijke platforms"
     },
     catalog: {
       searchPlaceholder: "Zoek producten op naam, SKU of merk...",
