@@ -3446,47 +3446,57 @@ async def admin_add_sourcing_note(sourcing_id: str, note_data: AdminAddNote):
 @api_router.get("/admin/buying-desk/dashboard-stats")
 async def admin_buying_desk_dashboard_stats():
     """Get comprehensive dashboard statistics for admin"""
-    # Tactical buying stats
-    tactical_total = await db.buying_desk_requests.count_documents({})
-    tactical_pending = await db.buying_desk_requests.count_documents({"current_stage": {"$nin": ["po_ready"]}})
-    tactical_completed = await db.buying_desk_requests.count_documents({"current_stage": "po_ready"})
-    
-    # Sourcing stats
-    sourcing_total = await db.sourcing_requests.count_documents({})
-    sourcing_pending = await db.sourcing_requests.count_documents({"status": {"$nin": ["COMPLETED", "CANCELLED"]}})
-    sourcing_completed = await db.sourcing_requests.count_documents({"status": "COMPLETED"})
-    sourcing_urgent = await db.sourcing_requests.count_documents({"urgency": {"$in": ["urgent", "critical"]}})
-    
-    # Calculate potential value
-    tactical_pipeline = await db.buying_desk_requests.aggregate([
-        {"$group": {"_id": None, "total_value": {"$sum": "$total_amount"}, "total_savings": {"$sum": "$potential_savings"}}}
-    ]).to_list(1)
-    
-    sourcing_pipeline = await db.sourcing_requests.aggregate([
-        {"$group": {"_id": None, "total_value": {"$sum": "$estimated_budget"}}}
-    ]).to_list(1)
-    
-    return {
-        "tactical_buying": {
-            "total": tactical_total,
-            "pending": tactical_pending,
-            "completed": tactical_completed,
-            "total_value": tactical_pipeline[0]["total_value"] if tactical_pipeline else 0,
-            "potential_savings": tactical_pipeline[0]["total_savings"] if tactical_pipeline else 0
-        },
-        "sourcing": {
-            "total": sourcing_total,
-            "pending": sourcing_pending,
-            "completed": sourcing_completed,
-            "urgent_critical": sourcing_urgent,
-            "total_value": sourcing_pipeline[0]["total_value"] if sourcing_pipeline else 0
-        },
-        "combined": {
-            "total_requests": tactical_total + sourcing_total,
-            "pending_requests": tactical_pending + sourcing_pending,
-            "completed_requests": tactical_completed + sourcing_completed
+    try:
+        # Tactical buying stats
+        tactical_total = await db.buying_desk_requests.count_documents({})
+        tactical_pending = await db.buying_desk_requests.count_documents({"current_stage": {"$nin": ["po_ready"]}})
+        tactical_completed = await db.buying_desk_requests.count_documents({"current_stage": "po_ready"})
+        
+        # Sourcing stats
+        sourcing_total = await db.sourcing_requests.count_documents({})
+        sourcing_pending = await db.sourcing_requests.count_documents({"status": {"$nin": ["COMPLETED", "CANCELLED"]}})
+        sourcing_completed = await db.sourcing_requests.count_documents({"status": "COMPLETED"})
+        sourcing_urgent = await db.sourcing_requests.count_documents({"urgency": {"$in": ["urgent", "critical"]}})
+        
+        # Calculate potential value with error handling
+        try:
+            tactical_pipeline = await db.buying_desk_requests.aggregate([
+                {"$group": {"_id": None, "total_value": {"$sum": "$total_amount"}, "total_savings": {"$sum": "$potential_savings"}}}
+            ]).to_list(1)
+        except Exception:
+            tactical_pipeline = []
+        
+        try:
+            sourcing_pipeline = await db.sourcing_requests.aggregate([
+                {"$group": {"_id": None, "total_value": {"$sum": "$estimated_budget"}}}
+            ]).to_list(1)
+        except Exception:
+            sourcing_pipeline = []
+        
+        return {
+            "tactical_buying": {
+                "total": tactical_total,
+                "pending": tactical_pending,
+                "completed": tactical_completed,
+                "total_value": tactical_pipeline[0]["total_value"] if tactical_pipeline else 0,
+                "potential_savings": tactical_pipeline[0]["total_savings"] if tactical_pipeline else 0
+            },
+            "sourcing": {
+                "total": sourcing_total,
+                "pending": sourcing_pending,
+                "completed": sourcing_completed,
+                "urgent_critical": sourcing_urgent,
+                "total_value": sourcing_pipeline[0]["total_value"] if sourcing_pipeline else 0
+            },
+            "combined": {
+                "total_requests": tactical_total + sourcing_total,
+                "pending_requests": tactical_pending + sourcing_pending,
+                "completed_requests": tactical_completed + sourcing_completed
+            }
         }
-    }
+    except Exception as e:
+        logger.error(f"Error fetching dashboard stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch dashboard statistics")
 
 # ============================================
 # QUOTATION UPLOAD & AI ANALYSIS ENDPOINTS
