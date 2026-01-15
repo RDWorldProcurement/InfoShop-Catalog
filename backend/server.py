@@ -3486,7 +3486,7 @@ async def engage_tactical_buyers(
     if not quotation:
         raise HTTPException(status_code=404, detail="Quotation not found")
     
-    # Create buying desk request record
+    # Create buying desk request record with full tracking stages
     buying_desk_request = {
         "request_id": f"IBD-{uuid.uuid4().hex[:8].upper()}",
         "quotation_id": quotation_id,
@@ -3497,9 +3497,20 @@ async def engage_tactical_buyers(
         "potential_savings": quotation.get("price_benchmark", {}).get("total_potential_savings", 0),
         "line_items_count": len(quotation.get("extracted_data", {}).get("line_items", [])),
         "status": "submitted",
+        "current_stage": "submitted",
+        "stages": [
+            {"stage": "submitted", "title": "Submitted", "completed": True, "completed_at": datetime.now(timezone.utc).isoformat()},
+            {"stage": "supplier_identification", "title": "Supplier Identification", "completed": False, "completed_at": None},
+            {"stage": "rfq_sent", "title": "RFQ Sent", "completed": False, "completed_at": None},
+            {"stage": "quotes_received", "title": "Quotes Received", "completed": False, "completed_at": None},
+            {"stage": "negotiating", "title": "Negotiating", "completed": False, "completed_at": None},
+            {"stage": "po_ready", "title": "PO Ready", "completed": False, "completed_at": None}
+        ],
         "assigned_to": "Infosys Tactical Buying Team",
         "submitted_at": datetime.now(timezone.utc).isoformat(),
-        "expected_response_by": (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat()
+        "expected_response_by": (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat(),
+        "notes": [],
+        "request_type": "quotation"
     }
     
     await db.buying_desk_requests.insert_one(buying_desk_request)
@@ -3520,6 +3531,29 @@ async def engage_tactical_buyers(
         "request_id": buying_desk_request["request_id"],
         "expected_response": "24 hours"
     }
+
+@api_router.get("/procurement/buying-desk/requests")
+async def get_buying_desk_requests(current_user: dict = Depends(get_current_user)):
+    """Get all buying desk requests for the current user"""
+    requests = await db.buying_desk_requests.find(
+        {"user_id": current_user.get("email")},
+        {"_id": 0}
+    ).sort("submitted_at", -1).to_list(100)
+    
+    return {"requests": requests}
+
+@api_router.get("/procurement/buying-desk/request/{request_id}")
+async def get_buying_desk_request(request_id: str, current_user: dict = Depends(get_current_user)):
+    """Get details of a specific buying desk request"""
+    request = await db.buying_desk_requests.find_one(
+        {"request_id": request_id, "user_id": current_user.get("email")},
+        {"_id": 0}
+    )
+    
+    if not request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    return request
 
 @api_router.post("/procurement/quotation/{quotation_id}/add-to-cart")
 async def add_quotation_to_cart(
