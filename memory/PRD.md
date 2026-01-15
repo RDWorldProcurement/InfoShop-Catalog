@@ -48,6 +48,25 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 - Terms of Service → https://www.infosys.com/terms-of-use.html
 - Contact Us → https://www.infosysbpm.com/contact.html
 
+### ✅ Phase 16.1 - Stability Improvements (January 15, 2026 - COMPLETED)
+**Health Check Endpoints Added:**
+- `GET /api/health` - Comprehensive health check with database, collections, and data counts
+- `GET /api/ready` - Kubernetes readiness probe
+- `GET /api/live` - Kubernetes liveness probe
+
+**Error Handling Improvements:**
+- Added try-except blocks to admin buying desk endpoints
+- Added logging for errors in admin endpoints
+- Added Error Boundary component for React frontend
+- Added axios interceptors for global error handling
+- Set axios timeout to 30 seconds
+- Auto-clear auth on 401 responses
+
+**Files Added/Modified:**
+- `/app/frontend/src/components/ErrorBoundary.jsx` - New error boundary component
+- `/app/frontend/src/App.js` - Added ErrorBoundary wrapper and axios interceptors
+- `/app/backend/server.py` - Added health endpoints and error handling
+
 ### ✅ Phase 15 - Multi-Language Translation Fix & Logo Enhancement (December 2025 - COMPLETED)
 **Landing Page Translation - Complete i18n Implementation:**
 - Fixed comprehensive multi-language support for all 5 languages: English, French, German, Italian, Dutch
