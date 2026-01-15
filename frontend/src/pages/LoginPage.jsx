@@ -76,11 +76,11 @@ const LoginPage = () => {
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#007CC3] to-[#004C79] p-12 flex-col justify-between">
         <div className="space-y-6">
           {/* Prominent Infosys BPM Logo */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 inline-block">
+          <div className="bg-white rounded-2xl p-6 border border-white/30 inline-block shadow-lg">
             <img 
               src="https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png" 
               alt="Infosys BPM"
-              className="h-14 brightness-200 drop-shadow-lg"
+              className="h-14 drop-shadow-sm"
             />
           </div>
           <div className="flex items-center gap-3">
