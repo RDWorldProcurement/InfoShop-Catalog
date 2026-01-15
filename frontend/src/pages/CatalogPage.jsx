@@ -147,6 +147,19 @@ const CatalogPage = () => {
     handleSearch();
   }, [activeTab, language]);
 
+  // Handle openCart query parameter
+  useEffect(() => {
+    if (searchParams.get("openCart") === "true") {
+      // First fetch cart, then open punchout modal
+      fetchCart().then(() => {
+        setPunchoutModalOpen(true);
+      });
+      // Clear the query parameter
+      searchParams.delete("openCart");
+      setSearchParams(searchParams);
+    }
+  }, [searchParams]);
+
   const fetchCategories = async () => {
     try {
       const [catRes, brandRes, serviceCatRes] = await Promise.all([
