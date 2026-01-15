@@ -203,7 +203,11 @@ const LandingPage = () => {
               />
               <div className="h-6 w-px bg-slate-300"></div>
               <div className="flex items-center gap-2">
-                <Package className="w-6 h-6 text-[#007CC3]" />
+                <img 
+                  src={OMNISUPPLY_LOGO}
+                  alt="OMNISupply.io"
+                  className="h-10 w-10 object-contain"
+                />
                 <span className="font-bold text-xl text-slate-900" style={{ fontFamily: 'Manrope' }}>
                   OMNI<span className="text-[#007CC3]">Supply</span>.io
                 </span>
