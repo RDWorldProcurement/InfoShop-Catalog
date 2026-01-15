@@ -316,7 +316,7 @@ const LandingPage = () => {
                   onClick={() => navigate("/login")}
                   data-testid="browse-catalog-btn"
                 >
-                  <ShoppingCart className="w-4 h-4 mr-2" /> Start Browsing
+                  <ShoppingCart className="w-4 h-4 mr-2" /> {t.landing.startBrowsing}
                 </Button>
               </CardContent>
             </Card>
@@ -329,23 +329,23 @@ const LandingPage = () => {
                   <FileUp className="w-7 h-7 text-purple-600" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
-                  One-Off Purchases
+                  {t.landing.oneOffPurchases}
                 </h3>
                 <p className="text-[#007CC3] font-semibold text-sm mb-2 flex items-center gap-1">
-                  <Brain className="w-4 h-4" /> Infosys AI Enabled Intelligent Buying
+                  <Brain className="w-4 h-4" /> {t.landing.aiIntelligentBuying}
                 </p>
                 <p className="text-slate-600 mb-4 text-sm">
-                  Upload your quotation for AI-powered analysis & processing
+                  {t.landing.oneOffPurchasesDesc}
                 </p>
                 <ul className="space-y-2 mb-6 text-sm">
                   <li className="flex items-center gap-2 text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> AI data extraction
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.aiDataExtraction}
                   </li>
                   <li className="flex items-center gap-2 text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Price benchmarking
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.priceBenchmarking}
                   </li>
                   <li className="flex items-center gap-2 text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Tax verification
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.taxVerification}
                   </li>
                 </ul>
                 <Button 
@@ -353,7 +353,7 @@ const LandingPage = () => {
                   onClick={() => navigate("/login?redirect=upload-quotation")}
                   data-testid="upload-quotation-btn"
                 >
-                  <Upload className="w-4 h-4 mr-2" /> Upload Quotation
+                  <Upload className="w-4 h-4 mr-2" /> {t.landing.uploadQuotation}
                 </Button>
               </CardContent>
             </Card>
@@ -366,17 +366,17 @@ const LandingPage = () => {
                   <Handshake className="w-7 h-7 text-[#FF6B00]" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
-                  Managed Services
+                  {t.landing.managedServices}
                 </h3>
                 <p className="text-slate-600 mb-4 text-sm">
-                  Let our Buying Desk handle end-to-end sourcing for you
+                  {t.landing.managedServicesDesc}
                 </p>
                 <ul className="space-y-2 mb-6 text-sm">
                   <li className="flex items-center gap-2 text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> Supplier identification
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.supplierIdentification}
                   </li>
                   <li className="flex items-center gap-2 text-slate-600">
-                    <CheckCircle className="w-4 h-4 text-green-500" /> RFQ management
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.rfqManagement}
                   </li>
                   <li className="flex items-center gap-2 text-slate-600">
                     <CheckCircle className="w-4 h-4 text-green-500" /> Expert negotiation
