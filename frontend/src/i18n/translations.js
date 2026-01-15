@@ -819,6 +819,15 @@ export const translations = {
       paymentProcessingPartner: "Betalingsverwerkingspartner",
       directPayment: "Directe Betaling",
       youPaySupplierDirectly: "U betaalt de leverancier direct na goedkeuring",
+      // Payment models
+      paymentModels: {
+        infosysLimited: "Infosys Limited",
+        propayWorldwide: "ProPay World Wide Inc.",
+        customerDirectPayment: "Directe Klantbetaling",
+        infosysLimitedDesc: "Klant plaatst order bij Infosys, Infosys plaatst order bij leverancier. Vereenvoudigd leveranciersbeheer en geconsolideerde facturering.",
+        propayDesc: "Klant plaatst order bij ProPay, ProPay plaatst order bij leverancier. Alternatieve betalingsverwerking met wereldwijde dekking.",
+        customerDirectDesc: "Infosys biedt volledige inkoop, onderhandeling en AI-gestuurde intelligentie. Klant betaalt leverancier direct na goedkeuring."
+      },
       // ERP Integration
       erpIntegration: "Naadloze ERP-Integratie",
       erpIntegrationDesc: "Breng goedgekeurde aankopen rechtstreeks over naar uw inkoopsysteem",
