@@ -877,7 +877,7 @@ const CatalogPage = () => {
                         <Button
                           size="sm"
                           className="bg-[#FF9900] hover:bg-[#FF6B00] text-white"
-                          onClick={() => { addToCart(product); toast.success("Added to cart"); }}
+                          onClick={() => { addToCart(product, false, true); setCompareModalOpen(false); }}
                           data-testid={`compare-add-cart-${product.id}`}
                         >
                           <ShoppingCart className="w-4 h-4 mr-1" />
