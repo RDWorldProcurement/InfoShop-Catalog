@@ -135,7 +135,7 @@ export const translations = {
     landing: {
       heroTitle: "Approvisionnement Intelligent",
       heroTitleHighlight: "Propulsé par l'IA",
-      heroSubtitle: "Transformez votre approvisionnement avec le traitement de documents assisté par IA, le benchmarking intelligent des prix et le support d'approvisionnement expert. Accédez à plus de 30M de produits ou laissez-nous gérer pour vous.",
+      heroSubtitle: "Réalisez 15-30% d'économies avec l'intelligence d'approvisionnement pilotée par l'IA. De l'analyse instantanée des devis à l'approvisionnement géré par des experts, nous transformons la façon dont les entreprises achètent — décisions plus rapides, négociations plus intelligentes, intégration ERP transparente. Une plateforme. Des possibilités illimitées.",
       poweredBy: "Propulsé par Infosys BPM",
       watchDemo: "Voir la Démo",
       getStarted: "Commencer",
