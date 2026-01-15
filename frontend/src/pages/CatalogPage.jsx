@@ -490,7 +490,7 @@ const CatalogPage = () => {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  onAddToCart={() => addToCart(product)}
+                  onAddToCart={() => addToCart(product, false, true)}
                   onCheckInventory={() => checkInventory(product)}
                   onRequestQuotation={() => { setSelectedProduct(product); setQuotationModalOpen(true); }}
                   onCompare={() => {
@@ -511,7 +511,7 @@ const CatalogPage = () => {
                 <ServiceCard
                   key={service.id}
                   service={service}
-                  onAddToCart={() => addToCart(service, true)}
+                  onAddToCart={() => addToCart(service, true, true)}
                   onRequestQuotation={() => { setSelectedProduct(service); setQuotationModalOpen(true); }}
                   onSubmitRFQ={() => { setRfqForm(prev => ({ ...prev, product_description: service.name, is_product: false })); setRfqModalOpen(true); }}
                   t={t}
