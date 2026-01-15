@@ -31,6 +31,12 @@ const SUPPORTED_LANGUAGES = [
   { code: "pt", name: "Portuguese", flag: "🇵🇹" }
 ];
 
+const INVOICE_HANDLING_OPTIONS = [
+  { id: "infosys_limited", name: "Infosys Limited", description: "Consolidated invoicing through Infosys entity" },
+  { id: "propay", name: "ProPay World Wide Inc", description: "Third-party payment processing partner" },
+  { id: "customer_direct", name: "Customer Direct", description: "Direct invoicing from supplier to customer" }
+];
+
 const UploadQuotationPage = () => {
   const navigate = useNavigate();
   const { user, token } = useAuth();
@@ -48,6 +54,7 @@ const UploadQuotationPage = () => {
   const [escalateNotes, setEscalateNotes] = useState("");
   const [engagingBuyers, setEngagingBuyers] = useState(false);
   const [buyersEngaged, setBuyersEngaged] = useState(false);
+  const [invoiceHandlingEntity, setInvoiceHandlingEntity] = useState("infosys_limited");
 
   const handleFileDrop = useCallback((e) => {
     e.preventDefault();
