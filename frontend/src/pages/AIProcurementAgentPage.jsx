@@ -885,43 +885,117 @@ const AIProcurementAgentPage = () => {
                     </div>
                   </div>
 
-                  {/* AI Progress Indicator */}
+                  {/* AI Progress Indicator with Real-time Percentage */}
                   {uploadingQuotation && aiAnalysisProgress && (
                     <div className="bg-slate-50 rounded-xl p-4 border">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Brain className="w-5 h-5 text-purple-600 animate-pulse" />
-                        <span className="font-semibold text-slate-900">AI Analysis in Progress</span>
-                      </div>
-                      <div className="space-y-2">
+                      <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          {aiAnalysisProgress.gpt === 'complete' ? (
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                          ) : (
-                            <Loader2 className="w-4 h-4 animate-spin text-green-500" />
-                          )}
-                          <span className="text-sm">GPT-5.2: {aiAnalysisProgress.gpt === 'complete' ? 'Complete' : 'Extracting data...'}</span>
+                          <Brain className="w-5 h-5 text-purple-600 animate-pulse" />
+                          <span className="font-semibold text-slate-900">AI Analysis in Progress</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {aiAnalysisProgress.claude === 'complete' ? (
-                            <CheckCircle className="w-4 h-4 text-purple-500" />
-                          ) : aiAnalysisProgress.claude === 'analyzing' ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
-                          ) : (
-                            <div className="w-4 h-4 rounded-full border-2 border-slate-300" />
-                          )}
-                          <span className="text-sm">Claude: {aiAnalysisProgress.claude === 'complete' ? 'Complete' : aiAnalysisProgress.claude === 'analyzing' ? 'Benchmarking...' : 'Waiting'}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {aiAnalysisProgress.gemini === 'complete' ? (
-                            <CheckCircle className="w-4 h-4 text-blue-500" />
-                          ) : aiAnalysisProgress.gemini === 'analyzing' ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-                          ) : (
-                            <div className="w-4 h-4 rounded-full border-2 border-slate-300" />
-                          )}
-                          <span className="text-sm">Gemini: {aiAnalysisProgress.gemini === 'complete' ? 'Complete' : aiAnalysisProgress.gemini === 'analyzing' ? 'Validating...' : 'Waiting'}</span>
+                        <div className="text-right">
+                          <span className="text-2xl font-bold text-purple-600">{analysisPercentage}%</span>
+                          <p className="text-xs text-slate-500">Complete</p>
                         </div>
                       </div>
+                      
+                      {/* Overall Progress Bar */}
+                      <div className="w-full bg-slate-200 rounded-full h-3 mb-4 overflow-hidden">
+                        <div 
+                          className="h-3 rounded-full bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 transition-all duration-500 ease-out"
+                          style={{ width: `${analysisPercentage}%` }}
+                        />
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {/* GPT-5.2 */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center bg-green-100">
+                            {aiAnalysisProgress.gpt === 'complete' ? (
+                              <CheckCircle className="w-4 h-4 text-green-500" />
+                            ) : aiAnalysisProgress.gpt === 'analyzing' ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-green-500" />
+                            ) : (
+                              <div className="w-3 h-3 rounded-full border-2 border-slate-300" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium">🤖 GPT-5.2</span>
+                              <span className="text-xs text-slate-500">
+                                {aiAnalysisProgress.gpt === 'complete' ? '100%' : aiAnalysisProgress.gpt === 'analyzing' ? 'In progress...' : 'Waiting'}
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-200 rounded-full h-1.5">
+                              <div 
+                                className="h-1.5 rounded-full bg-green-500 transition-all duration-300"
+                                style={{ width: aiAnalysisProgress.gpt === 'complete' ? '100%' : aiAnalysisProgress.gpt === 'analyzing' ? '60%' : '0%' }}
+                              />
+                            </div>
+                            <p className="text-xs text-slate-400 mt-0.5">Extracting & analyzing data</p>
+                          </div>
+                        </div>
+                        
+                        {/* Claude */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center bg-purple-100">
+                            {aiAnalysisProgress.claude === 'complete' ? (
+                              <CheckCircle className="w-4 h-4 text-purple-500" />
+                            ) : aiAnalysisProgress.claude === 'analyzing' ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+                            ) : (
+                              <div className="w-3 h-3 rounded-full border-2 border-slate-300" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium">🧠 Claude Sonnet 4.5</span>
+                              <span className="text-xs text-slate-500">
+                                {aiAnalysisProgress.claude === 'complete' ? '100%' : aiAnalysisProgress.claude === 'analyzing' ? 'In progress...' : 'Waiting'}
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-200 rounded-full h-1.5">
+                              <div 
+                                className="h-1.5 rounded-full bg-purple-500 transition-all duration-300"
+                                style={{ width: aiAnalysisProgress.claude === 'complete' ? '100%' : aiAnalysisProgress.claude === 'analyzing' ? '60%' : '0%' }}
+                              />
+                            </div>
+                            <p className="text-xs text-slate-400 mt-0.5">Price benchmarking & market rates</p>
+                          </div>
+                        </div>
+                        
+                        {/* Gemini */}
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center bg-blue-100">
+                            {aiAnalysisProgress.gemini === 'complete' ? (
+                              <CheckCircle className="w-4 h-4 text-blue-500" />
+                            ) : aiAnalysisProgress.gemini === 'analyzing' ? (
+                              <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                            ) : (
+                              <div className="w-3 h-3 rounded-full border-2 border-slate-300" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium">⚡ Gemini 3 Flash</span>
+                              <span className="text-xs text-slate-500">
+                                {aiAnalysisProgress.gemini === 'complete' ? '100%' : aiAnalysisProgress.gemini === 'analyzing' ? 'In progress...' : 'Waiting'}
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-200 rounded-full h-1.5">
+                              <div 
+                                className="h-1.5 rounded-full bg-blue-500 transition-all duration-300"
+                                style={{ width: aiAnalysisProgress.gemini === 'complete' ? '100%' : aiAnalysisProgress.gemini === 'analyzing' ? '60%' : '0%' }}
+                              />
+                            </div>
+                            <p className="text-xs text-slate-400 mt-0.5">Cross-validation & recommendations</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="mt-4 text-xs text-center text-slate-500">
+                        ⏱️ Typical analysis time: 2-3 minutes
+                      </p>
                     </div>
                   )}
 
