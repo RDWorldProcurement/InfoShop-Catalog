@@ -20,17 +20,6 @@ import Sidebar from "../components/Sidebar";
 const INFOSYS_BLUE = "#007CC3";
 const INFOSYS_ORANGE = "#FF6B00";
 
-// Currency mapping by language
-const CURRENCY_MAP = {
-  en: { code: "USD", symbol: "$", name: "US Dollar" },
-  fr: { code: "EUR", symbol: "€", name: "Euro" },
-  de: { code: "EUR", symbol: "€", name: "Euro" },
-  it: { code: "EUR", symbol: "€", name: "Euro" },
-  nl: { code: "EUR", symbol: "€", name: "Euro" },
-  es_es: { code: "EUR", symbol: "€", name: "Euro" },
-  es_mx: { code: "MXN", symbol: "$", name: "Mexican Peso" }
-};
-
 // AI Engine indicators
 const AI_ENGINES = [
   { id: "gpt", name: "GPT-5.2", icon: "🤖", color: "from-green-500 to-emerald-600" },
