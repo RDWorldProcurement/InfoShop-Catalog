@@ -169,15 +169,27 @@ const AIProcurementAgentPage = () => {
   // Handle adding to cart
   const handleAddToCart = async (item, type) => {
     try {
-      await axios.post(`${API}/cart/add`, {
-        item_id: item.id || item.product_id || item.service_id,
-        item_type: type,
-        quantity: 1
-      }, {
+      const cartPayload = {
+        product_id: item.id || item.product_id || item.service_id,
+        product_name: item.name,
+        brand: item.brand || "N/A",
+        sku: item.sku || item.id || "N/A",
+        unspsc_code: item.unspsc_code || item.unspsc || "43211500",
+        category: item.category || "General",
+        quantity: 1,
+        unit_price: item.price || item.rate || 0,
+        total_price: item.price || item.rate || 0,
+        currency_code: currency.code || "USD",
+        image_url: item.image_url || null,
+        is_service: type === "service"
+      };
+      
+      await axios.post(`${API}/cart/add`, cartPayload, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       toast.success(`${item.name} added to cart!`);
     } catch (error) {
+      console.error("Add to cart error:", error);
       toast.error("Failed to add item to cart");
     }
   };
