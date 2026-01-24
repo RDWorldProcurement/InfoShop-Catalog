@@ -192,6 +192,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/ai-agent"
+                element={
+                  <ProtectedRoute>
+                    <AIProcurementAgentPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/admin" element={<AdminPortalPage />} />
             </Routes>
             <ChatBot />
