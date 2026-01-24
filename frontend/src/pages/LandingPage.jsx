@@ -249,14 +249,14 @@ const LandingPage = () => {
         </div>
       </nav>
 
-      {/* Hero Section - 3 Options */}
+      {/* Hero Section - 4 Options with AI Agent Featured */}
       <section className="relative py-16 lg:py-24 overflow-hidden">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#007CC3]/5 via-white to-purple-50"></div>
         
         <div className="relative max-w-7xl mx-auto px-6">
           {/* Hero Header */}
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <Badge className="mb-4 bg-[#007CC3]/10 text-[#007CC3] border-[#007CC3]/20 px-4 py-1">
               {t.landing.poweredBy}
             </Badge>
@@ -283,6 +283,69 @@ const LandingPage = () => {
                 {t.landing.getStarted} <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
+          </div>
+
+          {/* Featured: AI Procurement Agent Card */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-purple-500 bg-gradient-to-br from-slate-900 via-purple-900 to-blue-900">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-cyan-500 to-blue-500"></div>
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
+              <CardContent className="relative p-8">
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                  {/* AI Visual */}
+                  <div className="flex-shrink-0">
+                    <div className="relative">
+                      <div className="w-24 h-24 bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform">
+                        <Brain className="w-12 h-12 text-white" />
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center animate-pulse">
+                        <Zap className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="flex items-center gap-2 justify-center md:justify-start mb-2">
+                      <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 px-3">
+                        NEW
+                      </Badge>
+                      <Badge variant="outline" className="border-purple-400 text-purple-300">
+                        GPT-5.2 + Claude + Gemini
+                      </Badge>
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-3" style={{ fontFamily: 'Manrope' }}>
+                      Advanced AI-Driven Procurement
+                    </h3>
+                    <p className="text-slate-300 mb-4 text-base">
+                      Tell us what you need in your own words. Our intelligent AI agent, powered by three leading LLMs, 
+                      will understand your requirements and guide you to the right solution — whether it's finding products, 
+                      analyzing quotations, or connecting you with sourcing experts.
+                    </p>
+                    <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-6">
+                      <div className="flex items-center gap-2 text-sm text-slate-300 bg-white/10 px-3 py-1.5 rounded-full">
+                        <CheckCircle className="w-4 h-4 text-green-400" /> Natural Language Understanding
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-slate-300 bg-white/10 px-3 py-1.5 rounded-full">
+                        <CheckCircle className="w-4 h-4 text-green-400" /> Intelligent Routing
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-slate-300 bg-white/10 px-3 py-1.5 rounded-full">
+                        <CheckCircle className="w-4 h-4 text-green-400" /> Instant Results
+                      </div>
+                    </div>
+                    <Button 
+                      size="lg"
+                      className="bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 hover:from-purple-600 hover:via-blue-600 hover:to-cyan-600 text-white shadow-lg shadow-purple-500/25"
+                      onClick={() => navigate("/login?redirect=ai-agent")}
+                      data-testid="ai-agent-btn"
+                    >
+                      <Brain className="w-5 h-5 mr-2" /> Start AI Conversation
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Three Option Cards */}
@@ -329,7 +392,7 @@ const LandingPage = () => {
               <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500"></div>
               <CardContent className="p-6">
                 <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Brain className="w-7 h-7 text-purple-600" />
+                  <FileUp className="w-7 h-7 text-purple-600" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
                   {t.landing.aiEnabledIntelligentBuying || "AI Enabled Intelligent Buying"}
