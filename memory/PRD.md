@@ -103,6 +103,46 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 - Frontend: 100% (16/16 tests passed)
 - Report: `/app/test_reports/iteration_16.json`
 
+### ✅ Phase 18.2 - Intelligent AI Agent Business Logic (January 24, 2026 - COMPLETED)
+**Smart Detection and User Guidance:**
+
+**Problem Solved:**
+- Previously, searching for "blue bike with red dots" would return random products
+- Now the AI intelligently recognizes this is NOT in the catalog and guides users appropriately
+
+**New Intelligent Features:**
+1. **is_likely_not_in_catalog()** function detects:
+   - Consumer items (bike, bicycle, furniture, clothing, food, etc.)
+   - Color + unusual pattern combinations (blue with red dots)
+   - Items outside standard industrial/IT procurement
+
+2. **assess_requirement_complexity()** function detects:
+   - Complex requirements (multiple, specialized, custom)
+   - Installation/integration needs
+   - Bulk/volume requirements
+   - Long-term/contract needs
+
+3. **Smart Response Flow:**
+   - If NOT_IN_CATALOG → Shows intelligent message + two action buttons
+   - If COMPLEX → Suggests Managed Services with UNSPSC classification
+   - If FOUND → Shows products with match scores
+   - If LOW_RELEVANCE → Shows products + offers alternatives
+
+4. **"Recommended Next Steps" UI Box:**
+   - Purple button: "Upload Quotation for Analysis" → `/upload-quotation`
+   - Orange button: "Request Buying Desk Support" → `/sourcing-support`
+   - Shows intelligent_guidance reason
+
+**API Response Enhancements:**
+- `show_quotation_upload`: boolean
+- `show_managed_services`: boolean  
+- `intelligent_guidance`: {reason, recommended_paths, confidence}
+
+**Test Results:**
+- Backend: 100% (16/16 tests passed)
+- Frontend: 100% (10/10 tests passed)
+- Report: `/app/test_reports/iteration_17.json`
+
 ### ✅ Phase 17 - Advanced AI Price Benchmarking with 3 LLMs (January 2026 - COMPLETED)
 **Major Feature: AI Enabled Intelligent Buying with 3 AI Engines**
 
