@@ -185,7 +185,7 @@ const OMNISUPPLY_LOGO = "https://static.prod-images.emergentagent.com/jobs/d1a8d
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { t, language, changeLanguage, languageOptions } = useLanguage();
+  const { t, language, changeLanguage, languageOptions, currency } = useLanguage();
   const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
