@@ -148,27 +148,37 @@ const Sidebar = ({ activePage }) => {
           </div>
         </nav>
 
-        {/* Language Selector */}
+        {/* Language & Currency Selector */}
         <div className="py-4 border-t border-slate-200">
-          <div className="px-4">
-            <p className="text-xs text-slate-500 mb-2 flex items-center gap-1">
-              <Languages className="w-3 h-3" /> Language
-            </p>
-            <Select value={language} onValueChange={changeLanguage}>
-              <SelectTrigger className="h-10 bg-slate-50 border-slate-200" data-testid="sidebar-language-selector">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {languageOptions.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code} data-testid={`sidebar-lang-${lang.code}`}>
-                    <span className="flex items-center gap-2">
-                      <span>{lang.flag}</span>
-                      <span>{lang.name}</span>
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="px-4 space-y-3">
+            <div>
+              <p className="text-xs text-slate-500 mb-2 flex items-center gap-1">
+                <Languages className="w-3 h-3" /> Language & Currency
+              </p>
+              <Select value={language} onValueChange={changeLanguage}>
+                <SelectTrigger className="h-10 bg-slate-50 border-slate-200" data-testid="sidebar-language-selector">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {languageOptions.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code} data-testid={`sidebar-lang-${lang.code}`}>
+                      <span className="flex items-center gap-2">
+                        <span>{lang.flag}</span>
+                        <span>{lang.name}</span>
+                        <span className="text-xs text-slate-400">({lang.currency})</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {/* Currency Display */}
+            <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg border border-slate-200">
+              <span className="text-xs text-slate-500">Currency</span>
+              <span className="font-semibold text-slate-700" data-testid="sidebar-currency-display">
+                {currency.symbol} {currency.code}
+              </span>
+            </div>
           </div>
         </div>
 
