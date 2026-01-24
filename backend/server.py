@@ -4660,29 +4660,112 @@ async def classify_user_intent_with_ai(message: str, context: Dict, session_id: 
         }
 
 async def search_catalog_for_agent(query: str, search_type: str, user: dict, limit: int = 5) -> Dict:
-    """Search catalog and return results for the AI agent"""
+    """
+    Search catalog and return results for the AI agent.
+    Searches both in-memory catalogs AND MongoDB vendor_products for comprehensive results.
+    Optimized for speed and accuracy with multi-field matching.
+    """
     currency = COUNTRY_CURRENCIES.get(user.get("country", "USA"), COUNTRY_CURRENCIES["USA"])
     results = {"products": [], "services": []}
     
     if search_type in ["product", None]:
-        # Search products
         query_lower = query.lower()
+        query_terms = [term.strip() for term in query_lower.split() if len(term.strip()) > 2]
         matched_products = []
+        seen_ids = set()
         
+        # 1. First search in-memory catalogs (IT_PRODUCTS_CATALOG + NEW_VENDOR_PRODUCTS)
         for product in IT_PRODUCTS_CATALOG + NEW_VENDOR_PRODUCTS:
             name_lower = product.get("name", "").lower()
             desc_lower = product.get("short_description", "").lower()
             brand_lower = product.get("brand", "").lower()
             category_lower = product.get("category", "").lower()
+            sku_lower = product.get("sku", "").lower()
             
-            if (query_lower in name_lower or 
-                query_lower in desc_lower or 
-                query_lower in brand_lower or
-                query_lower in category_lower or
-                any(term in name_lower for term in query_lower.split())):
-                matched_products.append(product)
+            # Calculate match score for ranking
+            score = 0
+            
+            # Exact phrase match (highest priority)
+            if query_lower in name_lower:
+                score += 100
+            if query_lower in sku_lower:
+                score += 90  # SKU/Part number match is very important
+            if query_lower in brand_lower:
+                score += 80
+            
+            # Term-by-term matching
+            for term in query_terms:
+                if term in name_lower:
+                    score += 30
+                if term in brand_lower:
+                    score += 25
+                if term in category_lower:
+                    score += 20
+                if term in desc_lower:
+                    score += 10
+                if term in sku_lower:
+                    score += 35
+            
+            if score > 0:
+                matched_products.append((score, product))
+                seen_ids.add(product["id"])
         
-        for product in matched_products[:limit]:
+        # 2. Search MongoDB vendor_products collection (uploaded catalogs)
+        try:
+            # Build MongoDB query for text search
+            mongo_query = {
+                "$or": [
+                    {"name": {"$regex": query_lower, "$options": "i"}},
+                    {"brand": {"$regex": query_lower, "$options": "i"}},
+                    {"sku": {"$regex": query_lower, "$options": "i"}},
+                    {"category": {"$regex": query_lower, "$options": "i"}},
+                    {"description": {"$regex": query_lower, "$options": "i"}}
+                ]
+            }
+            
+            # Also search for individual terms
+            if len(query_terms) > 1:
+                term_conditions = []
+                for term in query_terms:
+                    term_conditions.append({"name": {"$regex": term, "$options": "i"}})
+                    term_conditions.append({"brand": {"$regex": term, "$options": "i"}})
+                    term_conditions.append({"sku": {"$regex": term, "$options": "i"}})
+                mongo_query["$or"].extend(term_conditions)
+            
+            # Execute MongoDB search
+            vendor_products = await db.vendor_products.find(mongo_query).limit(limit * 2).to_list(limit * 2)
+            
+            for vp in vendor_products:
+                if str(vp.get("id", vp.get("_id"))) not in seen_ids:
+                    # Calculate score for vendor products
+                    name_lower = vp.get("name", "").lower()
+                    score = 0
+                    if query_lower in name_lower:
+                        score += 100
+                    for term in query_terms:
+                        if term in name_lower:
+                            score += 30
+                    
+                    matched_products.append((score, {
+                        "id": str(vp.get("id", vp.get("_id"))),
+                        "name": vp.get("name", ""),
+                        "short_description": vp.get("description", ""),
+                        "brand": vp.get("brand", ""),
+                        "category": vp.get("category", ""),
+                        "sku": vp.get("sku", ""),
+                        "base_price": vp.get("base_price", 0),
+                        "image_url": vp.get("image_url"),
+                        "availability": {"in_stock": True},
+                        "source": "vendor_catalog"
+                    }))
+                    seen_ids.add(str(vp.get("id", vp.get("_id"))))
+        except Exception as e:
+            logger.warning(f"MongoDB vendor search error: {e}")
+        
+        # 3. Sort by score (descending) and take top results
+        matched_products.sort(key=lambda x: x[0], reverse=True)
+        
+        for score, product in matched_products[:limit]:
             base_price = product.get("base_price", 0)
             results["products"].append({
                 "id": product["id"],
@@ -4690,34 +4773,83 @@ async def search_catalog_for_agent(query: str, search_type: str, user: dict, lim
                 "description": product.get("short_description", ""),
                 "brand": product.get("brand", ""),
                 "category": product.get("category", ""),
+                "sku": product.get("sku", ""),
                 "price": round(base_price * currency["rate"], 2),
                 "currency": currency["symbol"],
-                "unit": "EA",
+                "unit": product.get("unit", "EA"),
                 "image_url": product.get("image_url"),
-                "in_stock": product.get("availability", {}).get("in_stock", True)
+                "in_stock": product.get("availability", {}).get("in_stock", True),
+                "match_score": score,
+                "source": product.get("source", "catalog")
             })
     
     if search_type in ["service", None]:
-        # Search services
+        # Search services (similar enhanced logic)
         query_lower = query.lower()
-        service_keywords = ["network", "installation", "cybersecurity", "it managed", "facilities", "logistics", "labor", "marketing", "consulting"]
+        query_terms = [term.strip() for term in query_lower.split() if len(term.strip()) > 2]
+        matched_services = []
+        seen_ids = set()
         
-        for keyword in service_keywords:
-            if keyword in query_lower:
-                # Match services
-                for category in SERVICE_CATEGORIES:
-                    if keyword in category["name"].lower():
-                        base_rate = random.uniform(50, 250)
-                        results["services"].append({
-                            "id": f"SVC-{category['unspsc'][:4]}",
-                            "name": category["name"],
-                            "description": f"Professional {category['name'].lower()} from certified Infosys partners",
-                            "category": category["name"],
-                            "rate": round(base_rate * currency["rate"], 2),
-                            "currency": currency["symbol"],
-                            "pricing_model": "per hour",
-                            "image_url": SERVICE_IMAGE_URLS.get(category["name"], DEFAULT_SERVICE_IMAGE)
-                        })
+        # Search in-memory service categories
+        for category in SERVICE_CATEGORIES:
+            cat_name_lower = category["name"].lower()
+            score = 0
+            
+            if query_lower in cat_name_lower:
+                score += 100
+            for term in query_terms:
+                if term in cat_name_lower:
+                    score += 30
+            
+            if score > 0:
+                matched_services.append((score, category))
+                seen_ids.add(category["unspsc"])
+        
+        # Search MongoDB vendor_services
+        try:
+            mongo_query = {
+                "$or": [
+                    {"name": {"$regex": query_lower, "$options": "i"}},
+                    {"category": {"$regex": query_lower, "$options": "i"}},
+                    {"description": {"$regex": query_lower, "$options": "i"}}
+                ]
+            }
+            
+            vendor_services = await db.vendor_services.find(mongo_query).limit(limit * 2).to_list(limit * 2)
+            
+            for vs in vendor_services:
+                if str(vs.get("id", vs.get("_id"))) not in seen_ids:
+                    score = 50  # Base score for vendor services
+                    matched_services.append((score, {
+                        "unspsc": vs.get("unspsc_code", ""),
+                        "name": vs.get("name", ""),
+                        "description": vs.get("description", ""),
+                        "base_rate": vs.get("base_rate", 100),
+                        "pricing_model": vs.get("pricing_model", "per hour"),
+                        "source": "vendor_catalog"
+                    }))
+        except Exception as e:
+            logger.warning(f"MongoDB vendor service search error: {e}")
+        
+        # Sort and return top services
+        matched_services.sort(key=lambda x: x[0], reverse=True)
+        
+        for score, svc in matched_services[:limit]:
+            base_rate = svc.get("base_rate", random.uniform(50, 250))
+            results["services"].append({
+                "id": f"SVC-{svc.get('unspsc', '0000')[:4]}",
+                "name": svc["name"],
+                "description": svc.get("description", f"Professional {svc['name'].lower()} from certified Infosys partners"),
+                "category": svc["name"],
+                "rate": round(base_rate * currency["rate"], 2),
+                "currency": currency["symbol"],
+                "pricing_model": svc.get("pricing_model", "per hour"),
+                "image_url": SERVICE_IMAGE_URLS.get(svc["name"], DEFAULT_SERVICE_IMAGE),
+                "match_score": score,
+                "source": svc.get("source", "catalog")
+            })
+    
+    return results
                 break
     
     return results
