@@ -619,6 +619,37 @@ const UploadQuotationPage = () => {
                         </>
                       )}
                     </Button>
+                    
+                    {/* Real AI Processing Indicator */}
+                    {uploading && useRealAi && (
+                      <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-200">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="relative">
+                            <Brain className="w-8 h-8 text-purple-600 animate-pulse" />
+                            <Sparkles className="w-4 h-4 text-yellow-500 absolute -top-1 -right-1 animate-bounce" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-purple-900">AI Analysis in Progress</p>
+                            <p className="text-sm text-purple-600">Three AI engines are analyzing your quotation...</p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <Loader2 className="w-4 h-4 animate-spin text-green-500" />
+                            <span>GPT-5.2: Extracting line items & pricing...</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+                            <span>Claude: Analyzing market benchmarks...</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                            <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                            <span>Gemini: Cross-validating & recommendations...</span>
+                          </div>
+                        </div>
+                        <p className="mt-3 text-xs text-slate-500">This may take up to 2 minutes for complex quotations.</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
