@@ -5018,14 +5018,98 @@ async def ai_agent_conversation(
     """
     Main conversational endpoint for the AI Procurement Agent.
     Uses multi-LLM approach (GPT-5.2, Claude, Gemini) for intelligent routing.
+    Implements smart business logic to guide users appropriately.
     """
     try:
         session_id = request.session_id or f"session_{datetime.now(timezone.utc).timestamp()}_{current_user['email']}"
         context = request.context or {}
+        user_message = request.message.strip()
         
-        # Classify intent using AI
+        # Build response structure
+        response = {
+            "message": "",
+            "engines_used": ["gpt", "claude", "gemini"],
+            "action": None,
+            "products": None,
+            "services": None,
+            "context": {**context},
+            "search_results": None,
+            "supplier_form": None,
+            "managed_service_form": None,
+            "unspsc_suggestion": None,
+            "show_quotation_upload": False,
+            "show_managed_services": False,
+            "intelligent_guidance": None
+        }
+        
+        # Step 1: Check if user is responding to a previous prompt (context-aware)
+        previous_action = context.get("last_action")
+        if previous_action == "no_results_alternatives":
+            # User is responding to "do you have a supplier/quotation?" prompt
+            msg_lower = user_message.lower()
+            if any(kw in msg_lower for kw in ['yes', 'have', 'quotation', 'quote', 'supplier', 'upload']):
+                response["message"] = """Great! Let's analyze your quotation.
+
+Our AI system will:
+• **Extract all line items** automatically from your document
+• **Benchmark prices** against market rates using 3 AI engines
+• **Identify savings opportunities** typically 15-30%
+• **Verify tax calculations** for compliance
+
+Click below to upload your quotation (PDF, Excel, or image)."""
+                response["action"] = "prompt_quotation_upload"
+                response["show_quotation_upload"] = True
+                response["context"]["last_action"] = "quotation_upload_prompted"
+                return response
+            elif any(kw in msg_lower for kw in ['no', 'dont', "don't", 'help', 'find', 'sourcing']):
+                response["message"] = """No problem! Our **Infosys Buying Desk** can help you find the right supplier.
+
+Here's what our procurement specialists will do:
+• **Identify qualified suppliers** for your specific requirement
+• **Send RFQs** to multiple vendors
+• **Negotiate best pricing** on your behalf
+• **Manage the entire process** from sourcing to delivery
+
+Would you like me to submit a sourcing request to our team?"""
+                response["action"] = "prompt_managed_services"
+                response["show_managed_services"] = True
+                response["managed_service_form"] = True
+                response["context"]["last_action"] = "managed_services_prompted"
+                return response
+        
+        # Step 2: Check if this is likely NOT in our catalog (smart detection)
+        if is_likely_not_in_catalog(user_message):
+            response["message"] = INTELLIGENT_RESPONSES["no_results_with_alternatives"].format(query=user_message)
+            response["action"] = "not_in_catalog"
+            response["show_quotation_upload"] = True
+            response["show_managed_services"] = True
+            response["context"]["intent"] = "NOT_IN_CATALOG"
+            response["context"]["original_query"] = user_message
+            response["context"]["last_action"] = "no_results_alternatives"
+            response["intelligent_guidance"] = {
+                "reason": "Item appears to be outside standard industrial/IT procurement catalog",
+                "recommended_paths": ["quotation_analysis", "managed_services"],
+                "confidence": 0.85
+            }
+            
+            # Store conversation
+            await db.ai_agent_conversations.insert_one({
+                "session_id": session_id,
+                "user_id": current_user["email"],
+                "message": user_message,
+                "intent": "NOT_IN_CATALOG",
+                "response": response["message"][:500],
+                "confidence": 0.85,
+                "timestamp": datetime.now(timezone.utc),
+                "language": request.language,
+                "currency": request.currency,
+                "intelligent_detection": True
+            })
+            return response
+        
+        # Step 3: Classify intent using AI
         classification = await classify_user_intent_with_ai(
-            request.message, 
+            user_message, 
             context, 
             session_id
         )
@@ -5035,28 +5119,13 @@ async def ai_agent_conversation(
         search_query = classification.get("search_query")
         search_type = classification.get("search_type")
         
-        # Build response
-        response = {
-            "message": response_message,
-            "engines_used": ["gpt", "claude", "gemini"],
-            "action": None,
-            "products": None,
-            "services": None,
-            "context": {
-                "intent": intent,
-                "search_type": search_type,
-                "search_query": search_query,
-                **context
-            },
-            "search_results": None,
-            "supplier_form": None,
-            "managed_service_form": None,
-            "unspsc_suggestion": None
-        }
+        response["context"]["intent"] = intent
+        response["context"]["search_type"] = search_type
+        response["context"]["search_query"] = search_query
         
-        # Handle different intents
+        # Step 4: Handle CATALOG_SEARCH with intelligent fallback
         if intent == "CATALOG_SEARCH" and search_query:
-            # Search catalog and include results
+            # Search catalog
             search_results = await search_catalog_for_agent(
                 search_query, 
                 search_type, 
@@ -5064,36 +5133,76 @@ async def ai_agent_conversation(
                 limit=5
             )
             
-            if search_results["products"] or search_results["services"]:
+            has_products = bool(search_results.get("products"))
+            has_services = bool(search_results.get("services"))
+            
+            if has_products or has_services:
+                # Found results - check relevance
                 response["products"] = search_results["products"]
                 response["services"] = search_results["services"]
                 response["action"] = "show_results"
                 
-                # Enhance response message with results summary
-                product_count = len(search_results["products"])
-                service_count = len(search_results["services"])
+                product_count = len(search_results.get("products", []))
+                service_count = len(search_results.get("services", []))
                 
-                if product_count > 0 or service_count > 0:
+                # Check if results are actually relevant (high match scores)
+                top_score = 0
+                if search_results["products"]:
+                    top_score = max(p.get("match_score", 0) for p in search_results["products"])
+                
+                if top_score >= 50:
+                    # Good matches found
                     response["message"] = f"I found some matches for you:\n\n"
                     if product_count > 0:
                         response["message"] += f"• **{product_count} Products** matching your search\n"
                     if service_count > 0:
                         response["message"] += f"• **{service_count} Services** that may help\n"
                     response["message"] += "\nYou can add any of these directly to your cart, or let me know if you need something different."
+                else:
+                    # Low relevance matches - offer alternatives
+                    response["message"] = f"""I found some products, but they may not be exactly what you're looking for (**"{search_query}"**).
+
+Here are the closest matches I found. If these don't meet your needs:
+
+**Option 1:** Do you have a **quotation from a supplier** who can provide this? I can analyze it for pricing and compliance.
+
+**Option 2:** Would you like our **Buying Desk team** to source this for you?"""
+                    response["show_quotation_upload"] = True
+                    response["show_managed_services"] = True
+                    response["context"]["last_action"] = "low_relevance_results"
             else:
-                response["message"] = f"I searched for '{search_query}' but didn't find exact matches in our catalog.\n\nHere are some options:\n• **Refine your search**: Try different keywords or part numbers\n• **Upload a quotation**: If you have a supplier quote, I can analyze it\n• **Request sourcing support**: Let our team find what you need"
-                response["action"] = "no_results"
+                # No results found - intelligent guidance
+                complexity = assess_requirement_complexity(search_query, search_results)
+                
+                if complexity == "complex":
+                    response["message"] = INTELLIGENT_RESPONSES["complex_requirement_detected"].format(query=search_query)
+                    response["action"] = "suggest_managed_services"
+                    response["show_managed_services"] = True
+                    response["managed_service_form"] = True
+                else:
+                    response["message"] = INTELLIGENT_RESPONSES["no_results_with_alternatives"].format(query=search_query)
+                    response["action"] = "no_results"
+                    response["show_quotation_upload"] = True
+                    response["show_managed_services"] = True
+                
+                response["context"]["last_action"] = "no_results_alternatives"
+                response["context"]["original_query"] = search_query
         
+        # Step 5: Handle QUOTATION_ANALYSIS intent
         elif intent == "QUOTATION_ANALYSIS":
             response["action"] = "navigate_quotation"
-            response["message"] += "\n\n**Ready to analyze your quotation?** Click the button below to upload your document."
+            response["show_quotation_upload"] = True
+            response["message"] = response_message + "\n\n**Ready to analyze your quotation?** Click the button below to upload your document."
         
+        # Step 6: Handle MANAGED_SERVICES intent
         elif intent == "MANAGED_SERVICES":
             response["action"] = "navigate_managed_services"
             response["managed_service_form"] = True
+            response["show_managed_services"] = True
+            response["message"] = response_message
             
             # Try to suggest UNSPSC code
-            query_lower = request.message.lower()
+            query_lower = user_message.lower()
             for category in SERVICE_CATEGORIES:
                 if any(word in query_lower for word in category["name"].lower().split()):
                     response["unspsc_suggestion"] = {
@@ -5102,17 +5211,25 @@ async def ai_agent_conversation(
                     }
                     break
         
+        # Step 7: Handle CLARIFICATION_NEEDED
+        else:
+            response["message"] = INTELLIGENT_RESPONSES["clarification_needed"].format(query=user_message)
+            response["action"] = "clarification"
+            response["context"]["last_action"] = "clarification_asked"
+        
         # Store conversation in database for analytics
         await db.ai_agent_conversations.insert_one({
             "session_id": session_id,
             "user_id": current_user["email"],
-            "message": request.message,
+            "message": user_message,
             "intent": intent,
-            "response": response_message[:500],
+            "response": response["message"][:500],
             "confidence": classification.get("confidence", 0),
             "timestamp": datetime.now(timezone.utc),
             "language": request.language,
-            "currency": request.currency
+            "currency": request.currency,
+            "has_results": bool(response.get("products") or response.get("services")),
+            "offered_alternatives": response.get("show_quotation_upload") or response.get("show_managed_services")
         })
         
         return response
@@ -5129,7 +5246,10 @@ async def ai_agent_conversation(
             "search_results": None,
             "supplier_form": None,
             "managed_service_form": None,
-            "unspsc_suggestion": None
+            "unspsc_suggestion": None,
+            "show_quotation_upload": True,
+            "show_managed_services": True,
+            "intelligent_guidance": None
         }
 
 app.include_router(api_router)
