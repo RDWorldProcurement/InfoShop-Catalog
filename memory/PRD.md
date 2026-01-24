@@ -68,12 +68,14 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
   - `vendor_services`: name, category, description (text index)
 - Search results now include `match_score` and `source` fields (catalog vs vendor_catalog)
 - Verified admin catalog upload (`POST /api/admin/upload-catalog`) works with CSV/Excel files
+- Fixed vendor product scoring to match in-memory product scoring (SKU, brand, category matching)
 
 **⚠️ IMPORTANT: Catalog Scale Readiness**
 - User will be adding large number of products next week
 - MongoDB indexes are in place for performance
 - Search accuracy is critical - uses multi-field matching with scoring
 - SKU/Part number searches have highest priority (90 points)
+- All catalog search tests passed (15/15)
 
 ### ✅ Phase 17 - Advanced AI Price Benchmarking with 3 LLMs (January 2026 - COMPLETED)
 **Major Feature: AI Enabled Intelligent Buying with 3 AI Engines**
