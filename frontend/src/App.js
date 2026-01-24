@@ -15,6 +15,7 @@ import AdminPortalPage from "./pages/AdminPortalPage";
 import UploadQuotationPage from "./pages/UploadQuotationPage";
 import SourcingSupportPage from "./pages/SourcingSupportPage";
 import BuyingDeskDashboardPage from "./pages/BuyingDeskDashboardPage";
+import AIProcurementAgentPage from "./pages/AIProcurementAgentPage";
 
 // Components
 import ChatBot from "./components/ChatBot";
