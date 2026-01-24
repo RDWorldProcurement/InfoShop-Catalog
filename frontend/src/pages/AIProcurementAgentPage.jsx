@@ -238,6 +238,125 @@ const AIProcurementAgentPage = () => {
     }, 100);
   };
 
+  // Handle quotation file selection
+  const handleQuotationFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setQuotationFile(file);
+      // Add message showing file selected
+      const fileMsg = {
+        id: Date.now(),
+        type: "user",
+        content: `📎 Selected file: **${file.name}** (${(file.size / 1024).toFixed(1)} KB)`,
+        timestamp: new Date().toISOString(),
+        isFileUpload: true
+      };
+      setMessages(prev => [...prev, fileMsg]);
+    }
+  };
+
+  // Upload and analyze quotation with Real AI
+  const handleQuotationUpload = async () => {
+    if (!quotationFile) {
+      toast.error("Please select a file first");
+      return;
+    }
+    if (!supplierName.trim()) {
+      toast.error("Please enter supplier name");
+      return;
+    }
+
+    setUploadingQuotation(true);
+    setAiAnalysisProgress({ gpt: 'analyzing', claude: 'waiting', gemini: 'waiting' });
+
+    // Add processing message
+    const processingMsg = {
+      id: Date.now(),
+      type: "assistant",
+      content: "I'm analyzing your quotation with our AI-powered price benchmarking system. This uses **GPT-5.2**, **Claude Sonnet 4.5**, and **Gemini 3 Flash** working together.\n\nThis may take up to 2 minutes for complex quotations...",
+      timestamp: new Date().toISOString(),
+      engines: ["gpt", "claude", "gemini"],
+      isAnalyzing: true
+    };
+    setMessages(prev => [...prev, processingMsg]);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", quotationFile);
+      formData.append("supplier_name", supplierName);
+      formData.append("supplier_email", supplierEmail || "");
+      formData.append("document_language", language);
+
+      // Simulate progress updates
+      setTimeout(() => setAiAnalysisProgress({ gpt: 'complete', claude: 'analyzing', gemini: 'waiting' }), 3000);
+      setTimeout(() => setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'analyzing' }), 6000);
+
+      const response = await axios.post(`${API}/procurement/quotation/upload-with-ai`, formData, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        },
+        timeout: 180000 // 3 minutes for Real AI
+      });
+
+      setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'complete' });
+
+      if (response.data.success) {
+        setQuotationAnalysisResult(response.data);
+        
+        // Remove the processing message and add the result
+        setMessages(prev => {
+          const filtered = prev.filter(m => !m.isAnalyzing);
+          const analysis = response.data.analysis;
+          const benchmark = analysis?.price_benchmark || {};
+          const extractedData = analysis?.extracted_data || {};
+          const lineItems = extractedData.line_items || [];
+          const totalSavings = benchmark.total_potential_savings || 0;
+          
+          const resultMsg = {
+            id: Date.now(),
+            type: "assistant",
+            content: `## ✅ Quotation Analysis Complete\n\n**Supplier:** ${extractedData.supplier?.name || supplierName}\n**Quote #:** ${extractedData.quotation_details?.quotation_number || 'N/A'}\n**Total Amount:** ${currency.symbol}${extractedData.quotation_details?.total_amount?.toLocaleString() || 'N/A'}\n\n### AI Price Benchmarking Results\n\n• **${lineItems.length} Line Items** analyzed\n• **${benchmark.benchmarks?.length || 0} Price Benchmarks** generated\n• **Potential Savings:** ${currency.symbol}${totalSavings.toLocaleString()}\n\nI found opportunities to save money on several items. Would you like me to:\n\n• **View detailed benchmarks** for each line item\n• **Add approved items to cart** for PunchOut transfer\n• **Escalate to Buying Desk** for negotiation support`,
+            timestamp: new Date().toISOString(),
+            engines: response.data.ai_engines_used || ["gpt", "claude", "gemini"],
+            quotationAnalysis: response.data,
+            showQuotationResults: true
+          };
+          return [...filtered, resultMsg];
+        });
+
+        toast.success("Quotation analyzed successfully with Real AI!");
+        
+        // Reset upload form
+        setShowQuotationUpload(false);
+        setQuotationFile(null);
+        setSupplierName("");
+        setSupplierEmail("");
+      }
+    } catch (error) {
+      console.error("Quotation upload error:", error);
+      setMessages(prev => {
+        const filtered = prev.filter(m => !m.isAnalyzing);
+        const errorMsg = {
+          id: Date.now(),
+          type: "assistant",
+          content: error.code === 'ECONNABORTED' 
+            ? "The AI analysis is taking longer than expected. This can happen with complex quotations. Would you like to:\n\n• **Try again** with the same file\n• **Use Demo Mode** for instant results\n• **Upload via the dedicated page** for more options"
+            : `I encountered an issue analyzing your quotation: ${error.response?.data?.detail || error.message}\n\nWould you like to try again or use the dedicated upload page?`,
+          timestamp: new Date().toISOString(),
+          engines: [],
+          isError: true,
+          showQuotationUpload: true
+        };
+        return [...filtered, errorMsg];
+      });
+      toast.error("Failed to analyze quotation");
+    } finally {
+      setUploadingQuotation(false);
+      setAiAnalysisProgress(null);
+    }
+  };
+
   // Format price - uses API-provided currency symbol or falls back to context currency
   const formatPrice = (price, apiCurrency) => {
     const symbol = apiCurrency || currency.symbol;
