@@ -276,6 +276,7 @@ const AIProcurementAgentPage = () => {
 
     setUploadingQuotation(true);
     setAiAnalysisProgress({ gpt: 'analyzing', claude: 'waiting', gemini: 'waiting' });
+    setAnalysisPercentage(0);
 
     // Add processing message
     const processingMsg = {
@@ -288,18 +289,46 @@ const AIProcurementAgentPage = () => {
     };
     setMessages(prev => [...prev, processingMsg]);
 
+    // Real-time percentage progress simulation (total ~150 seconds = 2.5 min)
+    // Phase 1: GPT analyzing (0-35%) - 0-45 sec
+    // Phase 2: Claude analyzing (35-70%) - 45-90 sec  
+    // Phase 3: Gemini validating (70-95%) - 90-140 sec
+    // Phase 4: Final processing (95-100%) - 140-150 sec
+    const progressIntervals = [];
+    
+    // Phase 1: GPT (0-35%)
+    for (let i = 0; i <= 35; i += 2) {
+      progressIntervals.push(setTimeout(() => setAnalysisPercentage(i), i * 1200));
+    }
+    // Update status after 5 sec
+    progressIntervals.push(setTimeout(() => {
+      setAiAnalysisProgress({ gpt: 'analyzing', claude: 'analyzing', gemini: 'waiting' });
+    }, 5000));
+    
+    // Phase 2: Claude (35-70%)
+    for (let i = 36; i <= 70; i += 2) {
+      progressIntervals.push(setTimeout(() => setAnalysisPercentage(i), 42000 + (i - 35) * 1300));
+    }
+    // GPT complete at 45 sec
+    progressIntervals.push(setTimeout(() => {
+      setAiAnalysisProgress({ gpt: 'complete', claude: 'analyzing', gemini: 'waiting' });
+    }, 45000));
+    
+    // Phase 3: Gemini (70-95%)
+    for (let i = 71; i <= 95; i += 2) {
+      progressIntervals.push(setTimeout(() => setAnalysisPercentage(i), 88000 + (i - 70) * 1200));
+    }
+    // Claude complete, Gemini starts at 90 sec
+    progressIntervals.push(setTimeout(() => {
+      setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'analyzing' });
+    }, 90000));
+
     try {
       const formData = new FormData();
       formData.append("file", quotationFile);
       formData.append("supplier_name", supplierName || "");
       formData.append("supplier_email", supplierEmail || "");
       formData.append("document_language", language);
-
-      // Simulate progress updates with realistic timing (based on actual ~2.5 min processing)
-      setTimeout(() => setAiAnalysisProgress({ gpt: 'analyzing', claude: 'analyzing', gemini: 'waiting' }), 5000);
-      setTimeout(() => setAiAnalysisProgress({ gpt: 'complete', claude: 'analyzing', gemini: 'waiting' }), 45000);
-      setTimeout(() => setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'analyzing' }), 90000);
-      setTimeout(() => setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'analyzing' }), 120000);
 
       const response = await axios.post(`${API}/procurement/quotation/upload-with-ai`, formData, {
         headers: {
@@ -308,6 +337,9 @@ const AIProcurementAgentPage = () => {
         },
         timeout: 300000 // 5 minutes for Real AI analysis
       });
+      
+      // Clear all intervals
+      progressIntervals.forEach(interval => clearTimeout(interval));
 
       setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'complete' });
 
