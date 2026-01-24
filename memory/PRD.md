@@ -31,8 +31,23 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
    - Replaced `.to_list(10000)` with MongoDB aggregation in `/admin/catalog-summary`
    - Uses `$group` pipeline for efficient counting by delivery partner
 
+4. **Real-time % Progress Indicator (January 24, 2026):**
+   - Added `analysisPercentage` state for tracking progress 0-100%
+   - Large progress bar showing overall completion percentage
+   - Individual progress bars for each AI engine (GPT-5.2, Claude, Gemini)
+   - Shows descriptive text for each engine's task
+   - Simulated timing based on actual ~2.5 minute processing:
+     - Phase 1: GPT (0-35%) - Data extraction
+     - Phase 2: Claude (35-70%) - Price benchmarking
+     - Phase 3: Gemini (70-100%) - Cross-validation
+
+5. **"Upload Quotation for Analysis" Button Fix:**
+   - Added `openQuotationUpload()` function with scroll-to-view
+   - Uses `quotationUploadRef` to scroll smoothly to upload section
+   - Works from both "Recommended Next Steps" and "Manual Options"
+
 **Files Modified:**
-- `/app/frontend/src/pages/AIProcurementAgentPage.jsx` - handleQuotationUpload function, timeout, optional fields
+- `/app/frontend/src/pages/AIProcurementAgentPage.jsx` - handleQuotationUpload function, timeout, optional fields, progress indicator
 - `/app/frontend/src/pages/UploadQuotationPage.jsx` - axios timeout
 - `/app/backend/server.py` - catalog-summary endpoint refactored
 
