@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useMemo } from 'react';
 import { translations, languageOptions } from './translations';
 
 const LanguageContext = createContext(null);
@@ -25,16 +25,10 @@ export const LanguageProvider = ({ children }) => {
     return saved || 'en';
   });
 
-  const [currency, setCurrency] = useState(() => {
-    const savedLang = localStorage.getItem('omnisupply_lang') || 'en';
-    return LANGUAGE_CURRENCY_MAP[savedLang] || LANGUAGE_CURRENCY_MAP['en'];
-  });
-
-  useEffect(() => {
+  // Derive currency from language using useMemo to avoid unnecessary recalculations
+  const currency = useMemo(() => {
     localStorage.setItem('omnisupply_lang', language);
-    // Update currency when language changes
-    const newCurrency = LANGUAGE_CURRENCY_MAP[language] || LANGUAGE_CURRENCY_MAP['en'];
-    setCurrency(newCurrency);
+    return LANGUAGE_CURRENCY_MAP[language] || LANGUAGE_CURRENCY_MAP['en'];
   }, [language]);
 
   const t = translations[language] || translations[language.split('-')[0]] || translations.en;
