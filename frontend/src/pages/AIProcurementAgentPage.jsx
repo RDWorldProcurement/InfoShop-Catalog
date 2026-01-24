@@ -41,6 +41,7 @@ const AIProcurementAgentPage = () => {
   const { t, language, currency } = useLanguage();
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const quotationUploadRef = useRef(null);
   
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState("");
@@ -68,7 +69,17 @@ const AIProcurementAgentPage = () => {
   const [supplierEmail, setSupplierEmail] = useState("");
   const [quotationAnalysisResult, setQuotationAnalysisResult] = useState(null);
   const [aiAnalysisProgress, setAiAnalysisProgress] = useState(null);
+  const [analysisPercentage, setAnalysisPercentage] = useState(0);
   const fileInputRef = useRef(null);
+
+  // Function to open quotation upload and scroll to it
+  const openQuotationUpload = useCallback(() => {
+    setShowQuotationUpload(true);
+    // Use setTimeout to ensure the modal is rendered before scrolling
+    setTimeout(() => {
+      quotationUploadRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  }, []);
 
   // Initialize conversation
   useEffect(() => {
