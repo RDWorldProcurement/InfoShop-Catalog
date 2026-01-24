@@ -94,8 +94,8 @@ const Sidebar = ({ activePage }) => {
           <div className="py-3">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Procurement</p>
             <NavItem 
-              icon={FileUp} 
-              label="One-Off Purchases" 
+              icon={Brain} 
+              label="AI Enabled Intelligent Buying" 
               path="/upload-quotation" 
               id="upload-quotation" 
               activePage={activePage} 
