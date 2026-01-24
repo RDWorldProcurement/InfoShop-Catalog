@@ -786,6 +786,158 @@ const AIProcurementAgentPage = () => {
           </div>
         )}
 
+        {/* Inline Quotation Upload Form */}
+        {showQuotationUpload && (
+          <div className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-t border-purple-200 px-6 py-6">
+            <div className="max-w-3xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-lg border border-purple-200 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
+                      <FileUp className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg text-slate-900">Upload Quotation for AI Analysis</h3>
+                      <p className="text-sm text-slate-500">Powered by GPT-5.2, Claude & Gemini</p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    setShowQuotationUpload(false);
+                    setQuotationFile(null);
+                    setSupplierName("");
+                    setSupplierEmail("");
+                  }}>
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                {/* File Upload */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Quotation Document *
+                    </label>
+                    <div 
+                      className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
+                        quotationFile 
+                          ? 'border-purple-400 bg-purple-50' 
+                          : 'border-slate-300 hover:border-purple-400 hover:bg-purple-50/50'
+                      }`}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.xlsx,.xls,.png,.jpg,.jpeg"
+                        onChange={handleQuotationFileSelect}
+                        className="hidden"
+                      />
+                      {quotationFile ? (
+                        <div className="flex items-center justify-center gap-3">
+                          <CheckCircle className="w-8 h-8 text-purple-600" />
+                          <div className="text-left">
+                            <p className="font-semibold text-purple-900">{quotationFile.name}</p>
+                            <p className="text-sm text-purple-600">{(quotationFile.size / 1024).toFixed(1)} KB</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <Upload className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+                          <p className="text-slate-600">Click to upload or drag & drop</p>
+                          <p className="text-xs text-slate-400 mt-1">PDF, Excel, or Image (max 10MB)</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Supplier Name *
+                      </label>
+                      <Input
+                        value={supplierName}
+                        onChange={(e) => setSupplierName(e.target.value)}
+                        placeholder="Enter supplier name"
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Supplier Email
+                      </label>
+                      <Input
+                        value={supplierEmail}
+                        onChange={(e) => setSupplierEmail(e.target.value)}
+                        placeholder="supplier@company.com"
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+
+                  {/* AI Progress Indicator */}
+                  {uploadingQuotation && aiAnalysisProgress && (
+                    <div className="bg-slate-50 rounded-xl p-4 border">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Brain className="w-5 h-5 text-purple-600 animate-pulse" />
+                        <span className="font-semibold text-slate-900">AI Analysis in Progress</span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          {aiAnalysisProgress.gpt === 'complete' ? (
+                            <CheckCircle className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <Loader2 className="w-4 h-4 animate-spin text-green-500" />
+                          )}
+                          <span className="text-sm">GPT-5.2: {aiAnalysisProgress.gpt === 'complete' ? 'Complete' : 'Extracting data...'}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {aiAnalysisProgress.claude === 'complete' ? (
+                            <CheckCircle className="w-4 h-4 text-purple-500" />
+                          ) : aiAnalysisProgress.claude === 'analyzing' ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+                          ) : (
+                            <div className="w-4 h-4 rounded-full border-2 border-slate-300" />
+                          )}
+                          <span className="text-sm">Claude: {aiAnalysisProgress.claude === 'complete' ? 'Complete' : aiAnalysisProgress.claude === 'analyzing' ? 'Benchmarking...' : 'Waiting'}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {aiAnalysisProgress.gemini === 'complete' ? (
+                            <CheckCircle className="w-4 h-4 text-blue-500" />
+                          ) : aiAnalysisProgress.gemini === 'analyzing' ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                          ) : (
+                            <div className="w-4 h-4 rounded-full border-2 border-slate-300" />
+                          )}
+                          <span className="text-sm">Gemini: {aiAnalysisProgress.gemini === 'complete' ? 'Complete' : aiAnalysisProgress.gemini === 'analyzing' ? 'Validating...' : 'Waiting'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <Button
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 py-6"
+                    onClick={handleQuotationUpload}
+                    disabled={!quotationFile || !supplierName.trim() || uploadingQuotation}
+                  >
+                    {uploadingQuotation ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        AI Analyzing (up to 2 minutes)...
+                      </>
+                    ) : (
+                      <>
+                        <Brain className="w-5 h-5 mr-2" />
+                        Analyze with Real AI
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Input Area */}
         <div className="bg-white border-t px-6 py-4">
           <div className="max-w-5xl mx-auto">
