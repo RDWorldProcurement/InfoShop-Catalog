@@ -3831,12 +3831,39 @@ async def upload_quotation_with_real_ai(
         quotation_id = f"QAI-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6].upper()}"
         session_id = f"ai_benchmark_{quotation_id}"
         
-        # Step 1: Extract data (using existing mock for document parsing)
-        extracted_data = generate_ai_extraction(file.filename, supplier_name)
+        logging.info(f"Starting REAL document extraction for {file.filename} ({file_size} bytes)")
+        
+        # Step 1: REAL Document Extraction using AI
+        extracted_data = await extract_quotation_data(
+            file_content=file_content,
+            file_name=file.filename,
+            file_type=file.content_type,
+            supplier_name=supplier_name,
+            session_id=session_id
+        )
+        
+        # Check for extraction errors
+        if extracted_data.get("error"):
+            logging.warning(f"Document extraction warning: {extracted_data.get('message')}")
+        
+        logging.info(f"Extracted {len(extracted_data.get('line_items', []))} line items from document")
         
         # Step 2: Perform REAL AI price benchmarking with all 3 LLMs
+        line_items = extracted_data.get("line_items", [])
+        
+        if not line_items:
+            # Return early if no items extracted
+            return {
+                "success": False,
+                "quotation_id": quotation_id,
+                "message": "Could not extract line items from the document. Please ensure the file is readable and contains quotation data.",
+                "analysis_mode": "REAL_AI",
+                "extraction_error": True,
+                "extracted_data": extracted_data
+            }
+        
         ai_benchmark_results = await perform_ai_price_benchmarking(
-            extracted_data.get("line_items", []),
+            line_items,
             session_id
         )
         
