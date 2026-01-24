@@ -4,7 +4,7 @@ import { useLanguage } from "../i18n/LanguageContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import {
   Package, Search, History, RefreshCw, Upload, Award, LogOut, User, Coins, Languages,
-  FileUp, Handshake, Building2
+  FileUp, Handshake, Building2, Brain
 } from "lucide-react";
 
 // NavItem component moved outside Sidebar to prevent re-creation on each render
