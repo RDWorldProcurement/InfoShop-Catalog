@@ -5047,6 +5047,31 @@ async def liveness_check():
     """Liveness probe for Kubernetes"""
     return {"alive": True, "timestamp": datetime.now(timezone.utc).isoformat()}
 
+@app.on_event("startup")
+async def startup_db_client():
+    """Initialize database indexes for optimal search performance"""
+    try:
+        # Create indexes for vendor_products collection
+        # These indexes enable fast text-based search on large catalogs
+        await db.vendor_products.create_index([("name", "text"), ("brand", "text"), ("category", "text"), ("description", "text"), ("sku", "text")], name="vendor_products_text_search")
+        await db.vendor_products.create_index("sku", name="vendor_products_sku")
+        await db.vendor_products.create_index("brand", name="vendor_products_brand")
+        await db.vendor_products.create_index("category", name="vendor_products_category")
+        await db.vendor_products.create_index("delivery_partner_id", name="vendor_products_partner")
+        
+        # Create indexes for vendor_services collection
+        await db.vendor_services.create_index([("name", "text"), ("category", "text"), ("description", "text")], name="vendor_services_text_search")
+        await db.vendor_services.create_index("category", name="vendor_services_category")
+        
+        # Create indexes for ai_agent_conversations for analytics
+        await db.ai_agent_conversations.create_index("session_id", name="ai_conversations_session")
+        await db.ai_agent_conversations.create_index("user_id", name="ai_conversations_user")
+        await db.ai_agent_conversations.create_index("timestamp", name="ai_conversations_timestamp")
+        
+        logger.info("Database indexes created successfully for optimal search performance")
+    except Exception as e:
+        logger.warning(f"Index creation warning (may already exist): {e}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
