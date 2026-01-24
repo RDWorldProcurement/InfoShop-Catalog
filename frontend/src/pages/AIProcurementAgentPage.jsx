@@ -850,7 +850,7 @@ const AIProcurementAgentPage = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Supplier Name *
+                        Supplier Name <span className="text-slate-400 font-normal">(optional)</span>
                       </label>
                       <Input
                         value={supplierName}
@@ -861,7 +861,7 @@ const AIProcurementAgentPage = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Supplier Email
+                        Supplier Email <span className="text-slate-400 font-normal">(optional)</span>
                       </label>
                       <Input
                         value={supplierEmail}
