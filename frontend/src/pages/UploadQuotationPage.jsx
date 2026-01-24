@@ -213,7 +213,8 @@ const UploadQuotationPage = () => {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
-        }
+        },
+        timeout: useRealAi ? 120000 : 30000 // 2 minutes for Real AI, 30s for demo
       });
 
       if (response.data.success) {
@@ -225,7 +226,11 @@ const UploadQuotationPage = () => {
       }
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error(error.response?.data?.detail || "Failed to upload quotation");
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        toast.error("AI analysis is taking longer than expected. Please try again or use the demo mode.");
+      } else {
+        toast.error(error.response?.data?.detail || "Failed to upload quotation");
+      }
     } finally {
       setUploading(false);
       setShowAiAnalysis(false);
