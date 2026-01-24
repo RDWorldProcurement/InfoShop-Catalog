@@ -610,7 +610,7 @@ const UploadQuotationPage = () => {
                       {uploading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          {useRealAi ? 'AI Analyzing...' : 'Analyzing...'}
+                          {useRealAi ? 'AI Analyzing (this may take up to 2 minutes)...' : 'Analyzing...'}
                         </>
                       ) : (
                         <>
