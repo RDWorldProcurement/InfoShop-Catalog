@@ -34,7 +34,7 @@ const NavItem = ({ icon: Icon, label, path, id, activePage, navigate, badge, bad
 const Sidebar = ({ activePage }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { t, language, changeLanguage, languageOptions } = useLanguage();
+  const { t, language, changeLanguage, languageOptions, currency } = useLanguage();
 
   const handleLogout = () => {
     logout();
