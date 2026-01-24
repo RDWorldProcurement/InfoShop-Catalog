@@ -8,6 +8,51 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 
 ## What's Been Implemented
 
+### ✅ Phase 17 - Advanced AI Price Benchmarking with 3 LLMs (January 2026 - COMPLETED)
+**Major Feature: AI Enabled Intelligent Buying with 3 AI Engines**
+
+**Naming Updates:**
+- Renamed "One-Off Purchases" to "AI Enabled Intelligent Buying" across all pages
+- Added AI-themed tags to all 3 landing page cards:
+  - Browse Catalog: "PunchOut Enabled Catalog" tag (blue, cart icon)
+  - AI Enabled Intelligent Buying: "Infosys AI Enabled Intelligent Buying" tag (purple, brain icon)
+  - Managed Services: "Infosys Buying Desk" tag (orange, handshake icon)
+
+**Real AI Price Benchmarking Implementation:**
+- Integrated 3 LLMs working in parallel:
+  - 🤖 **OpenAI GPT-5.2** - Product price analysis and market research
+  - 🧠 **Claude Sonnet 4.5** - Professional services rate analysis (Robert Half, PayScale)
+  - ⚡ **Gemini 3 Flash** - Cross-validation and synthesis
+- Created `/app/backend/ai_price_benchmark.py` module with async LLM integration
+- Added `POST /api/procurement/quotation/upload-with-ai` endpoint for real AI analysis
+
+**"Use Already Available Quotations" Feature (Demo Mode):**
+- Added prominent orange button for instant demo without file upload
+- Pre-loaded quotation from "TechPro Solutions Inc." with 6 line items:
+  - Professional Services: Senior Cloud Architect ($29,600), DevOps Engineer ($13,200)
+  - MRO Maintenance: HVAC Maintenance ($11,400), Electrical Inspection ($5,100)
+  - MRO Products: Safety Equipment ($7,225), Hydraulic Parts ($5,625)
+- Total value: ~$72K (under $75K limit as requested)
+- Shows impressive AI analysis animation with progress bars for all 3 engines
+- Displays potential savings of $4,535
+
+**Upload Quotation Page Updates:**
+- New header: "Infosys AI Enabled Intelligent Buying"
+- AI Capabilities card showing all 3 engines with specialties
+- "Use Real AI Analysis" toggle checkbox
+- AI Analysis Progress modal with animated progress bars
+- Expanded results showing individual AI engine analyses per line item
+
+**Backend Endpoints Added:**
+- `GET /api/procurement/quotation/demo-analysis` - Pre-loaded impressive demo analysis
+- `POST /api/procurement/quotation/upload-with-ai` - Real AI-powered analysis
+
+**Files Created/Modified:**
+- `/app/backend/ai_price_benchmark.py` - New AI price benchmarking module
+- `/app/frontend/src/pages/UploadQuotationPage.jsx` - Complete rewrite
+- `/app/frontend/src/pages/LandingPage.jsx` - Added AI tags to all cards
+- `/app/frontend/src/components/Sidebar.jsx` - Updated label and Brain icon
+
 ### ✅ Phase 16 - Admin Buying Desk Management System (January 15, 2026 - COMPLETED)
 **Admin Portal - Buying Desk Management:**
 - **Tactical Buying Tab** (formerly "Upload Catalog" was the default):
