@@ -56,6 +56,25 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 - Test file: `/app/backend/tests/test_ai_agent.py`
 - Report: `/app/test_reports/iteration_14.json`
 
+**Catalog Search Enhancements (January 24, 2026):**
+- Enhanced `search_catalog_for_agent()` to search BOTH in-memory catalogs AND MongoDB `vendor_products` collection
+- Implemented match scoring algorithm for relevance ranking:
+  - Exact phrase match in name: +100 points
+  - SKU/Part number match: +90 points
+  - Brand match: +80 points
+  - Individual term matches: +10-35 points per term
+- Added MongoDB text indexes at startup for fast search on large catalogs:
+  - `vendor_products`: name, brand, category, description, sku (text index)
+  - `vendor_services`: name, category, description (text index)
+- Search results now include `match_score` and `source` fields (catalog vs vendor_catalog)
+- Verified admin catalog upload (`POST /api/admin/upload-catalog`) works with CSV/Excel files
+
+**⚠️ IMPORTANT: Catalog Scale Readiness**
+- User will be adding large number of products next week
+- MongoDB indexes are in place for performance
+- Search accuracy is critical - uses multi-field matching with scoring
+- SKU/Part number searches have highest priority (90 points)
+
 ### ✅ Phase 17 - Advanced AI Price Benchmarking with 3 LLMs (January 2026 - COMPLETED)
 **Major Feature: AI Enabled Intelligent Buying with 3 AI Engines**
 
