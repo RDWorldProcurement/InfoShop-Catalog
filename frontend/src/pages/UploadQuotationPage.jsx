@@ -296,6 +296,43 @@ const UploadQuotationPage = () => {
     return null;
   }
 
+  // Render helper for AI engine status badge
+  const renderAiStatusBadge = (status) => {
+    if (status.status === 'complete') {
+      return (
+        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+          <CheckCircle className="w-3 h-3 mr-1" /> Complete
+        </Badge>
+      );
+    } else if (status.status === 'analyzing') {
+      return (
+        <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 animate-pulse">
+          <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Analyzing
+        </Badge>
+      );
+    } else if (status.status === 'waiting') {
+      return (
+        <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">
+          <Clock className="w-3 h-3 mr-1" /> Waiting
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+          <Zap className="w-3 h-3 mr-1" /> Starting
+        </Badge>
+      );
+    }
+  };
+
+  // Render helper for AI engine analysis text
+  const getAnalysisText = (engineId) => {
+    if (engineId === 'openai') return 'Querying market databases, supplier catalogs...';
+    if (engineId === 'claude') return 'Analyzing Robert Half data, PayScale, industry rates...';
+    if (engineId === 'gemini') return 'Cross-validating results, calculating confidence scores...';
+    return '';
+  };
+
   // AI Analysis Animation Panel
   const AiAnalysisPanel = () => (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
