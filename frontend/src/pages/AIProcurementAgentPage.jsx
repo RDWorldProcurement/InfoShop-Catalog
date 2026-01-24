@@ -519,6 +519,44 @@ const AIProcurementAgentPage = () => {
                     {/* Search Results */}
                     {renderSearchResults(msg)}
                     
+                    {/* Intelligent Action Buttons - Show when no results or alternatives offered */}
+                    {msg.type === 'assistant' && (msg.showQuotationUpload || msg.showManagedServices) && (
+                      <div className="mt-4 p-4 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl border border-slate-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Lightbulb className="w-5 h-5 text-amber-500" />
+                          <span className="font-semibold text-slate-700">Recommended Next Steps</span>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          {msg.showQuotationUpload && (
+                            <Button
+                              onClick={() => navigate("/upload-quotation")}
+                              className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                              data-testid="ai-upload-quotation-btn"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              Upload Quotation for Analysis
+                            </Button>
+                          )}
+                          {msg.showManagedServices && (
+                            <Button
+                              onClick={() => navigate("/sourcing-support")}
+                              className="flex-1 bg-[#FF6B00] hover:bg-[#E65000]"
+                              data-testid="ai-managed-services-btn"
+                            >
+                              <Handshake className="w-4 h-4 mr-2" />
+                              Request Buying Desk Support
+                            </Button>
+                          )}
+                        </div>
+                        {msg.intelligentGuidance && (
+                          <p className="mt-3 text-xs text-slate-500 flex items-center gap-1">
+                            <Info className="w-3 h-3" />
+                            {msg.intelligentGuidance.reason}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    
                     {/* Managed Service UNSPSC Suggestion */}
                     {msg.unspscSuggestion && (
                       <div className="mt-4 p-4 bg-orange-50 rounded-xl border border-orange-200">
