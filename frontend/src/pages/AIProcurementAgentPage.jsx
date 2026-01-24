@@ -49,7 +49,7 @@ const QUICK_ACTIONS = [
 const AIProcurementAgentPage = () => {
   const navigate = useNavigate();
   const { user, token } = useAuth();
-  const { t, language } = useLanguage();
+  const { t, language, currency, formatPrice } = useLanguage();
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   
@@ -70,9 +70,6 @@ const AIProcurementAgentPage = () => {
   });
   const [searchResults, setSearchResults] = useState(null);
   const [showManualOptions, setShowManualOptions] = useState(false);
-
-  // Get currency based on language
-  const currency = CURRENCY_MAP[language] || CURRENCY_MAP.en;
 
   // Initialize conversation
   useEffect(() => {
