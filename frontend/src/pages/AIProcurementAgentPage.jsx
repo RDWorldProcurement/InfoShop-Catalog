@@ -341,6 +341,8 @@ const AIProcurementAgentPage = () => {
       // Clear all intervals
       progressIntervals.forEach(interval => clearTimeout(interval));
 
+      // Set to 100% complete
+      setAnalysisPercentage(100);
       setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'complete' });
 
       if (response.data.success) {
@@ -376,6 +378,9 @@ const AIProcurementAgentPage = () => {
         setSupplierEmail("");
       }
     } catch (error) {
+      // Clear all intervals on error
+      progressIntervals.forEach(interval => clearTimeout(interval));
+      
       console.error("Quotation upload error:", error);
       setMessages(prev => {
         const filtered = prev.filter(m => !m.isAnalyzing);
@@ -396,6 +401,7 @@ const AIProcurementAgentPage = () => {
     } finally {
       setUploadingQuotation(false);
       setAiAnalysisProgress(null);
+      setAnalysisPercentage(0);
     }
   };
 
