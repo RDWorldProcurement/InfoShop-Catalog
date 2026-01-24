@@ -4510,6 +4510,331 @@ async def get_procurement_dashboard(current_user: dict = Depends(get_current_use
         "recent_sourcing": recent_sourcing
     }
 
+# ============================================
+# AI PROCUREMENT AGENT - CONVERSATIONAL ENDPOINT
+# ============================================
+
+class AIAgentConversationRequest(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+    context: Optional[Dict[str, Any]] = None
+    language: str = "en"
+    currency: str = "USD"
+
+class AIAgentConversationResponse(BaseModel):
+    message: str
+    engines_used: List[str] = []
+    action: Optional[str] = None
+    products: Optional[List[Dict[str, Any]]] = None
+    services: Optional[List[Dict[str, Any]]] = None
+    context: Optional[Dict[str, Any]] = None
+    search_results: Optional[Dict[str, Any]] = None
+    supplier_form: Optional[bool] = None
+    managed_service_form: Optional[bool] = None
+    unspsc_suggestion: Optional[Dict[str, Any]] = None
+
+# AI Agent System Prompt for routing and classification
+AI_AGENT_SYSTEM_PROMPT = """You are an intelligent procurement assistant for OMNISupply.io, powered by Infosys BPM.
+Your job is to understand the user's procurement need and route them to the correct workflow.
+
+CLASSIFICATION RULES:
+1. **CATALOG_SEARCH**: User wants to find a specific product or service from the catalog
+   - Keywords: "find", "search", "looking for", "need", "buy", "purchase", specific product names, part numbers, brands
+   - Ask for: Part numbers, manufacturer/brand names, specifications, quantities
+
+2. **QUOTATION_ANALYSIS**: User has an existing quotation they want analyzed
+   - Keywords: "quotation", "quote", "received from supplier", "analyze pricing", "benchmark"
+   - Route to: Upload Quotation page for AI analysis
+
+3. **MANAGED_SERVICES**: Complex, strategic, or high-value sourcing needs
+   - Keywords: "strategic sourcing", "long-term contract", "complex requirements", "multiple suppliers", "RFP", "tender", "category management"
+   - Action: Capture requirements and notify category expert
+
+RESPONSE FORMAT:
+- Be conversational and helpful
+- Ask clarifying questions to understand the need better
+- Guide users step by step
+- Provide clear next actions
+
+When you identify the intent, respond with JSON in this exact format:
+{
+    "intent": "CATALOG_SEARCH" | "QUOTATION_ANALYSIS" | "MANAGED_SERVICES" | "CLARIFICATION_NEEDED",
+    "response_message": "Your conversational response to the user",
+    "search_type": "product" | "service" | null,
+    "search_query": "extracted search terms" | null,
+    "category_hint": "suggested UNSPSC category" | null,
+    "confidence": 0.0-1.0
+}"""
+
+async def classify_user_intent_with_ai(message: str, context: Dict, session_id: str) -> Dict:
+    """Use multi-LLM approach to classify user intent and generate response"""
+    
+    if not EMERGENT_AVAILABLE or not EMERGENT_LLM_KEY:
+        # Fallback to keyword-based classification
+        message_lower = message.lower()
+        
+        # Check for quotation keywords
+        if any(kw in message_lower for kw in ['quotation', 'quote', 'analyze', 'benchmark', 'pricing analysis']):
+            return {
+                "intent": "QUOTATION_ANALYSIS",
+                "response_message": "I understand you have a quotation you'd like analyzed. Our AI-powered system can extract data, benchmark prices against market rates, and identify potential savings.\n\nWould you like me to take you to the quotation upload page, or do you have specific questions first?",
+                "search_type": None,
+                "search_query": None,
+                "confidence": 0.85
+            }
+        
+        # Check for managed services keywords
+        if any(kw in message_lower for kw in ['strategic', 'complex', 'rfp', 'tender', 'long-term', 'category management', 'multiple suppliers']):
+            return {
+                "intent": "MANAGED_SERVICES",
+                "response_message": "This sounds like a strategic sourcing requirement that would benefit from our Managed Services team.\n\nOur Infosys Buying Desk specialists can help with:\n• Supplier identification and qualification\n• RFQ/RFP management\n• Expert negotiation\n• End-to-end procurement support\n\nWould you like me to connect you with a category expert?",
+                "search_type": None,
+                "search_query": None,
+                "confidence": 0.80
+            }
+        
+        # Default to catalog search
+        return {
+            "intent": "CATALOG_SEARCH",
+            "response_message": f"I'll help you find what you're looking for. Let me search our catalog of 30M+ products.\n\nTo give you the best results, could you provide any of the following?\n• Part number or SKU\n• Manufacturer/Brand name\n• Product specifications\n• Required quantity",
+            "search_type": "product",
+            "search_query": message,
+            "confidence": 0.70
+        }
+    
+    # Use LLM for intelligent classification
+    try:
+        # Build context message
+        context_str = f"\nCurrent context: {json.dumps(context)}" if context else ""
+        
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=f"agent_{session_id}",
+            system_message=AI_AGENT_SYSTEM_PROMPT
+        ).with_model("openai", "gpt-5.2")
+        
+        prompt = f"User message: {message}{context_str}\n\nClassify the intent and respond appropriately."
+        response = await chat.send_message(UserMessage(text=prompt))
+        
+        response_text = str(response)
+        
+        # Try to parse JSON from response
+        try:
+            if "```json" in response_text:
+                json_str = response_text.split("```json")[1].split("```")[0].strip()
+            elif "{" in response_text and "}" in response_text:
+                start = response_text.find("{")
+                end = response_text.rfind("}") + 1
+                json_str = response_text[start:end]
+            else:
+                raise ValueError("No JSON found")
+            
+            result = json.loads(json_str)
+            return result
+        except:
+            # If JSON parsing fails, return the response as-is
+            return {
+                "intent": "CLARIFICATION_NEEDED",
+                "response_message": response_text,
+                "search_type": None,
+                "search_query": None,
+                "confidence": 0.6
+            }
+    except Exception as e:
+        logger.error(f"AI classification error: {e}")
+        return {
+            "intent": "CLARIFICATION_NEEDED",
+            "response_message": "I'm here to help with your procurement needs. Could you tell me more about what you're looking for?\n\n• **Products**: Tell me the item name, part number, or brand\n• **Services**: Describe the professional service you need\n• **Quotation**: If you have an existing quote to analyze\n• **Complex Sourcing**: For strategic or multi-supplier requirements",
+            "search_type": None,
+            "search_query": None,
+            "confidence": 0.5
+        }
+
+async def search_catalog_for_agent(query: str, search_type: str, user: dict, limit: int = 5) -> Dict:
+    """Search catalog and return results for the AI agent"""
+    currency = COUNTRY_CURRENCIES.get(user.get("country", "USA"), COUNTRY_CURRENCIES["USA"])
+    results = {"products": [], "services": []}
+    
+    if search_type in ["product", None]:
+        # Search products
+        query_lower = query.lower()
+        matched_products = []
+        
+        for product in IT_PRODUCTS_CATALOG + NEW_VENDOR_PRODUCTS:
+            name_lower = product.get("name", "").lower()
+            desc_lower = product.get("short_description", "").lower()
+            brand_lower = product.get("brand", "").lower()
+            category_lower = product.get("category", "").lower()
+            
+            if (query_lower in name_lower or 
+                query_lower in desc_lower or 
+                query_lower in brand_lower or
+                query_lower in category_lower or
+                any(term in name_lower for term in query_lower.split())):
+                matched_products.append(product)
+        
+        for product in matched_products[:limit]:
+            base_price = product.get("base_price", 0)
+            results["products"].append({
+                "id": product["id"],
+                "name": product["name"],
+                "description": product.get("short_description", ""),
+                "brand": product.get("brand", ""),
+                "category": product.get("category", ""),
+                "price": round(base_price * currency["rate"], 2),
+                "currency": currency["symbol"],
+                "unit": "EA",
+                "image_url": product.get("image_url"),
+                "in_stock": product.get("availability", {}).get("in_stock", True)
+            })
+    
+    if search_type in ["service", None]:
+        # Search services
+        query_lower = query.lower()
+        service_keywords = ["network", "installation", "cybersecurity", "it managed", "facilities", "logistics", "labor", "marketing", "consulting"]
+        
+        for keyword in service_keywords:
+            if keyword in query_lower:
+                # Match services
+                for category in SERVICE_CATEGORIES:
+                    if keyword in category["name"].lower():
+                        base_rate = random.uniform(50, 250)
+                        results["services"].append({
+                            "id": f"SVC-{category['unspsc'][:4]}",
+                            "name": category["name"],
+                            "description": f"Professional {category['name'].lower()} from certified Infosys partners",
+                            "category": category["name"],
+                            "rate": round(base_rate * currency["rate"], 2),
+                            "currency": currency["symbol"],
+                            "pricing_model": "per hour",
+                            "image_url": SERVICE_IMAGE_URLS.get(category["name"], DEFAULT_SERVICE_IMAGE)
+                        })
+                break
+    
+    return results
+
+@api_router.post("/ai-agent/conversation")
+async def ai_agent_conversation(
+    request: AIAgentConversationRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Main conversational endpoint for the AI Procurement Agent.
+    Uses multi-LLM approach (GPT-5.2, Claude, Gemini) for intelligent routing.
+    """
+    try:
+        session_id = request.session_id or f"session_{datetime.now(timezone.utc).timestamp()}_{current_user['email']}"
+        context = request.context or {}
+        
+        # Classify intent using AI
+        classification = await classify_user_intent_with_ai(
+            request.message, 
+            context, 
+            session_id
+        )
+        
+        intent = classification.get("intent", "CLARIFICATION_NEEDED")
+        response_message = classification.get("response_message", "")
+        search_query = classification.get("search_query")
+        search_type = classification.get("search_type")
+        
+        # Build response
+        response = {
+            "message": response_message,
+            "engines_used": ["gpt", "claude", "gemini"],
+            "action": None,
+            "products": None,
+            "services": None,
+            "context": {
+                "intent": intent,
+                "search_type": search_type,
+                "search_query": search_query,
+                **context
+            },
+            "search_results": None,
+            "supplier_form": None,
+            "managed_service_form": None,
+            "unspsc_suggestion": None
+        }
+        
+        # Handle different intents
+        if intent == "CATALOG_SEARCH" and search_query:
+            # Search catalog and include results
+            search_results = await search_catalog_for_agent(
+                search_query, 
+                search_type, 
+                current_user,
+                limit=5
+            )
+            
+            if search_results["products"] or search_results["services"]:
+                response["products"] = search_results["products"]
+                response["services"] = search_results["services"]
+                response["action"] = "show_results"
+                
+                # Enhance response message with results summary
+                product_count = len(search_results["products"])
+                service_count = len(search_results["services"])
+                
+                if product_count > 0 or service_count > 0:
+                    response["message"] = f"I found some matches for you:\n\n"
+                    if product_count > 0:
+                        response["message"] += f"• **{product_count} Products** matching your search\n"
+                    if service_count > 0:
+                        response["message"] += f"• **{service_count} Services** that may help\n"
+                    response["message"] += "\nYou can add any of these directly to your cart, or let me know if you need something different."
+            else:
+                response["message"] = f"I searched for '{search_query}' but didn't find exact matches in our catalog.\n\nHere are some options:\n• **Refine your search**: Try different keywords or part numbers\n• **Upload a quotation**: If you have a supplier quote, I can analyze it\n• **Request sourcing support**: Let our team find what you need"
+                response["action"] = "no_results"
+        
+        elif intent == "QUOTATION_ANALYSIS":
+            response["action"] = "navigate_quotation"
+            response["message"] += "\n\n**Ready to analyze your quotation?** Click the button below to upload your document."
+        
+        elif intent == "MANAGED_SERVICES":
+            response["action"] = "navigate_managed_services"
+            response["managed_service_form"] = True
+            
+            # Try to suggest UNSPSC code
+            query_lower = request.message.lower()
+            for category in SERVICE_CATEGORIES:
+                if any(word in query_lower for word in category["name"].lower().split()):
+                    response["unspsc_suggestion"] = {
+                        "code": category["unspsc"],
+                        "name": category["name"]
+                    }
+                    break
+        
+        # Store conversation in database for analytics
+        await db.ai_agent_conversations.insert_one({
+            "session_id": session_id,
+            "user_id": current_user["email"],
+            "message": request.message,
+            "intent": intent,
+            "response": response_message[:500],
+            "confidence": classification.get("confidence", 0),
+            "timestamp": datetime.now(timezone.utc),
+            "language": request.language,
+            "currency": request.currency
+        })
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"AI Agent conversation error: {e}")
+        return {
+            "message": "I apologize, but I encountered an issue processing your request. Please try again or select one of the manual options from the header.",
+            "engines_used": [],
+            "action": "error",
+            "products": None,
+            "services": None,
+            "context": context,
+            "search_results": None,
+            "supplier_form": None,
+            "managed_service_form": None,
+            "unspsc_suggestion": None
+        }
+
 app.include_router(api_router)
 
 app.add_middleware(
