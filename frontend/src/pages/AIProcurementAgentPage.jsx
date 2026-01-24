@@ -620,7 +620,7 @@ const AIProcurementAgentPage = () => {
                 
                 <Card 
                   className="cursor-pointer hover:shadow-md transition-all hover:border-purple-500"
-                  onClick={() => setShowQuotationUpload(true)}
+                  onClick={openQuotationUpload}
                 >
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
