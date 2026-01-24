@@ -333,91 +333,70 @@ const UploadQuotationPage = () => {
     return '';
   };
 
-  // AI Analysis Animation Panel
-  const AiAnalysisPanel = () => (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
-      <Card className="w-full max-w-2xl mx-4 bg-slate-900 border-slate-700">
-        <CardHeader className="border-b border-slate-700">
-          <CardTitle className="text-white flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center animate-pulse">
-              <Brain className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <span>AI Price Benchmarking in Progress</span>
-              <p className="text-sm font-normal text-slate-400 mt-1">3 AI Engines analyzing your quotation</p>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          {AI_ENGINES.map((engine) => {
-            const status = aiEngineStatus[engine.id];
-            return (
-              <div key={engine.id} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${engine.color} flex items-center justify-center text-white text-xl`}>
-                      {engine.icon}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white">{engine.name}</p>
-                      <p className="text-xs text-slate-400">{engine.specialty}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {status.status === 'complete' ? (
-                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                        <CheckCircle className="w-3 h-3 mr-1" /> Complete
-                      </Badge>
-                    ) : status.status === 'analyzing' ? (
-                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 animate-pulse">
-                        <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Analyzing
-                      </Badge>
-                    ) : status.status === 'waiting' ? (
-                      <Badge className="bg-slate-500/20 text-slate-400 border-slate-500/30">
-                        <Clock className="w-3 h-3 mr-1" /> Waiting
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                        <Zap className="w-3 h-3 mr-1" /> Starting
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full bg-gradient-to-r ${engine.color} transition-all duration-300`}
-                    style={{ width: `${status.progress}%` }}
-                  />
-                </div>
-                {status.status === 'analyzing' && (
-                  <div className="text-xs text-slate-500 flex items-center gap-2">
-                    <CircleDot className="w-3 h-3 animate-pulse" />
-                    {engine.id === 'openai' && 'Querying market databases, supplier catalogs...'}
-                    {engine.id === 'claude' && 'Analyzing Robert Half data, PayScale, industry rates...'}
-                    {engine.id === 'gemini' && 'Cross-validating results, calculating confidence scores...'}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          
-          <div className="pt-4 border-t border-slate-700">
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <Database className="w-4 h-4" />
-              <span>Data sources: Grainger, MSC Industrial, Robert Half, PayScale, CAT Parts, Industry Reports</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
   return (
     <div className="flex min-h-screen bg-slate-100">
       <Sidebar activePage="upload-quotation" />
       
       {/* AI Analysis Overlay */}
-      {(showAiAnalysis || demoMode) && <AiAnalysisPanel />}
+      {(showAiAnalysis || demoMode) && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
+          <Card className="w-full max-w-2xl mx-4 bg-slate-900 border-slate-700">
+            <CardHeader className="border-b border-slate-700">
+              <CardTitle className="text-white flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center animate-pulse">
+                  <Brain className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <span>AI Price Benchmarking in Progress</span>
+                  <p className="text-sm font-normal text-slate-400 mt-1">3 AI Engines analyzing your quotation</p>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              {AI_ENGINES.map((engine) => {
+                const status = aiEngineStatus[engine.id];
+                return (
+                  <div key={engine.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${engine.color} flex items-center justify-center text-white text-xl`}>
+                          {engine.icon}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-white">{engine.name}</p>
+                          <p className="text-xs text-slate-400">{engine.specialty}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {renderAiStatusBadge(status)}
+                      </div>
+                    </div>
+                    <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full bg-gradient-to-r ${engine.color} transition-all duration-300`}
+                        style={{ width: `${status.progress}%` }}
+                      />
+                    </div>
+                    {status.status === 'analyzing' && (
+                      <div className="text-xs text-slate-500 flex items-center gap-2">
+                        <CircleDot className="w-3 h-3 animate-pulse" />
+                        {getAnalysisText(engine.id)}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              
+              <div className="pt-4 border-t border-slate-700">
+                <div className="flex items-center gap-2 text-slate-400 text-sm">
+                  <Database className="w-4 h-4" />
+                  <span>Data sources: Grainger, MSC Industrial, Robert Half, PayScale, CAT Parts, Industry Reports</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       
       <main className="flex-1 p-6 lg:p-8 overflow-auto">
         <div className="max-w-6xl mx-auto">
