@@ -35,6 +35,9 @@ from ai_price_benchmark import (
     analyze_with_gemini
 )
 
+# Import real document extraction module
+from document_extractor import extract_quotation_data
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
