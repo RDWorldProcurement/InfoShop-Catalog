@@ -4850,9 +4850,6 @@ async def search_catalog_for_agent(query: str, search_type: str, user: dict, lim
             })
     
     return results
-                break
-    
-    return results
 
 @api_router.post("/ai-agent/conversation")
 async def ai_agent_conversation(
