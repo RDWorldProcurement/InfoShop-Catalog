@@ -372,12 +372,17 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 
 ## Prioritized Backlog
 
+### P0 (Immediate - Next Tasks)
+- [ ] Dynamic Currency Mapping: EUR for French & Spanish (Spain), MXN for Spanish (Mexico), USD for English
+
 ### P1 (High Priority)
+- [ ] Real-time notifications for Buying Desk status changes
 - [ ] Real AI/ML document extraction integration
 - [ ] Schedule Repeat Orders backend logic
 - [ ] Bulk Submission via Excel upload
 
 ### P2 (Medium Priority)
+- [ ] DB query optimization (replace `.to_list(10000)` with aggregation pipelines)
 - [ ] Enhance InfoConnect chatbot with LLM
 - [ ] Real vendor API integration (Grainger)
 - [ ] Email notifications for sourcing updates
