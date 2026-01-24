@@ -284,7 +284,7 @@ const AIProcurementAgentPage = () => {
                   <p className="text-sm text-slate-600 line-clamp-2">{product.description}</p>
                   <div className="flex items-center gap-4 mt-2">
                     <Badge variant="outline">{product.brand}</Badge>
-                    <span className="text-lg font-bold text-[#007CC3]">{formatPrice(product.price)}</span>
+                    <span className="text-lg font-bold text-[#007CC3]">{formatPrice(product.price, product.currency)}</span>
                     <span className="text-sm text-slate-500">per {product.unit || 'EA'}</span>
                   </div>
                 </div>
