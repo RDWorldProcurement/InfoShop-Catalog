@@ -5,8 +5,56 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 1. **Product & Service Catalogs** - 30M+ Industrial MRO Products and 100K+ Professional Services
 2. **AI-Powered Quotation Analysis** - Upload quotations for AI extraction, price benchmarking, and tax verification
 3. **End-to-End Sourcing Support** - Full procurement services handled by Infosys specialists
+4. **Advanced AI Procurement Agent** - Conversational AI interface for intelligent procurement routing
 
 ## What's Been Implemented
+
+### ✅ Phase 18 - Advanced AI-Driven Procurement Handling (January 24, 2026 - COMPLETED)
+**Major Feature: AI Procurement Agent - Conversational Entry Point**
+
+**New AI Procurement Agent Page (/ai-agent):**
+- Conversational chat interface with natural language understanding
+- Powered by 3 LLMs working in concert: GPT-5.2, Claude Sonnet 4.5, Gemini 3 Flash
+- Intelligent routing to one of three workflows:
+  1. **CATALOG_SEARCH**: When user wants to find products/services → Shows matching products with Add to Cart
+  2. **QUOTATION_ANALYSIS**: When user has a supplier quote → Guides to Upload Quotation page
+  3. **MANAGED_SERVICES**: For strategic/complex sourcing → Routes to Buying Desk with UNSPSC suggestion
+- Quick action buttons: Find a Product, Find a Service, I have a Quotation, Complex/Strategic Sourcing
+- Real-time LLM indicator badges (GPT-5.2, Claude, Gemini)
+- Currency display at bottom (USD/EUR/MXN based on user's country)
+
+**Landing Page Update - 4 Options Layout:**
+- Featured AI Procurement Agent card at top with gradient styling
+- "NEW" badge and "GPT-5.2 + Claude + Gemini" badge
+- Three regular option cards below:
+  1. Browse Catalog (PunchOut Enabled)
+  2. AI Enabled Intelligent Buying (Upload Quotation)
+  3. Managed Services (Buying Desk)
+
+**Sidebar Navigation Update:**
+- Added "AI Procurement Agent" with "NEW" badge (purple gradient)
+- Positioned at top of Procurement section
+
+**Backend Endpoint Added:**
+- `POST /api/ai-agent/conversation` - Main conversational endpoint
+  - Accepts: message, session_id, context, language, currency
+  - Returns: message, engines_used, action, products, services, context, unspsc_suggestion
+  - Intent classification using LLM with keyword-based fallback
+  - Product/service search integration
+  - Conversation storage in MongoDB for analytics
+
+**Files Created/Modified:**
+- `/app/frontend/src/pages/AIProcurementAgentPage.jsx` - Full conversational UI
+- `/app/frontend/src/pages/LandingPage.jsx` - Updated to 4-option layout with featured AI card
+- `/app/frontend/src/components/Sidebar.jsx` - Added AI Procurement Agent nav item
+- `/app/frontend/src/App.js` - Added /ai-agent route
+- `/app/backend/server.py` - Added AI agent conversation endpoint (lines 4515-4800)
+
+**Test Results:**
+- Backend: 100% (12/12 tests passed)
+- Frontend: All features working correctly
+- Test file: `/app/backend/tests/test_ai_agent.py`
+- Report: `/app/test_reports/iteration_14.json`
 
 ### ✅ Phase 17 - Advanced AI Price Benchmarking with 3 LLMs (January 2026 - COMPLETED)
 **Major Feature: AI Enabled Intelligent Buying with 3 AI Engines**
