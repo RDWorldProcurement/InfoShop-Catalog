@@ -95,6 +95,16 @@ const Sidebar = ({ activePage }) => {
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Procurement</p>
             <NavItem 
               icon={Brain} 
+              label="AI Procurement Agent" 
+              path="/ai-agent" 
+              id="ai-agent" 
+              activePage={activePage} 
+              navigate={navigate}
+              badge="NEW"
+              badgeColor="bg-gradient-to-r from-purple-500 to-blue-500 text-white"
+            />
+            <NavItem 
+              icon={Brain} 
               label="AI Enabled Intelligent Buying" 
               path="/upload-quotation" 
               id="upload-quotation" 
