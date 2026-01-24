@@ -1,96 +1,84 @@
 <analysis>**original_problem_statement:**
-The user wants to merge two applications, OMNISupply.io and infosys-ai-desk.preview.emergentagent.com, into a single, unified platform under the OMNISupply.io brand.
+The user wants to transform OMNISupply.io into an intelligent, prompt-driven procurement platform. The primary new feature is an Advanced AI Driven Procurement Handling capability.
 
 **PRODUCT REQUIREMENTS:**
-*   **Unified Landing Page:** Redesign the OMNISupply.io landing page to incorporate the business offerings and content from the Infosys AI Desk, presenting three core user actions:
-    1.  Browse Catalogs (existing OMNISupply.io feature).
-    2.  Upload Quotation for AI-powered analysis (from Infosys AI Desk).
-    3.  Request End-to-End Sourcing Support (from Infosys AI Desk).
-*   **Feature Integration:** Integrate the Upload Quotation and Sourcing Support features as new, fully functional pages within OMNISupply.io.
-*   **Backend Implementation:** Create new backend endpoints for the integrated features. These should be fully functional, with mocked but realistic AI analysis, and persist all data (requests, user info, history) to MongoDB.
-*   **Authentication:** The new Upload Quotation and Sourcing Support features must require user login.
-*   **Branding:** Ensure 100% branding alignment with Infosys BPM. Use a unique, AI-generated logo for OMNISupply.io and specific ERP vendor logos.
-*   **UI/UX Refinements:**
-    *   Clarify button/page labels (e.g., Sourcing Support to Managed Services / Buying Desk).
-    *   Add a PO and Invoice Handling Entity selection to procurement flows.
-    *   Implement a Buying Desk Dashboard to track the status of managed sourcing requests.
-    *   Ensure full multi-language support on the landing page for all 5 languages (English, French, German, Italian, Dutch).
-    *   Update the value proposition text on the landing page to be more compelling and transformational.
+*   **AI Procurement Agent:**
+    *   Create a new, primary user interface that is conversational and prompt-driven.
+    *   The user should describe their needs in natural language.
+    *   The AI agent will analyze the user's prompt and intelligently guide them to one of three workflows:
+        1.  **Catalog Search:** If the user is looking for a specific product/service. The agent should ask for details (Part #, Mfg, etc.) and search the catalog. If found, display results for cart transfer.
+        2.  **AI Enabled Intelligent Quotation Handling:** If the product/service is not found, or if the user mentions they have a quote, the agent should transition them to the quotation analysis flow.
+        3.  **Managed Services:** If the prompt indicates a complex, strategic, or high-value sourcing need, the agent should identify it as a Managed Services request, capture initial information, and inform the user a category expert will be in touch.
+    *   The AI conversation interface must be visually attractive, branded for Infosys BPM, and provide an option for the user to exit and manually select one of the three individual options at any time.
+*   **Landing Page Update:**
+    *   The main landing page should feature four main options:
+        1.  Advanced AI Driven Procurement Handling (new feature, placed prominently at the top).
+        2.  Browse and Buy from Catalog.
+        3.  AI Enabled Intelligent Quotation Handling.
+        4.  Submit Managed Services Request.
+*   **Multi-Currency and Language:**
+    *   The entire application must support full language translation.
+    *   Currency must dynamically change based on the selected language/region.
+    *   Examples: French should show EUR, Spanish (Mexico) should show MXN, Spanish (Spain) should show EUR.
+*   **Backend & AI:**
+    *   The conversational AI must be powered by three LLMs working in concert: OpenAI GPT-5.2, Claude Sonnet 4.5, and Gemini 3 Flash.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a unified procurement platform, OMNISupply.io. It integrates catalog browsing with AI-powered quotation analysis (One-Off Purchases) and managed procurement (Managed Services / Buying Desk). A new Buying Desk Dashboard has been implemented to track sourcing requests through various stages. The UI has been significantly updated with a new AI-generated logo for OMNISupply.io, logos for ERP partners and ProPay.ai, and revised labeling for clarity. A language selector has been added to the landing page, and the translation files have been updated for five languages. However, the landing page itself is not fully translated, with several sections still displaying hardcoded English text.
+The application is a procurement platform with three core, manually-selected features: Catalog Browsing, AI-Enabled Intelligent Buying (formerly One-Off Purchases), and Managed Services. The AI-Enabled Intelligent Buying feature has been significantly enhanced to use a combination of OpenAI, Claude, and Gemini for real price benchmarking and includes an impressive demo mode that simulates the analysis process. A comprehensive Admin Buying Desk has been built for Infosys staff to manage all incoming tactical and sourcing requests. The landing page translations have been fixed, and build stability has been improved with better error handling and health check endpoints.
 
 **Last working item**:
-    - Last item agent was working: The agent was in the middle of fixing a recurring bug where the landing page would not fully translate when switching languages. The agent correctly identified that numerous text elements were hardcoded in English. After updating the translation files () with all the necessary keys for all five languages, the agent started editing  to replace the hardcoded strings with the  translation function. This work is incomplete.
+    - Last item agent was working: The agent began implementing the Advanced AI Driven Procurement Handling feature, which is the new conversational entry point for the application.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? frontend testing agent. After the fix, the agent should take full-page screenshots for all 5 languages (English, French, German, Italian, Dutch) to verify that every single text element on the landing page is correctly translated.
-    - User Testing Done: N
+    - Which testing method agent to use? backend testing agent for the new conversational endpoint first, then the frontend testing agent for the new  UI and workflow.
 
 **All Pending/In progress Issue list**:
-  - Issue 1:  Landing page multi-language support is incomplete and broken (P0)
-
-  Issues Detail:
-  - Issue 1: 
-     - **Description:** When the user changes the language on the landing page, large sections of the page remain in English. This includes the navigation links (Features, How It Works), stats cards (Annual Spend Managed), AI feature descriptions, and more. This provides a broken user experience.
-     - **Attempted fixes:** The agent correctly identified the root cause: hardcoded English strings in . The agent successfully populated  with all the required translation keys for all 5 supported languages. The agent then started updating  but only managed to translate the main navigation links before the session ended.
-     - **Next debug checklist**:
-        - Continue editing .
-        - Systematically replace all remaining hardcoded English text with the corresponding translation keys from  using the  function.
-        - **Sections to fix**:
-            - Feature lists inside the main CTA cards (e.g., Multi-brand comparison).
-            - The stats section (Annual Spend Managed, Enterprise Clients, etc.).
-            - The How It Works / AI Intelligence section titles and descriptions.
-            - The ERP integrations section title and subtitle.
-            - The final call-to-action section (Ready to transform your procurement?).
-            - The footer links.
-     - **Why fix this issue and what will be achieved with the fix?**: To provide a seamless and professional multi-language experience as requested by the user, ensuring the entire landing page is usable for non-English speakers.
-     - **Status**:  IN PROGRESS
-     - **Is recurring issue?** Y (This is the second attempt to fix the translation comprehensively).
-     - **Should Test frontend/backend/both after fix?** Frontend
-     - **Blocked on other issue**: None
+No pending issues.
 
 **In progress Task List**:
-  - Task 1:  Complete the translation of the Landing Page (P0)
- 
+  - Task 1:  Implement the Advanced AI Driven Procurement Handling feature (P0)
+
  Task Detail:
   - Task 1: 
-     - **Where to resume**: The file  is open for edits. The agent has just finished updating the navigation links (around line 240). The next step is to continue down the file, find the next hardcoded section (the feature list inside the CTA cards, around line 370), and replace it with , etc.
-     - **What will be achieved with this?**: A fully internationalized landing page where all text content changes dynamically based on the selected language.
-     - **Status**: IN PROGRESS
-     - **Should Test frontend/backend/both after fix?**: Frontend
+     - **Where to resume**: The agent has created the placeholder file for the new UI at . The next immediate step is to create the new backend API endpoint in  that will handle the conversational logic, taking a user's prompt and returning the AI's response or next action.
+     - **What will be achieved with this?**: A new conversational entry point that guides users to the correct procurement workflow, making the application more intuitive and intelligent.
+     - **Status**:  IN PROGRESS
+     - **Should Test frontend/backend/both after fix?**: Both
      - **Blocked on something**: No
 
 **Upcoming and Future Tasks**
-*   **P1 - Real-time Notifications:** Implement email or in-app notifications to alert users when their Buying Desk request status changes (e.g., from RFQ Sent to Quotes Received).
-*   **P2 - Admin View for Buying Desk:** Create a new page/dashboard for admins to view, manage, and update the status of all user-submitted Buying Desk requests.
-*   **P2 - InfoConnect Chatbot:** Integrate a real LLM into the InfoConnect chatbot placeholder to provide conversational support.
-*   **P2 - DB Query Optimization:** Address the minor performance warning from the deployment health check by refactoring two queries in  (lines 3084, 3090) to use more efficient MongoDB aggregation pipelines instead of .
+*   **P0 - Complete AI Procurement Agent Feature**:
+    *   Create the backend endpoint in  for conversational AI logic.
+    *   Build the conversational chat UI in , ensuring it is attractive and branded.
+    *   Integrate the frontend UI with the new backend endpoint.
+    *   Implement the intelligent routing logic to guide users to the Catalog, Quotation, or Managed Services workflows based on the conversation.
+*   **P0 - Update Landing Page**: Modify  to display the four capabilities, with the new Advanced AI Driven Procurement Handling option featured at the top.
+*   **P1 - Implement Dynamic Currency Mapping**: Update the frontend to change the displayed currency symbol (€, $, MXN) based on the selected language/region. This will likely involve changes to the  and relevant UI components.
+*   **P1 - Real-time Notifications:** Implement email or in-app notifications to alert users when their Buying Desk request status changes.
+*   **P2 - DB Query Optimization:** Address the minor performance warning by refactoring two queries in  to use more efficient MongoDB aggregation pipelines instead of .
 
 **Completed work in this session**
-- **Bug Fixes:**
-  - Fixed Add to Cart functionality to correctly open the PunchOut/cart transfer modal.
-- **New Features & Enhancements:**
-  - Implemented an Engage Infosys Tactical Buyers feature on the quotation analysis page, with a new backend endpoint.
-  - Created the **Buying Desk Dashboard**, a new page for users to track the status of their managed sourcing requests with a visual progress timeline.
-  - Added backend endpoints and database schema updates to support the new tracking dashboard.
-- **UI/UX & Branding Updates:**
-  - Renamed key features for clarity: Sourcing Support -> Managed Services / Buying Desk, and Upload Quotation -> One-Off Purchases.
-  - Added a PO and Invoice Handling Entity selection component (Infosys, ProPay, Customer Direct) to the Sourcing Support and Upload Quotation pages.
-  - Updated the ProPay logo to a new, clearer SVG version and changed its text label to ProPay World Wide Inc..
-  - Generated and implemented a unique, AI-created icon-only logo for OMNISupply.io, making it larger for better visibility.
-  - Generated and implemented new logos for ERP partners (Coupa, SAP Ariba, etc.) on the landing page.
-  - Added a prominent Infosys AI Enabled Intelligent Buying banner/label to the Upload Quotation page and the corresponding card on the landing page.
-  - Rewrote the main value proposition on the landing page to be more compelling and value-oriented.
-  - Added a language selector dropdown to the landing page header and populated the translation file with keys for 5 languages.
+- **Major Features Implemented**:
+  - **Admin Buying Desk Management System**: Added a new Buying Desk Management section to the Admin Portal () for Infosys staff to view, manage, and update the status of all user-submitted Tactical Buying and Managed Services requests. Implemented all necessary backend endpoints.
+  - **Advanced AI Price Benchmarking**: Replaced the mock price benchmarking with a real AI-powered system using OpenAI GPT-5.2, Claude Sonnet 4.5, and Gemini 3 Flash. Implemented a sophisticated Demo Mode with an impressive animated UI that simulates a live analysis using a pre-canned quotation.
+- **UI/UX & Branding Updates**:
+  - Renamed One-Off Purchases to **AI Enabled Intelligent Buying** across the application, including the sidebar.
+  - Added new, styled tags with icons to all three main feature cards on the landing page for a more modern look.
+  - Updated footer links (Privacy Policy, Terms of Use, Contact Us) to point to the correct Infosys URLs.
+- **Bug Fixes & Stability**:
+  - **Resolved Landing Page Translation:** Comprehensively fixed the recurring issue where the landing page was not fully translating. All text elements are now correctly internationalized for all 5 languages.
+  - **Fixed Login Page Logo:** Removed a visual filter to make the Infosys BPM logo clearer on the login page.
+  - **Build Stability Refinements:** Added a comprehensive backend health check endpoint (), implemented frontend error boundaries, and added a global Axios error interceptor to make the application more robust.
 
 **Earlier issues found/mentioned but not fixed**
 None.
 
 **Known issue recurrence from previous fork**
-The issue of incomplete multi-language support on the landing page is a recurring problem within this session. The agent's first attempt was incomplete, leading to the user reporting it again. The current work is the second, more comprehensive attempt to fix it.
+- **Issue:** Incomplete multi-language support on the landing page.
+- **Recurrence count:** 2
+- **Status:** RESOLVED
 
 **Code Architecture**
 
@@ -98,93 +86,94 @@ The issue of incomplete multi-language support on the landing page is a recurrin
 **Key Technical Concepts**
 - **Backend:** FastAPI, Python, MongoDB ().
 - **Frontend:** React, JavaScript, , TailwindCSS.
-- **State Management:** React  for global state like user authentication and language selection.
-- **Authentication:** JWT (JSON Web Tokens).
-- **Internationalization (i18n):** A custom solution using React Context and a  object to provide dynamic content in 5 languages.
-- **Real-time Progress Tracker UI:** A new component on the  that visually represents the current stage of a procurement request.
+- **Multi-LLM Integration:** Using  to orchestrate calls to OpenAI, Claude, and Gemini in parallel for advanced analysis.
+- **Conversational AI:** The new feature being built will use natural language processing to guide users.
+- **State Management:** React  for authentication and language selection.
+- **Authentication:** JWT for both regular users and admins.
 
 **key DB schema**
-  - **users:** {id, email, name, country}
-  - **products:** {id, name, description, brand, category, ...}
-  - **quotations:** {id, user_id, file_url, analysis_results, status, created_at, po_entity}
-  - **buying_desk_requests:** (formerly ) {id, user_id, title, category, description, status, created_at, **current_stage**, **stages**}
-    -  is an array of objects: .
-    -  is a string like submitted, rfq_sent, negotiating.
+  - **buying_desk_requests:** {..., **admin_notes**: List, **assigned_specialist**: str}
+  - **quotations:** {..., **analysis_results**: Dict, **is_demo**: bool}
+  - No schema changes yet for the new AI Procurement Agent.
 
 **changes in tech stack**
-None.
+-  library was installed and used for multi-LLM integrations.
 
 **All files of reference**
-*   : Heavily updated with complete translations for all 5 languages for the landing page.
-*   : Partially updated to use translation keys. Needs to be completed. Also updated with new logos and UI text.
-*   : New file created for the tracking dashboard feature.
-*   : Updated with new endpoints for the buying desk dashboard (, ) and to support the new tracking stages in sourcing requests.
-*   : Updated with new labels, ProPay logo, and the PO/Invoice entity selection.
-*   : Updated with new labels, ProPay logo, and the PO/Invoice entity selection.
-*   : Updated with the route for the new .
-*   : Updated with the new OMNISupply logo and a link to the .
-*   : Updated to fix the Add to Cart navigation behavior.
-*   : Updated to reflect completed tasks and new requirements.
+*   **/app/frontend/src/pages/AIProcurementAgentPage.jsx**: New file created for the conversational AI feature. Currently a placeholder.
+*   **/app/frontend/src/pages/AdminPortalPage.jsx**: Heavily overwritten to add the full Buying Desk Management feature with multiple tabs and data tables.
+*   **/app/frontend/src/pages/UploadQuotationPage.jsx**: Heavily overwritten to integrate the real AI benchmarking, the demo mode, and the visualization of the three AI engines.
+*   **/app/frontend/src/pages/LandingPage.jsx**: Updated with new feature names, AI tags on cards, and completed translations.
+*   **/app/frontend/src/components/Sidebar.jsx**: Updated to rename One-Off Purchases to AI Enabled Intelligent Buying.
+*   **/app/backend/server.py**: Significantly updated with new admin endpoints for the buying desk, new endpoints for real and demo AI analysis, a new health check endpoint, and improved error handling.
+*   **/app/backend/ai_price_benchmark.py**: New file containing the core logic for the multi-LLM price benchmarking analysis.
+*   **/app/frontend/src/i18n/translations.js**: Updated with all necessary keys for the new features and completed landing page translation.
+*   **/app/frontend/src/components/ErrorBoundary.jsx**: New component to improve UI stability.
+*   **/app/frontend/src/App.js**: Updated to use the ErrorBoundary and add a global Axios error interceptor.
+*   **/app/memory/PRD.md**: Updated to reflect all completed work and new requirements.
 
 **Areas that need refactoring**:
-- **DB Query Optimization**: Two queries in  (lines 3084, 3090) use a blanket . These should be refactored to use more efficient aggregation pipelines for better performance as the data grows.
+- **DB Query Optimization**: Two queries in  use  and could be refactored into more efficient aggregation pipelines.
 
 **key api endpoints**
-- **New:**
-  - : Engages the tactical buying team for a specific quotation.
-  - : Fetches all sourcing requests for the current user with tracking data.
-  - : Fetches aggregate stats for the buying desk dashboard.
-- **Existing:**
+- **New (Admin Buying Desk):**
   - 
   - 
+  - 
+  - 
+  - 
+- **New (AI Analysis):**
+  - 
+  - 
+- **New (Health & Stability):**
+  - 
+- **Upcoming:**
+  - An endpoint for the AI Procurement Agent's conversational logic (e.g., ).
 
 **Critical Info for New Agent**
-- **Priority #1 is fixing the landing page translation.** The user has reported this twice. All the backend data (translation keys) is ready in ; you just need to finish wiring it up in the  component. Do not move on to other tasks until the landing page is fully and correctly translated in all 5 languages.
-- The user is very detail-oriented about UI/UX. Pay close attention to branding, logos, and text labels.
-- A new feature, the Buying Desk Dashboard, is now live. It relies on new fields (, ) in the  MongoDB collection. The agent has already run a migration script to update existing records.
-- All logo and branding changes requested by the user have been completed.
+- You are starting a major new feature: the **AI Procurement Agent**. The user has a clear vision for a sophisticated, conversational UI that intelligently guides users. UX and visual polish are critical.
+- The immediate next step is to build the backend endpoint for the conversation in  before building out the UI in the new .
+- The architecture requires using three LLMs (OpenAI, Claude, Gemini) via the  library. The  is already in the environment.
+- After implementing the core agent, you must update the  to reflect the new 4-option layout and then implement the dynamic currency mapping.
 
 **documents and test reports created in this job**
--  (updated multiple times)
+- 
+- 
+- 
 - 
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User**: Reports that the landing page is messed up and offerings are misaligned when switching languages. (IN PROGRESS)
-2.  **Agent**: Investigates, identifies that German/Italian/Dutch translations are missing keys, adds them, and verifies the fix.
-3.  **User**: Calls for another deployment health check.
-4.  **Agent**: Runs the health check and confirms readiness, noting a minor DB optimization warning.
-5.  **User**: Reports the landing page value proposition text is not compelling.
-6.  **Agent**: Rewrites the value proposition text, which the user implicitly approves by moving on.
-7.  **User**: Reports the multi-language translation is still not working across the entire page. (This is the current active issue).
-8.  **Agent**: Investigates again, identifies many more hardcoded sections on the landing page.
-9.  **Agent**: Updates  with a comprehensive set of keys for all languages.
-10. **Agent**: Begins updating  to use the new keys but does not finish.
+1.  **User (Msg 332):** Requests a major new feature: an Advanced AI Driven Procurement Handling system. This involves a new conversational UI that guides users to the correct workflow (Catalog, AI Quotation, or Managed Services). Also requested dynamic currency mapping based on language.
+2.  **Agent (Msg 333):** Asks clarifying questions about the UI, LLMs, and currency.
+3.  **User (Msg 335):** Confirms requirements: Use all 3 LLMs, ensure an attractive UI with an escape hatch, provides specific currency mapping rules (Spanish EU -> EUR, Spanish MX -> MXN).
+4.  **Agent (Msg 336-340):** Acknowledges the task and begins implementation by creating the placeholder file  and signaling the intent to create the backend endpoint.
 
 **Project Health Check:**
-*   **Broken:**
-    *   Multi-language functionality on the Landing Page is partially broken.
+*   **Broken:** None. The core application is stable.
 *   **Mocked:**
     *   PunchOut functionality.
-    *   Schedule Repeat Orders and Bulk Submission features (UI exists, no backend).
+    *   Schedule Repeat Orders and Bulk Submission features.
     *   InfoConnect chatbot.
-    *   AI analysis logic for quotations (produces realistic but fake data).
-    *   File processing logic within the Admin Portal.
+*   **In Progress:** The new Advanced AI Driven Procurement Handling feature is in the initial stage of development.
 
 **3rd Party Integrations**
-*   **Emergent LLM** (Text Generation) - Uses Emergent LLM Key for i18n translations.
-*   **Image Generation** - Used for generating logos for OMNISupply.io and ERP partners.
+*   **OpenAI GPT-5.2 (Text Generation)** — uses Emergent LLM Key via .
+*   **Claude Sonnet 4.5 (Text Generation)** — uses Emergent LLM Key via .
+*   **Gemini 3 Flash (Text Generation)** — uses Emergent LLM Key via .
+*   **Image Generation** - Previously used for logo creation.
 
 **Testing status**
-  - Testing agent used after significant changes: YES
+  - Testing agent used after significant changes: YES (For Admin Buying Desk and AI Price Benchmarking features).
   - Troubleshoot agent used after agent stuck in loop: NO
-  - Test files created: No new test files were created in this session.
-  - Known regressions: The multi-language functionality on the landing page regressed after new content was added and not properly internationalized.
+  - Test files created: A new test class  was added by the testing agent in a temporary file, but not committed to a permanent test file.
+  - Known regressions: None.
 
 **Credentials to test flow:**
 *   **User Email:** 
 *   **User Password:** 
+*   **Login Payload:** 
 *   **Admin Email:** 
 *   **Admin Password:** 
 
 **What agent forgot to execute**
-The agent did not forget but failed to fully complete the task of translating the landing page. After correctly identifying that numerous UI elements were hardcoded, the agent updated the translation files but only partially updated the  component, leaving most of the page untranslated.</analysis>
+The agent is in the middle of a large, multi-step implementation and has not forgotten anything. The next logical step is to create the backend endpoint for the new conversational feature.</analysis>
