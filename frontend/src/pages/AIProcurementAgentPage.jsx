@@ -920,12 +920,12 @@ const AIProcurementAgentPage = () => {
                     {uploadingQuotation ? (
                       <>
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        AI Analyzing (up to 2 minutes)...
+                        AI Analyzing (please wait up to 3 minutes)...
                       </>
                     ) : (
                       <>
                         <Brain className="w-5 h-5 mr-2" />
-                        Analyze with Real AI
+                        Upload &amp; Analyze
                       </>
                     )}
                   </Button>
