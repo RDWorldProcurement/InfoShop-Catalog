@@ -131,7 +131,10 @@ const AIProcurementAgentPage = () => {
         services: aiResponse.services,
         supplierForm: aiResponse.supplier_form,
         managedServiceForm: aiResponse.managed_service_form,
-        unspscSuggestion: aiResponse.unspsc_suggestion
+        unspscSuggestion: aiResponse.unspsc_suggestion,
+        showQuotationUpload: aiResponse.show_quotation_upload,
+        showManagedServices: aiResponse.show_managed_services,
+        intelligentGuidance: aiResponse.intelligent_guidance
       };
       setMessages(prev => [...prev, assistantMsg]);
 
