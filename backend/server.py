@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import json
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Dict, Any
@@ -14,7 +15,15 @@ import jwt
 import random
 import hashlib
 import asyncio
-from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+# Import Emergent LLM integration
+try:
+    from emergentintegrations.llm.chat import LlmChat, UserMessage
+    EMERGENT_AVAILABLE = True
+except ImportError:
+    EMERGENT_AVAILABLE = False
+    LlmChat = None
+    UserMessage = None
 
 # Import AI price benchmarking module
 from ai_price_benchmark import (
