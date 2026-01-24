@@ -2159,8 +2159,19 @@ async def search_products(
     
     search_term = q.lower()
     
-    # First, add real catalog products (IT_PRODUCTS_CATALOG + NEW_VENDOR_PRODUCTS)
-    all_catalog_products = IT_PRODUCTS_CATALOG + NEW_VENDOR_PRODUCTS
+    # First, add real catalog products - interleave for variety (industrial + IT mixed)
+    # Combine and shuffle for diverse display when no search term
+    all_catalog_products = []
+    it_products = list(IT_PRODUCTS_CATALOG)
+    vendor_products = list(NEW_VENDOR_PRODUCTS)
+    
+    # Interleave products: 1 industrial, 1 IT, 1 industrial, etc. for better variety
+    max_len = max(len(vendor_products), len(it_products))
+    for i in range(max_len):
+        if i < len(vendor_products):
+            all_catalog_products.append(vendor_products[i])
+        if i < len(it_products):
+            all_catalog_products.append(it_products[i])
     
     # Filter catalog products based on search, category, and brand
     filtered_catalog = []
