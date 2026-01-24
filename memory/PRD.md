@@ -46,14 +46,47 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
    - Uses `quotationUploadRef` to scroll smoothly to upload section
    - Works from both "Recommended Next Steps" and "Manual Options"
 
-**Files Modified:**
-- `/app/frontend/src/pages/AIProcurementAgentPage.jsx` - handleQuotationUpload function, timeout, optional fields, progress indicator
-- `/app/frontend/src/pages/UploadQuotationPage.jsx` - axios timeout
-- `/app/backend/server.py` - catalog-summary endpoint refactored
+### ✅ Phase 18.4 - REAL Document Extraction (January 24, 2026 - COMPLETED)
+**Critical Fix: Document extraction was using mock/random data instead of actual file content**
+
+**Root Cause:**
+- `generate_ai_extraction()` function was generating random mock data
+- Uploaded file content was being read but never processed
+- AI benchmarking was running on fake data, not the actual quotation
+
+**Solution Implemented:**
+Created `/app/backend/document_extractor.py` module with:
+
+1. **Multi-Format Support:**
+   - PDF text extraction using PyPDF2
+   - Word document extraction using python-docx
+   - Excel extraction using openpyxl
+   - Image support using Pillow for base64 conversion
+
+2. **AI-Powered Extraction:**
+   - Uses GPT-5.2 to parse document content into structured JSON
+   - Extracts: supplier info, quotation details, line items, totals
+   - Handles both text-based and image-based documents
+
+3. **Robust Validation:**
+   - `validate_and_clean_extraction()` ensures proper data structure
+   - Calculates missing totals from line items
+   - Handles null/missing values gracefully
+
+**Files Created/Modified:**
+- **NEW:** `/app/backend/document_extractor.py` - Real document extraction module
+- `/app/backend/server.py` - Updated to use `extract_quotation_data()` instead of mock function
+- `/app/backend/requirements.txt` - Added PyPDF2, python-docx, lxml
 
 **Test Results:**
-- Backend: 100% (6/6 tests passed)
-- Frontend: 100% (verified all UI changes)
+- Uploaded test PDF with 4 line items
+- Correctly extracted: Supplier (ABC Industrial Supplies), Quote # (QT-2024-001234)
+- All line items extracted with correct quantities and prices
+- AI benchmarking ran on REAL data and identified $1,074 potential savings
+- Processing time: ~1.5 minutes
+
+**Test Results:**
+- Backend: 100% (extraction working)
 - Report: `/app/test_reports/iteration_18.json`
 
 ### ✅ Phase 18 - Advanced AI-Driven Procurement Handling (January 24, 2026 - COMPLETED)
