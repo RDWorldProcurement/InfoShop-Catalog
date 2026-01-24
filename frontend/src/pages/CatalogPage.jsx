@@ -77,7 +77,7 @@ const CatalogPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
-  const { t, language } = useLanguage();
+  const { t, language, currency, formatPrice } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("products");
   const [loading, setLoading] = useState(false);
