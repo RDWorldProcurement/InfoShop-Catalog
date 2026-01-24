@@ -4586,6 +4586,132 @@ When you identify the intent, respond with JSON in this exact format:
     "confidence": 0.0-1.0
 }"""
 
+# Intelligent response templates for different scenarios
+INTELLIGENT_RESPONSES = {
+    "no_results_with_alternatives": """I've searched our catalog of 30M+ products and services, but I couldn't find an exact match for **"{query}"**.
+
+Let me help you find the right solution:
+
+**Option 1: Do you have a supplier in mind?**
+If you've already identified a supplier who can provide this, I can help you:
+• Upload their quotation for AI-powered price benchmarking
+• Verify pricing against market rates
+• Ensure tax compliance
+
+**Option 2: Need help finding a supplier?**
+Our Infosys Buying Desk specialists can:
+• Identify qualified suppliers for your specific requirement
+• Manage the RFQ process
+• Negotiate best pricing on your behalf
+
+What would you like to do?""",
+
+    "complex_requirement_detected": """This sounds like a specialized requirement that could benefit from expert sourcing support.
+
+For **"{query}"**, I recommend our **Managed Services** approach where our procurement specialists can:
+
+• **Source qualified suppliers** who can meet your exact specifications
+• **Manage the entire RFQ/RFP process** from start to finish
+• **Negotiate optimal pricing** leveraging our $2B+ annual spend volume
+• **Ensure compliance** with your procurement policies
+
+Would you like me to connect you with a category expert? They typically respond within 2-4 business hours.""",
+
+    "quotation_prompt": """I understand you may have a supplier who can provide **"{query}"**.
+
+If you have a quotation from them, I can help you:
+• **Extract all line items automatically** using AI
+• **Benchmark prices** against market rates and historical data
+• **Identify potential savings** of 15-30% on average
+• **Verify tax calculations** for compliance
+
+Would you like to upload a quotation for analysis?""",
+
+    "clarification_needed": """I want to make sure I understand your requirement correctly.
+
+You mentioned **"{query}"** - could you help me with a few details?
+
+• **What category does this fall under?** (e.g., Industrial Equipment, IT Hardware, Services)
+• **Do you have a specific brand or manufacturer preference?**
+• **Is this a one-time purchase or recurring need?**
+• **Do you already have a supplier or quotation?**
+
+This will help me guide you to the best procurement path."""
+}
+
+def is_likely_not_in_catalog(query: str) -> bool:
+    """
+    Detect if a query is likely NOT in our standard industrial/IT catalog.
+    Uses pattern matching for unusual, consumer, or highly specific items.
+    """
+    query_lower = query.lower()
+    
+    # Consumer/non-industrial indicators
+    consumer_indicators = [
+        'bike', 'bicycle', 'car', 'vehicle', 'motorcycle', 'scooter',
+        'food', 'grocery', 'restaurant', 'coffee', 'snack',
+        'clothing', 'shirt', 'pants', 'shoes', 'dress', 'fashion',
+        'toy', 'game', 'entertainment', 'movie', 'music',
+        'pet', 'dog', 'cat', 'animal',
+        'jewelry', 'watch', 'ring', 'necklace',
+        'furniture', 'sofa', 'couch', 'bed', 'mattress',
+        'cosmetic', 'makeup', 'beauty', 'perfume',
+        'sports', 'gym', 'fitness', 'yoga',
+        'travel', 'vacation', 'hotel', 'flight'
+    ]
+    
+    # Color + unusual item combinations (like "blue bike with red dots")
+    color_words = ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'pink', 'black', 'white', 'gold', 'silver']
+    unusual_patterns = ['dots', 'stripes', 'pattern', 'custom', 'personalized', 'unique', 'rare', 'vintage', 'antique']
+    
+    # Check for consumer items
+    if any(indicator in query_lower for indicator in consumer_indicators):
+        return True
+    
+    # Check for color + unusual pattern combinations
+    has_color = any(color in query_lower for color in color_words)
+    has_unusual = any(pattern in query_lower for pattern in unusual_patterns)
+    if has_color and has_unusual:
+        return True
+    
+    # Check for very specific/custom descriptions (long queries with adjectives)
+    words = query_lower.split()
+    if len(words) > 5 and has_color:
+        return True
+    
+    return False
+
+def assess_requirement_complexity(query: str, search_results: dict) -> str:
+    """
+    Assess if a requirement is complex enough to warrant Managed Services.
+    Returns: 'simple', 'moderate', 'complex'
+    """
+    query_lower = query.lower()
+    
+    # Complex indicators
+    complex_indicators = [
+        'multiple', 'several', 'various', 'different',
+        'custom', 'specialized', 'specific', 'unique',
+        'large quantity', 'bulk', 'volume',
+        'installation', 'setup', 'configuration', 'integration',
+        'ongoing', 'recurring', 'long-term', 'contract',
+        'compliance', 'certified', 'approved', 'qualified',
+        'international', 'global', 'cross-border',
+        'urgent', 'emergency', 'critical', 'asap'
+    ]
+    
+    complexity_score = sum(1 for indicator in complex_indicators if indicator in query_lower)
+    
+    # No results + complexity indicators = likely complex
+    no_results = not search_results.get('products') and not search_results.get('services')
+    
+    if complexity_score >= 3 or (no_results and complexity_score >= 1):
+        return 'complex'
+    elif complexity_score >= 1 or no_results:
+        return 'moderate'
+    else:
+        return 'simple'
+
 async def classify_user_intent_with_ai(message: str, context: Dict, session_id: str) -> Dict:
     """Use multi-LLM approach to classify user intent and generate response"""
     
