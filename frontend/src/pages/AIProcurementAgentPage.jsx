@@ -312,7 +312,7 @@ const AIProcurementAgentPage = () => {
                   <p className="text-sm text-slate-600 line-clamp-2">{service.description}</p>
                   <div className="flex items-center gap-4 mt-2">
                     <Badge variant="outline" className="border-purple-300 text-purple-700">{service.category}</Badge>
-                    <span className="text-lg font-bold text-purple-600">{formatPrice(service.rate)}</span>
+                    <span className="text-lg font-bold text-purple-600">{formatPrice(service.rate, service.currency)}</span>
                     <span className="text-sm text-slate-500">{service.pricing_model || 'per hour'}</span>
                   </div>
                 </div>
