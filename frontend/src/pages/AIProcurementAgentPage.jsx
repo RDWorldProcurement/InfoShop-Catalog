@@ -213,11 +213,6 @@ const AIProcurementAgentPage = () => {
     }, 100);
   };
 
-  // Format price with currency
-  const formatPrice = (price) => {
-    return `${currency.symbol}${price?.toLocaleString() || '0'}`;
-  };
-
   // Render message content with markdown-like formatting
   const renderMessageContent = (content) => {
     if (!content) return null;
