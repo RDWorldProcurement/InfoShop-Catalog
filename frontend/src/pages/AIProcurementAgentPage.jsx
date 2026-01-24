@@ -59,6 +59,16 @@ const AIProcurementAgentPage = () => {
   });
   const [searchResults, setSearchResults] = useState(null);
   const [showManualOptions, setShowManualOptions] = useState(false);
+  
+  // Quotation upload state
+  const [showQuotationUpload, setShowQuotationUpload] = useState(false);
+  const [uploadingQuotation, setUploadingQuotation] = useState(false);
+  const [quotationFile, setQuotationFile] = useState(null);
+  const [supplierName, setSupplierName] = useState("");
+  const [supplierEmail, setSupplierEmail] = useState("");
+  const [quotationAnalysisResult, setQuotationAnalysisResult] = useState(null);
+  const [aiAnalysisProgress, setAiAnalysisProgress] = useState(null);
+  const fileInputRef = useRef(null);
 
   // Initialize conversation
   useEffect(() => {
