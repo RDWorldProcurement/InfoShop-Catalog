@@ -670,7 +670,7 @@ const AIProcurementAgentPage = () => {
                         <div className="flex flex-col sm:flex-row gap-3">
                           {msg.showQuotationUpload && (
                             <Button
-                              onClick={() => navigate("/upload-quotation")}
+                              onClick={() => setShowQuotationUpload(true)}
                               className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                               data-testid="ai-upload-quotation-btn"
                             >
