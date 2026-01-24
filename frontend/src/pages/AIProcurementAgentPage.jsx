@@ -38,7 +38,7 @@ const QUICK_ACTIONS = [
 const AIProcurementAgentPage = () => {
   const navigate = useNavigate();
   const { user, token } = useAuth();
-  const { t, language, currency, formatPrice } = useLanguage();
+  const { t, language, currency } = useLanguage();
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   
