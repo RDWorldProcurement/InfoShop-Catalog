@@ -422,6 +422,7 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 ### P0 (Immediate - Next Tasks)
 - [x] ~~Dynamic Currency Mapping: EUR for French & Spanish (Spain), MXN for Spanish (Mexico), USD for English~~ **COMPLETED**
 - [x] ~~Mixed Catalog Display: Industrial products, spare parts, and IT equipment interleaved~~ **COMPLETED**
+- [x] ~~Intelligent AI Agent: Detect items NOT in catalog, guide users to quotation upload or Managed Services~~ **COMPLETED**
 
 ### P1 (High Priority)
 - [ ] Real-time notifications for Buying Desk status changes
