@@ -147,12 +147,14 @@ const UploadQuotationPage = () => {
       if (response.data.success) {
         setAnalysisResult(response.data);
         setDemoMode(false);
+        setShowAiAnalysis(false);
         toast.success("AI Analysis Complete! 3 AI Engines processed your quotation.");
       }
     } catch (error) {
       console.error("Demo analysis error:", error);
       toast.error("Failed to load demo analysis");
       setDemoMode(false);
+      setShowAiAnalysis(false);
     }
   };
 
