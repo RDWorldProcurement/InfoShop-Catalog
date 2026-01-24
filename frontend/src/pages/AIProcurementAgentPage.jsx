@@ -12,7 +12,7 @@ import {
   Brain, Send, Loader2, ShoppingCart, FileUp, Handshake, Search,
   Bot, User, Sparkles, ArrowRight, Package, Briefcase, X, ChevronRight,
   Building2, Phone, Mail, Globe, MapPin, CheckCircle, AlertCircle,
-  Zap, MessageSquare, RotateCcw, Home
+  Zap, MessageSquare, RotateCcw, Home, Upload, Lightbulb, Info
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 
