@@ -261,10 +261,7 @@ const AIProcurementAgentPage = () => {
       toast.error("Please select a file first");
       return;
     }
-    if (!supplierName.trim()) {
-      toast.error("Please enter supplier name");
-      return;
-    }
+    // Supplier name is now optional
 
     setUploadingQuotation(true);
     setAiAnalysisProgress({ gpt: 'analyzing', claude: 'waiting', gemini: 'waiting' });
@@ -296,7 +293,7 @@ const AIProcurementAgentPage = () => {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         },
-        timeout: 180000 // 3 minutes for Real AI
+        timeout: 300000 // 5 minutes for Real AI analysis
       });
 
       setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'complete' });
@@ -918,7 +915,7 @@ const AIProcurementAgentPage = () => {
                   <Button
                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 py-6"
                     onClick={handleQuotationUpload}
-                    disabled={!quotationFile || !supplierName.trim() || uploadingQuotation}
+                    disabled={!quotationFile || uploadingQuotation}
                   >
                     {uploadingQuotation ? (
                       <>

@@ -214,7 +214,7 @@ const UploadQuotationPage = () => {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
         },
-        timeout: useRealAi ? 120000 : 30000 // 2 minutes for Real AI, 30s for demo
+        timeout: useRealAi ? 300000 : 30000 // 5 minutes for Real AI, 30s for demo
       });
 
       if (response.data.success) {
