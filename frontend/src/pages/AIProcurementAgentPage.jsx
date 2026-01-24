@@ -270,7 +270,7 @@ const AIProcurementAgentPage = () => {
     const processingMsg = {
       id: Date.now(),
       type: "assistant",
-      content: "I'm analyzing your quotation with our AI-powered price benchmarking system. This uses **GPT-5.2**, **Claude Sonnet 4.5**, and **Gemini 3 Flash** working together.\n\nThis may take up to 2 minutes for complex quotations...",
+      content: "I'm analyzing your quotation with our AI-powered price benchmarking system. This uses **GPT-5.2**, **Claude Sonnet 4.5**, and **Gemini 3 Flash** working together.\n\n⏳ This typically takes **2-3 minutes** for complete analysis. Please wait...",
       timestamp: new Date().toISOString(),
       engines: ["gpt", "claude", "gemini"],
       isAnalyzing: true
@@ -280,13 +280,15 @@ const AIProcurementAgentPage = () => {
     try {
       const formData = new FormData();
       formData.append("file", quotationFile);
-      formData.append("supplier_name", supplierName);
+      formData.append("supplier_name", supplierName || "");
       formData.append("supplier_email", supplierEmail || "");
       formData.append("document_language", language);
 
-      // Simulate progress updates
-      setTimeout(() => setAiAnalysisProgress({ gpt: 'complete', claude: 'analyzing', gemini: 'waiting' }), 3000);
-      setTimeout(() => setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'analyzing' }), 6000);
+      // Simulate progress updates with realistic timing (based on actual ~2.5 min processing)
+      setTimeout(() => setAiAnalysisProgress({ gpt: 'analyzing', claude: 'analyzing', gemini: 'waiting' }), 5000);
+      setTimeout(() => setAiAnalysisProgress({ gpt: 'complete', claude: 'analyzing', gemini: 'waiting' }), 45000);
+      setTimeout(() => setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'analyzing' }), 90000);
+      setTimeout(() => setAiAnalysisProgress({ gpt: 'complete', claude: 'complete', gemini: 'analyzing' }), 120000);
 
       const response = await axios.post(`${API}/procurement/quotation/upload-with-ai`, formData, {
         headers: {
