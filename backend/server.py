@@ -13,7 +13,18 @@ from datetime import datetime, timezone, timedelta
 import jwt
 import random
 import hashlib
+import asyncio
 from emergentintegrations.llm.chat import LlmChat, UserMessage
+
+# Import AI price benchmarking module
+from ai_price_benchmark import (
+    perform_ai_price_benchmarking, 
+    DEMO_QUOTATION, 
+    DEMO_ANALYSIS_RESULTS,
+    analyze_with_openai,
+    analyze_with_claude,
+    analyze_with_gemini
+)
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
