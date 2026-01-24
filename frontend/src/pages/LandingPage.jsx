@@ -297,6 +297,9 @@ const LandingPage = () => {
                 <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
                   {t.landing.browseCatalog}
                 </h3>
+                <p className="text-[#007CC3] font-semibold text-sm mb-2 flex items-center gap-1">
+                  <ShoppingCart className="w-4 h-4" /> {t.landing.punchoutEnabledCatalog || "PunchOut Enabled Catalog"}
+                </p>
                 <p className="text-slate-600 mb-4 text-sm">
                   {t.landing.browseCatalogDesc}
                 </p>
@@ -321,17 +324,17 @@ const LandingPage = () => {
               </CardContent>
             </Card>
 
-            {/* Option 2: Upload Quotation - One Off Purchases */}
+            {/* Option 2: AI Enabled Intelligent Buying */}
             <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-purple-500">
-              <div className="absolute top-0 left-0 right-0 h-2 bg-purple-500"></div>
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500"></div>
               <CardContent className="p-6">
-                <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <FileUp className="w-7 h-7 text-purple-600" />
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Brain className="w-7 h-7 text-purple-600" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
-                  {t.landing.oneOffPurchases}
+                  {t.landing.aiEnabledIntelligentBuying || "AI Enabled Intelligent Buying"}
                 </h3>
-                <p className="text-[#007CC3] font-semibold text-sm mb-2 flex items-center gap-1">
+                <p className="text-purple-600 font-semibold text-sm mb-2 flex items-center gap-1">
                   <Brain className="w-4 h-4" /> {t.landing.aiIntelligentBuying}
                 </p>
                 <p className="text-slate-600 mb-4 text-sm">
@@ -349,7 +352,7 @@ const LandingPage = () => {
                   </li>
                 </ul>
                 <Button 
-                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                   onClick={() => navigate("/login?redirect=upload-quotation")}
                   data-testid="upload-quotation-btn"
                 >
@@ -368,6 +371,9 @@ const LandingPage = () => {
                 <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
                   {t.landing.managedServices}
                 </h3>
+                <p className="text-[#FF6B00] font-semibold text-sm mb-2 flex items-center gap-1">
+                  <Handshake className="w-4 h-4" /> {t.landing.infosysBuyingDesk || "Infosys Buying Desk"}
+                </p>
                 <p className="text-slate-600 mb-4 text-sm">
                   {t.landing.managedServicesDesc}
                 </p>
