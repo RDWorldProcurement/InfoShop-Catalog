@@ -374,9 +374,9 @@ const CatalogPage = () => {
             </Button>
 
             {/* Currency Display */}
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-lg border border-slate-200">
+            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-lg border border-slate-200" data-testid="catalog-currency-display">
               <span className="text-sm text-slate-500">{t.common.currency}:</span>
-              <span className="font-semibold text-slate-900">{user?.currency?.code}</span>
+              <span className="font-semibold text-slate-900">{currency.symbol} {currency.code}</span>
             </div>
           </div>
         </header>
