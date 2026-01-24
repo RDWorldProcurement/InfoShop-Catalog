@@ -3111,17 +3111,21 @@ async def get_uploaded_catalogs():
     products_by_partner = {}
     services_by_partner = {}
     
-    # Count products by partner
-    products = await db.vendor_products.find({}, {"delivery_partner": 1, "_id": 0}).to_list(10000)
-    for p in products:
-        partner = p.get("delivery_partner", "Unknown")
-        products_by_partner[partner] = products_by_partner.get(partner, 0) + 1
+    # Count products by partner using aggregation (optimized)
+    products_pipeline = [
+        {"$group": {"_id": "$delivery_partner", "count": {"$sum": 1}}}
+    ]
+    async for doc in db.vendor_products.aggregate(products_pipeline):
+        partner = doc.get("_id") or "Unknown"
+        products_by_partner[partner] = doc.get("count", 0)
     
-    # Count services by partner
-    services = await db.vendor_services.find({}, {"delivery_partner": 1, "_id": 0}).to_list(10000)
-    for s in services:
-        partner = s.get("delivery_partner", "Unknown")
-        services_by_partner[partner] = services_by_partner.get(partner, 0) + 1
+    # Count services by partner using aggregation (optimized)
+    services_pipeline = [
+        {"$group": {"_id": "$delivery_partner", "count": {"$sum": 1}}}
+    ]
+    async for doc in db.vendor_services.aggregate(services_pipeline):
+        partner = doc.get("_id") or "Unknown"
+        services_by_partner[partner] = doc.get("count", 0)
     
     return {
         "products_by_partner": products_by_partner,
