@@ -394,7 +394,7 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 ## Prioritized Backlog
 
 ### P0 (Immediate - Next Tasks)
-- [ ] Dynamic Currency Mapping: EUR for French & Spanish (Spain), MXN for Spanish (Mexico), USD for English
+- [x] ~~Dynamic Currency Mapping: EUR for French & Spanish (Spain), MXN for Spanish (Mexico), USD for English~~ **COMPLETED**
 
 ### P1 (High Priority)
 - [ ] Real-time notifications for Buying Desk status changes
