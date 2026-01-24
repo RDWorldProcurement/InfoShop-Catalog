@@ -836,7 +836,10 @@ const AIProcurementAgentPage = () => {
 
         {/* Inline Quotation Upload Form */}
         {showQuotationUpload && (
-          <div className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-t border-purple-200 px-6 py-6">
+          <div 
+            ref={quotationUploadRef}
+            className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 border-t border-purple-200 px-6 py-6"
+          >
             <div className="max-w-3xl mx-auto">
               <div className="bg-white rounded-2xl shadow-lg border border-purple-200 p-6">
                 <div className="flex items-center justify-between mb-4">
