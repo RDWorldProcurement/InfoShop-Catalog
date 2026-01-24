@@ -916,11 +916,13 @@ export const translations = {
 };
 
 export const languageOptions = [
-  { code: "en", name: "English", flag: "🇬🇧" },
-  { code: "fr", name: "Français", flag: "🇫🇷" },
-  { code: "de", name: "Deutsch", flag: "🇩🇪" },
-  { code: "it", name: "Italiano", flag: "🇮🇹" },
-  { code: "nl", name: "Nederlands", flag: "🇳🇱" }
+  { code: "en", name: "English", flag: "🇬🇧", currency: "USD" },
+  { code: "fr", name: "Français", flag: "🇫🇷", currency: "EUR" },
+  { code: "de", name: "Deutsch", flag: "🇩🇪", currency: "EUR" },
+  { code: "it", name: "Italiano", flag: "🇮🇹", currency: "EUR" },
+  { code: "nl", name: "Nederlands", flag: "🇳🇱", currency: "EUR" },
+  { code: "es-ES", name: "Español (España)", flag: "🇪🇸", currency: "EUR" },
+  { code: "es-MX", name: "Español (México)", flag: "🇲🇽", currency: "MXN" }
 ];
 
 export default translations;
