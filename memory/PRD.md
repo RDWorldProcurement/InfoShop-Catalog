@@ -77,6 +77,32 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 - SKU/Part number searches have highest priority (90 points)
 - All catalog search tests passed (15/15)
 
+### ✅ Phase 18.1 - Dynamic Currency Mapping (January 24, 2026 - COMPLETED)
+**Multi-Currency Support Based on Language Selection:**
+- Added 7 language options with associated currencies:
+  - English (en) → USD ($)
+  - Français (fr) → EUR (€)
+  - Deutsch (de) → EUR (€)
+  - Italiano (it) → EUR (€)
+  - Nederlands (nl) → EUR (€)
+  - Español (España) (es-ES) → EUR (€)
+  - Español (México) (es-MX) → MXN (MX$)
+- Currency automatically updates when language is changed
+- Added full Spanish translations for Spain and Mexico variants
+- Sidebar shows "Language & Currency" section with currency display
+- Catalog header shows current currency
+- Currency persists in localStorage across navigation and page refresh
+
+**Files Modified:**
+- `/app/frontend/src/i18n/LanguageContext.js` - Added LANGUAGE_CURRENCY_MAP, useMemo for currency derivation, formatPrice helper
+- `/app/frontend/src/i18n/translations.js` - Added es-ES and es-MX translations with all UI strings
+- `/app/frontend/src/components/Sidebar.jsx` - Updated language selector to show currency codes and display
+- `/app/frontend/src/pages/CatalogPage.jsx` - Uses dynamic currency from LanguageContext
+
+**Test Results:**
+- Frontend: 100% (16/16 tests passed)
+- Report: `/app/test_reports/iteration_16.json`
+
 ### ✅ Phase 17 - Advanced AI Price Benchmarking with 3 LLMs (January 2026 - COMPLETED)
 **Major Feature: AI Enabled Intelligent Buying with 3 AI Engines**
 
