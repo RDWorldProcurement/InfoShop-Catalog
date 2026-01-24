@@ -4737,28 +4737,50 @@ async def search_catalog_for_agent(query: str, search_type: str, user: dict, lim
             
             for vp in vendor_products:
                 if str(vp.get("id", vp.get("_id"))) not in seen_ids:
-                    # Calculate score for vendor products
+                    # Calculate score for vendor products - same scoring as in-memory products
                     name_lower = vp.get("name", "").lower()
+                    brand_lower = vp.get("brand", "").lower()
+                    category_lower = vp.get("category", "").lower()
+                    sku_lower = vp.get("sku", "").lower()
+                    desc_lower = vp.get("description", "").lower()
+                    
                     score = 0
+                    
+                    # Exact phrase match (highest priority)
                     if query_lower in name_lower:
                         score += 100
+                    if query_lower in sku_lower:
+                        score += 90  # SKU/Part number match is very important
+                    if query_lower in brand_lower:
+                        score += 80
+                    
+                    # Term-by-term matching
                     for term in query_terms:
                         if term in name_lower:
                             score += 30
+                        if term in brand_lower:
+                            score += 25
+                        if term in category_lower:
+                            score += 20
+                        if term in desc_lower:
+                            score += 10
+                        if term in sku_lower:
+                            score += 35
                     
-                    matched_products.append((score, {
-                        "id": str(vp.get("id", vp.get("_id"))),
-                        "name": vp.get("name", ""),
-                        "short_description": vp.get("description", ""),
-                        "brand": vp.get("brand", ""),
-                        "category": vp.get("category", ""),
-                        "sku": vp.get("sku", ""),
-                        "base_price": vp.get("base_price", 0),
-                        "image_url": vp.get("image_url"),
-                        "availability": {"in_stock": True},
-                        "source": "vendor_catalog"
-                    }))
-                    seen_ids.add(str(vp.get("id", vp.get("_id"))))
+                    if score > 0:
+                        matched_products.append((score, {
+                            "id": str(vp.get("id", vp.get("_id"))),
+                            "name": vp.get("name", ""),
+                            "short_description": vp.get("description", ""),
+                            "brand": vp.get("brand", ""),
+                            "category": vp.get("category", ""),
+                            "sku": vp.get("sku", ""),
+                            "base_price": vp.get("base_price", 0),
+                            "image_url": vp.get("image_url"),
+                            "availability": {"in_stock": True},
+                            "source": "vendor_catalog"
+                        }))
+                        seen_ids.add(str(vp.get("id", vp.get("_id"))))
         except Exception as e:
             logger.warning(f"MongoDB vendor search error: {e}")
         
