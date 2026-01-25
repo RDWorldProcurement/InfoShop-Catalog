@@ -5654,72 +5654,12 @@ async def ai_agent_conversation(
             "intelligent_guidance": None
         }
         
-        # Step 1: Check if user is responding to a previous prompt (context-aware)
-        previous_action = context.get("last_action")
-        if previous_action == "no_results_alternatives":
-            # User is responding to "do you have a supplier/quotation?" prompt
-            msg_lower = user_message.lower()
-            if any(kw in msg_lower for kw in ['yes', 'have', 'quotation', 'quote', 'supplier', 'upload']):
-                response["message"] = """Great! Let's analyze your quotation.
-
-Our AI system will:
-• **Extract all line items** automatically from your document
-• **Benchmark prices** against market rates using 3 AI engines
-• **Identify savings opportunities** typically 15-30%
-• **Verify tax calculations** for compliance
-
-Click below to upload your quotation (PDF, Excel, or image)."""
-                response["action"] = "prompt_quotation_upload"
-                response["show_quotation_upload"] = True
-                response["context"]["last_action"] = "quotation_upload_prompted"
-                return response
-            elif any(kw in msg_lower for kw in ['no', 'dont', "don't", 'help', 'find', 'sourcing']):
-                response["message"] = """No problem! Our **Infosys Buying Desk** can help you find the right supplier.
-
-Here's what our procurement specialists will do:
-• **Identify qualified suppliers** for your specific requirement
-• **Send RFQs** to multiple vendors
-• **Negotiate best pricing** on your behalf
-• **Manage the entire process** from sourcing to delivery
-
-Would you like me to submit a sourcing request to our team?"""
-                response["action"] = "prompt_managed_services"
-                response["show_managed_services"] = True
-                response["managed_service_form"] = True
-                response["context"]["last_action"] = "managed_services_prompted"
-                return response
+        # ============================================================
+        # ROUTER PATTERN: AI Classification FIRST for context awareness
+        # This ensures follow-up questions are handled correctly
+        # ============================================================
         
-        # Step 2: Check if this is likely NOT in our catalog (smart detection)
-        if is_likely_not_in_catalog(user_message):
-            response["message"] = INTELLIGENT_RESPONSES["no_results_with_alternatives"].format(query=user_message)
-            response["action"] = "not_in_catalog"
-            response["show_quotation_upload"] = True
-            response["show_managed_services"] = True
-            response["context"]["intent"] = "NOT_IN_CATALOG"
-            response["context"]["original_query"] = user_message
-            response["context"]["last_action"] = "no_results_alternatives"
-            response["intelligent_guidance"] = {
-                "reason": "Item appears to be outside standard industrial/IT procurement catalog",
-                "recommended_paths": ["quotation_analysis", "managed_services"],
-                "confidence": 0.85
-            }
-            
-            # Store conversation
-            await db.ai_agent_conversations.insert_one({
-                "session_id": session_id,
-                "user_id": current_user["email"],
-                "message": user_message,
-                "intent": "NOT_IN_CATALOG",
-                "response": response["message"][:500],
-                "confidence": 0.85,
-                "timestamp": datetime.now(timezone.utc),
-                "language": request.language,
-                "currency": request.currency,
-                "intelligent_detection": True
-            })
-            return response
-        
-        # Step 3: Classify intent using AI
+        # Step 1: Classify intent using AI (MOVED TO TOP for context awareness)
         classification = await classify_user_intent_with_ai(
             user_message, 
             context, 
