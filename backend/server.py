@@ -5158,50 +5158,68 @@ async def classify_user_intent_with_ai(message: str, context: Dict, session_id: 
             {"session_id": session_id}
         ).sort("timestamp", -1).limit(10).to_list(10)
         
-        # Build conversation history string
+        # Build conversation history and extract current topic
         history_str = ""
+        current_topic = None
+        last_search_query = None
         if recent_messages:
             recent_messages.reverse()  # Oldest first
-            history_str = "\n\n**Recent conversation:**\n"
+            history_str = "\n\n## CONVERSATION HISTORY (YOU MUST REFERENCE THIS):\n"
             for msg in recent_messages:
-                history_str += f"User: {msg.get('message', '')}\n"
-                history_str += f"Assistant: {msg.get('response', '')[:200]}...\n\n"
+                user_msg = msg.get('message', '')
+                assistant_msg = msg.get('response', '')[:300]
+                history_str += f"USER: {user_msg}\n"
+                history_str += f"ASSISTANT: {assistant_msg}...\n\n"
+                # Extract topic from user messages
+                if msg.get('search_query'):
+                    last_search_query = msg.get('search_query')
+                    current_topic = last_search_query
+            
+            if last_search_query:
+                history_str += f"\n**CURRENT TOPIC: {last_search_query}**\n"
+                history_str += f"(User has been asking about: {last_search_query} - ANY follow-up questions relate to this topic!)\n"
         
         # Build context message including any quotation data
         context_str = ""
         if context:
             if context.get("quotation_analyzed"):
-                context_str += f"\n\n**Current quotation context:**\nQuotation ID: {context.get('quotation_id')}\nSupplier: {context.get('supplier_name')}\nTotal: ${context.get('quotation_total', 0):,.2f}\nLine items: {context.get('line_items_count', 0)}\n"
+                context_str += f"\n\n**ACTIVE QUOTATION CONTEXT:**\nQuotation ID: {context.get('quotation_id')}\nSupplier: {context.get('supplier_name')}\nTotal: ${context.get('quotation_total', 0):,.2f}\nLine items: {context.get('line_items_count', 0)}\nPotential savings: ${context.get('potential_savings', 0):,.2f}\n"
             if context.get("cart_items"):
                 context_str += f"\n**Cart:** {len(context.get('cart_items', []))} items in cart\n"
             if context.get("last_action"):
                 context_str += f"Last action: {context.get('last_action')}\n"
+            if context.get("search_query"):
+                current_topic = context.get('search_query')
         
-        intelligent_system_prompt = """You are an intelligent AI procurement assistant for Infosys OMNISupply.io platform.
+        intelligent_system_prompt = """You are an intelligent AI procurement assistant for Infosys OMNISupply.io platform. You MUST maintain conversation context.
 
-You have memory of the conversation and can reference previous exchanges. When users ask follow-up questions, connect the dots from prior context.
+## CRITICAL INSTRUCTIONS:
+1. **READ THE CONVERSATION HISTORY** - Always check what was discussed before
+2. **CONNECT FOLLOW-UP QUESTIONS** - If user asks "what brands?" after asking about bearings, they want BEARING BRANDS
+3. **NEVER IGNORE CONTEXT** - Use prior messages to understand what the user means
+4. **BE CONVERSATIONAL** - Like ChatGPT, remember and reference earlier parts of the conversation
 
-**Your capabilities:**
-1. Search 30M+ industrial/MRO products and 100K+ professional services
-2. Analyze uploaded quotations with AI-powered price benchmarking
-3. Connect users to the Infosys Buying Desk for complex sourcing
+## Your capabilities:
+- Search 30M+ industrial/MRO products and 100K+ professional services
+- Analyze uploaded quotations with AI-powered price benchmarking  
+- Connect users to the Infosys Buying Desk for complex sourcing
 
-**Response rules:**
-1. Be conversational and helpful, like ChatGPT
-2. Remember what was discussed earlier and refer back to it
-3. If user asks about "line items" or "details" after a quotation was analyzed, help them based on that context
-4. Ask clarifying questions to understand needs better
-5. Guide users to the best procurement path
+## IMPORTANT CONTEXT RULES:
+- If CONVERSATION HISTORY mentions a product/topic, ALL follow-up questions relate to that topic
+- "What brands?" = "What brands of [PREVIOUS TOPIC]?"
+- "Show cheaper options" = "Show cheaper [PREVIOUS TOPIC]"
+- "Any alternatives?" = "Alternatives for [PREVIOUS TOPIC]"
 
-**You MUST respond with valid JSON in this exact format:**
+## Response format (VALID JSON ONLY):
 {
     "intent": "CATALOG_SEARCH" | "QUOTATION_ANALYSIS" | "MANAGED_SERVICES" | "FOLLOW_UP" | "CLARIFICATION_NEEDED",
-    "response_message": "Your conversational response here",
+    "response_message": "Your conversational response - MUST reference prior context when applicable",
     "search_type": "product" | "service" | null,
-    "search_query": "extracted search terms" | null,
+    "search_query": "Include the original topic + any refinements - e.g., 'industrial bearings SKF brand'",
     "confidence": 0.0-1.0,
     "follow_up_action": "show_line_items" | "show_savings" | "add_to_cart" | "negotiate" | null,
-    "references_prior_context": true | false
+    "references_prior_context": true | false,
+    "understood_topic": "The topic user is asking about based on history"
 }"""
 
         chat = LlmChat(
