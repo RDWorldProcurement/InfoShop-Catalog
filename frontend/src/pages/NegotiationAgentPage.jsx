@@ -119,7 +119,8 @@ const NegotiationAgentPage = () => {
           const quotRes = await axios.get(`${API}/procurement/quotation/${quotationId}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          setQuotation(quotRes.data.quotation);
+          // API returns quotation data directly, not wrapped in 'quotation' key
+          setQuotation(quotRes.data.quotation || quotRes.data);
         }
       } catch (error) {
         console.error("Error loading data:", error);
