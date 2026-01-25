@@ -52,8 +52,9 @@ const Sidebar = ({ activePage }) => {
             className="h-7 mb-4"
           />
           <div 
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={() => navigate("/")}
+            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate("/ai-agent")}
+            title="Go to AI Procurement Agent"
           >
             <img 
               src="https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/5544120fa58b5db3f9b4ad8c6dafa2c32057f9ac5ad4be02779d98746bd4131d.png"
