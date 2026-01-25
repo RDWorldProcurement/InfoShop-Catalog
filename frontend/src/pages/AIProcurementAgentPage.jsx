@@ -72,6 +72,28 @@ const AIProcurementAgentPage = () => {
   const [aiAnalysisProgress, setAiAnalysisProgress] = useState(null);
   const [analysisPercentage, setAnalysisPercentage] = useState(0);
   const fileInputRef = useRef(null);
+  
+  // Cart and transfer state
+  const [selectedPaymentEntity, setSelectedPaymentEntity] = useState(null);
+  const [selectedPunchoutSystem, setSelectedPunchoutSystem] = useState(null);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [transferringCart, setTransferringCart] = useState(false);
+
+  // Payment entities
+  const PAYMENT_ENTITIES = [
+    { id: "infosys", name: "Infosys", description: "Payment handled by Infosys on behalf of customer", icon: "🏢" },
+    { id: "propay", name: "ProPay", description: "Payment through ProPay procurement service", icon: "💳" },
+    { id: "customer", name: "Direct by Customer", description: "Customer handles payment directly", icon: "👤" }
+  ];
+
+  // PunchOut systems
+  const PUNCHOUT_SYSTEMS = [
+    { name: "Coupa", logo: "https://logo.clearbit.com/coupa.com" },
+    { name: "SAP Ariba", logo: "https://logo.clearbit.com/ariba.com" },
+    { name: "SAP ERP", logo: "https://logo.clearbit.com/sap.com" },
+    { name: "Ivalua", logo: "https://logo.clearbit.com/ivalua.com" },
+    { name: "Oracle", logo: "https://logo.clearbit.com/oracle.com" }
+  ];
 
   // Function to open quotation upload and scroll to it
   const openQuotationUpload = useCallback(() => {
