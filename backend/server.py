@@ -5606,6 +5606,8 @@ Would you like me to submit a sourcing request to our team?"""
         search_query = classification.get("search_query")
         search_type = classification.get("search_type")
         
+        # Add intent to response for frontend
+        response["intent"] = intent
         response["context"]["intent"] = intent
         response["context"]["search_type"] = search_type
         response["context"]["search_query"] = search_query
