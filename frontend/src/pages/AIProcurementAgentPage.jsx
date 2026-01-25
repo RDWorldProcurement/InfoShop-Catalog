@@ -710,6 +710,57 @@ const AIProcurementAgentPage = () => {
     }
   };
 
+  // Engage Infosys Buying Desk with context
+  const handleEngageBuyingDesk = async (context = {}) => {
+    setEngagingBuyingDesk(true);
+    
+    try {
+      // Build request data with all available context
+      const requestData = {
+        request_type: context.requestType || "general_sourcing",
+        description: context.description || conversationContext.searchQuery || "Procurement assistance requested",
+        quotation_id: context.quotationId || quotationAnalysisResult?.quotation_id || null,
+        search_query: conversationContext.searchQuery,
+        unspsc_code: conversationContext.unspscCode,
+        category_name: conversationContext.categoryName,
+        supplier_info: context.supplierInfo || conversationContext.supplierInfo,
+        line_items: context.lineItems || quotationAnalysisResult?.data?.line_items || [],
+        potential_savings: context.potentialSavings || null,
+        user_notes: context.notes || "",
+        session_id: sessionId
+      };
+
+      const response = await axios.post(`${API}/procurement/buying-desk/engage`, requestData, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      if (response.data.success) {
+        // Track which context this engagement is for
+        const engagementKey = context.quotationId || context.messageId || 'general';
+        setBuyingDeskEngaged(prev => ({ ...prev, [engagementKey]: true }));
+        
+        // Add confirmation message to chat
+        const confirmMsg = {
+          id: Date.now(),
+          type: "assistant",
+          content: `## ✅ Infosys Buying Desk Engaged\n\n**Request ID:** ${response.data.request_id}\n\nOur procurement specialists have been notified and will review your request:\n\n${context.quotationId ? `• **Quotation:** ${context.supplierName || 'Attached quotation'}\n• **Potential Savings:** ${context.potentialSavings || 'To be determined'}\n` : ''}${conversationContext.searchQuery ? `• **Your Request:** ${conversationContext.searchQuery}\n` : ''}• **Priority:** ${response.data.priority || 'Standard'}\n\n📞 **A specialist will contact you within 2-4 business hours.**\n\nIn the meantime, feel free to continue searching or upload additional quotations.`,
+          timestamp: new Date().toISOString(),
+          engines: [],
+          buyingDeskConfirmation: true,
+          requestId: response.data.request_id
+        };
+        setMessages(prev => [...prev, confirmMsg]);
+        
+        toast.success("Infosys Buying Desk has been notified!");
+      }
+    } catch (error) {
+      console.error("Buying desk engagement error:", error);
+      toast.error("Failed to engage Buying Desk. Please try again.");
+    } finally {
+      setEngagingBuyingDesk(false);
+    }
+  };
+
   // Format price - uses API-provided currency symbol or falls back to context currency
   const formatPrice = (price, apiCurrency) => {
     const symbol = apiCurrency || currency.symbol;
