@@ -5589,11 +5589,13 @@ async def search_catalog_for_agent(query: str, search_type: str, user: dict, lim
         
         # Search MongoDB vendor_services
         try:
+            # Use escaped query for regex safety
+            escaped_query = escape_regex(query_clean) if 'query_clean' in dir() else escape_regex(query_lower)
             mongo_query = {
                 "$or": [
-                    {"name": {"$regex": query_lower, "$options": "i"}},
-                    {"category": {"$regex": query_lower, "$options": "i"}},
-                    {"description": {"$regex": query_lower, "$options": "i"}}
+                    {"name": {"$regex": escaped_query, "$options": "i"}},
+                    {"category": {"$regex": escaped_query, "$options": "i"}},
+                    {"description": {"$regex": escaped_query, "$options": "i"}}
                 ]
             }
             
