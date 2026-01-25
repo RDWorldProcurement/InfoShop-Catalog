@@ -5408,6 +5408,12 @@ OUTPUT VALID JSON ONLY:"""
             "confidence": 0.5
         }
 
+import re
+
+def escape_regex(text: str) -> str:
+    """Escape special regex characters for safe MongoDB regex queries"""
+    return re.escape(text)
+
 async def search_catalog_for_agent(query: str, search_type: str, user: dict, limit: int = 5) -> Dict:
     """
     Search catalog and return results for the AI agent.
@@ -5419,7 +5425,10 @@ async def search_catalog_for_agent(query: str, search_type: str, user: dict, lim
     
     if search_type in ["product", None]:
         query_lower = query.lower()
-        query_terms = [term.strip() for term in query_lower.split() if len(term.strip()) > 2]
+        # Clean query: remove parentheses and special chars that break regex
+        query_clean = re.sub(r'[()[\]{}|\\^$.*+?]', ' ', query_lower).strip()
+        query_clean = re.sub(r'\s+', ' ', query_clean)  # Normalize whitespace
+        query_terms = [term.strip() for term in query_clean.split() if len(term.strip()) > 2]
         matched_products = []
         seen_ids = set()
         
