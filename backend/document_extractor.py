@@ -96,7 +96,9 @@ You MUST respond with ONLY valid JSON in this exact structure:
             "unit": "EA/HR/etc",
             "line_total": number,
             "category": "best category match",
-            "part_number": "if present"
+            "part_number": "if present",
+            "unspsc_code": "8-digit UNSPSC code (e.g., 31171500 for Bearings)",
+            "unspsc_category": "UNSPSC category name"
         }
     ],
     "totals": {
