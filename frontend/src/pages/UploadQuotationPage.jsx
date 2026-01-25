@@ -402,55 +402,113 @@ const UploadQuotationPage = () => {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
           <Card className="w-full max-w-2xl mx-4 bg-slate-900 border-slate-700">
             <CardHeader className="border-b border-slate-700">
-              <CardTitle className="text-white flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center animate-pulse">
-                  <Brain className="w-6 h-6 text-white" />
+              <CardTitle className="text-white flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center animate-pulse">
+                    <Brain className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <span>AI Price Benchmarking in Progress</span>
+                    <p className="text-sm font-normal text-slate-400 mt-1">3 AI Engines analyzing your quotation</p>
+                  </div>
                 </div>
-                <div>
-                  <span>AI Price Benchmarking in Progress</span>
-                  <p className="text-sm font-normal text-slate-400 mt-1">3 AI Engines analyzing your quotation</p>
+                {/* Elapsed Time Display */}
+                <div className="text-right">
+                  <div className="text-2xl font-mono text-white">
+                    {Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}
+                  </div>
+                  <p className="text-xs text-slate-400">elapsed time</p>
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
-              {AI_ENGINES.map((engine) => {
-                const status = aiEngineStatus[engine.id];
-                return (
-                  <div key={engine.id} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${engine.color} flex items-center justify-center text-white text-xl`}>
-                          {engine.icon}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-white">{engine.name}</p>
-                          <p className="text-xs text-slate-400">{engine.specialty}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {renderAiStatusBadge(status)}
-                      </div>
-                    </div>
-                    <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full bg-gradient-to-r ${engine.color} transition-all duration-300`}
-                        style={{ width: `${status.progress}%` }}
-                      />
-                    </div>
-                    {status.status === 'analyzing' && (
-                      <div className="text-xs text-slate-500 flex items-center gap-2">
-                        <CircleDot className="w-3 h-3 animate-pulse" />
-                        {getAnalysisText(engine.id)}
-                      </div>
-                    )}
+              {/* Overall Progress Section */}
+              <div className="bg-slate-800 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-5 h-5 text-purple-400" />
+                    <span className="font-semibold text-white">Overall Progress</span>
                   </div>
-                );
-              })}
+                  <span className="text-xl font-bold text-purple-400">{overallProgress.percent}%</span>
+                </div>
+                <div className="h-3 bg-slate-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 transition-all duration-500 ease-out"
+                    style={{ width: `${overallProgress.percent}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-slate-300">
+                    {overallProgress.phase === 'finalizing' ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                    ) : overallProgress.phase === 'complete' ? (
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                    ) : (
+                      <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
+                    )}
+                    <span>{overallProgress.message || 'Initializing...'}</span>
+                  </div>
+                  {elapsedTime > 30 && overallProgress.phase !== 'complete' && (
+                    <span className="text-xs text-slate-500">Usually takes 1-2 minutes</span>
+                  )}
+                </div>
+              </div>
               
-              <div className="pt-4 border-t border-slate-700">
+              {/* Individual Engine Progress */}
+              <div className="space-y-4">
+                <p className="text-xs text-slate-500 uppercase tracking-wider">Engine Status</p>
+                {AI_ENGINES.map((engine) => {
+                  const status = aiEngineStatus[engine.id];
+                  return (
+                    <div key={engine.id} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${engine.color} flex items-center justify-center text-white text-xl`}>
+                            {engine.icon}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-white">{engine.name}</p>
+                            <p className="text-xs text-slate-400">{engine.specialty}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {renderAiStatusBadge(status)}
+                        </div>
+                      </div>
+                      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full bg-gradient-to-r ${engine.color} transition-all duration-300`}
+                          style={{ width: `${status.progress}%` }}
+                        />
+                      </div>
+                      {status.status === 'analyzing' && (
+                        <div className="text-xs text-slate-500 flex items-center gap-2">
+                          <CircleDot className="w-3 h-3 animate-pulse" />
+                          {getAnalysisText(engine.id)}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <div className="pt-4 border-t border-slate-700 space-y-3">
                 <div className="flex items-center gap-2 text-slate-400 text-sm">
                   <Database className="w-4 h-4" />
                   <span>Data sources: Grainger, MSC Industrial, Robert Half, PayScale, CAT Parts, Industry Reports</span>
+                </div>
+                {/* User Guidance Message */}
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                  <p className="text-sm text-blue-300 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    <span>
+                      {overallProgress.percent < 50 
+                        ? "Please wait while we extract and analyze your document..."
+                        : overallProgress.percent < 85
+                        ? "Almost there! Cross-validating results for accuracy..."
+                        : "Finalizing your analysis report. Results will appear shortly."}
+                    </span>
+                  </p>
                 </div>
               </div>
             </CardContent>
