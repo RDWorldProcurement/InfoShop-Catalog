@@ -74,6 +74,8 @@ const UploadQuotationPage = () => {
   });
   const [showAiAnalysis, setShowAiAnalysis] = useState(false);
   const [useRealAi, setUseRealAi] = useState(false);
+  const [overallProgress, setOverallProgress] = useState({ phase: 'idle', percent: 0, message: '' });
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   const handleFileDrop = useCallback((e) => {
     e.preventDefault();
