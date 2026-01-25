@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="10" time="19.760" timestamp="2026-01-25T05:33:58.131191+00:00" hostname="agent-env-93149f04-1d72-486f-9a3b-b90230076919"><testcase classname="tests.test_ai_conversation_context.TestAIConversationContext" name="test_initial_search_returns_products" time="2.542" /><testcase classname="tests.test_ai_conversation_context.TestAIConversationContext" name="test_followup_brands_maintains_context" time="6.943" /><testcase classname="tests.test_ai_conversation_context.TestAIConversationContext" name="test_followup_cheaper_maintains_context" time="7.301" /><testcase classname="tests.test_ai_conversation_context.TestAIConversationContext" name="test_new_session_no_context" time="2.503" /><testcase classname="tests.test_ai_conversation_context.TestLoginAndAuth" name="test_demo_login" time="0.059"><failure message="AssertionError: assert 'user' in {'country': 'USA', 'currency': {'code': 'USD', 'rate': 1.0, 'symbol': '$'}, 'email': 'demo@infosys.com', 'id': 'a26db1f5-1bcc-41a2-b65a-1d7f338c74e2', ...}">tests/test_ai_conversation_context.py:148: in test_demo_login
+    assert "user" in data
+E   AssertionError: assert 'user' in {'country': 'USA', 'currency': {'code': 'USD', 'rate': 1.0, 'symbol': '$'}, 'email': 'demo@infosys.com', 'id': 'a26db1f5-1bcc-41a2-b65a-1d7f338c74e2', ...}</failure></testcase><testcase classname="tests.test_ai_conversation_context.TestLoginAndAuth" name="test_admin_login" time="0.035"><failure message="KeyError: 'user'">tests/test_ai_conversation_context.py:161: in test_admin_login
+    assert data["user"]["role"] == "admin"
+           ^^^^^^^^^^^^
+E   KeyError: 'user'</failure></testcase><testcase classname="tests.test_ai_conversation_context.TestLoginAndAuth" name="test_invalid_login" time="0.046"><failure message="assert 200 == 401&#10; +  where 200 = &lt;Response [200]&gt;.status_code">tests/test_ai_conversation_context.py:170: in test_invalid_login
+    assert resp.status_code == 401
+E   assert 200 == 401
+E    +  where 200 = &lt;Response [200]&gt;.status_code</failure></testcase><testcase classname="tests.test_ai_conversation_context.TestCatalogSearch" name="test_search_products" time="0.080"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">tests/test_ai_conversation_context.py:193: in test_search_products
+    assert resp.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="tests.test_ai_conversation_context.TestCatalogSearch" name="test_search_services" time="0.077"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">tests/test_ai_conversation_context.py:203: in test_search_services
+    assert resp.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="tests.test_ai_conversation_context.TestHealthCheck" name="test_health_endpoint" time="0.065" /></testsuite></testsuites>
