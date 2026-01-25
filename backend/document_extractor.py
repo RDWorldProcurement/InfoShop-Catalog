@@ -219,9 +219,11 @@ async def extract_with_ai_text(text_content: str, session_id: str) -> Dict:
         logger.error("Emergent LLM not available for extraction")
         return None
     
-    if not text_content or len(text_content.strip()) < 50:
-        logger.warning("Insufficient text content for extraction")
+    if not text_content or len(text_content.strip()) < 20:
+        logger.warning(f"Insufficient text content for extraction: {len(text_content.strip()) if text_content else 0} chars")
         return None
+    
+    logger.info(f"Starting AI text extraction with {len(text_content)} chars")
     
     try:
         chat = LlmChat(
