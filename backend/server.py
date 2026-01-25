@@ -5260,108 +5260,99 @@ async def classify_user_intent_with_ai(message: str, context: Dict, session_id: 
     
     # Use LLM for intelligent classification with conversation history
     try:
-        # Retrieve recent conversation history for context
-        recent_messages = await db.ai_agent_conversations.find(
-            {"session_id": session_id}
-        ).sort("timestamp", -1).limit(10).to_list(10)
+        # Use pre-fetched conversation context
+        current_topic = conv_context.get('current_topic')
         
-        # Build conversation history and extract current topic
+        # Build conversation history string
         history_str = ""
-        current_topic = None
-        last_search_query = None
-        if recent_messages:
-            recent_messages.reverse()  # Oldest first
-            history_str = "\n\n## CONVERSATION HISTORY (YOU MUST REFERENCE THIS):\n"
-            for msg in recent_messages:
-                user_msg = msg.get('message', '')
-                assistant_msg = msg.get('response', '')[:300]
-                history_str += f"USER: {user_msg}\n"
-                history_str += f"ASSISTANT: {assistant_msg}...\n\n"
-                # Extract topic from user messages
-                if msg.get('search_query'):
-                    last_search_query = msg.get('search_query')
-                    current_topic = last_search_query
-            
-            if last_search_query:
-                history_str += f"\n**CURRENT TOPIC: {last_search_query}**\n"
-                history_str += f"(User has been asking about: {last_search_query} - ANY follow-up questions relate to this topic!)\n"
+        if conv_context.get('history'):
+            history_str = "\n\n## CONVERSATION HISTORY (CRITICAL - READ THIS FIRST):\n"
+            for i, msg in enumerate(conv_context['history']):
+                history_str += f"[Turn {i+1}]\n"
+                history_str += f"USER: {msg['user']}\n"
+                history_str += f"ASSISTANT: {msg['assistant']}\n"
+                if msg.get('topic'):
+                    history_str += f"[Topic: {msg['topic']}]\n"
+                history_str += "\n"
         
-        # Build context message including any quotation data
+        # Build context string from frontend context
         context_str = ""
         if context:
             if context.get("quotation_analyzed"):
-                context_str += f"\n\n**ACTIVE QUOTATION CONTEXT:**\nQuotation ID: {context.get('quotation_id')}\nSupplier: {context.get('supplier_name')}\nTotal: ${context.get('quotation_total', 0):,.2f}\nLine items: {context.get('line_items_count', 0)}\nPotential savings: ${context.get('potential_savings', 0):,.2f}\n"
+                context_str += f"\n\n**ACTIVE QUOTATION:**\nSupplier: {context.get('supplier_name')}\nTotal: ${context.get('quotation_total', 0):,.2f}\nItems: {context.get('line_items_count', 0)}\nPotential savings: ${context.get('potential_savings', 0):,.2f}\n"
             if context.get("cart_items"):
-                context_str += f"\n**Cart:** {len(context.get('cart_items', []))} items in cart\n"
-            if context.get("last_action"):
-                context_str += f"Last action: {context.get('last_action')}\n"
-            if context.get("search_query"):
+                context_str += f"\n**Cart:** {len(context.get('cart_items', []))} items\n"
+            if context.get("search_query") and not current_topic:
                 current_topic = context.get('search_query')
         
-        intelligent_system_prompt = """You are an intelligent AI procurement assistant for Infosys OMNISupply.io platform. You MUST maintain conversation context.
+        # IMPROVED System prompt for better context understanding
+        intelligent_system_prompt = f"""You are a highly intelligent AI procurement assistant for Infosys OMNISupply.io. 
 
-## CRITICAL INSTRUCTIONS:
-1. **READ THE CONVERSATION HISTORY** - Always check what was discussed before
-2. **CONNECT FOLLOW-UP QUESTIONS** - If user asks "what brands?" after asking about bearings, they want BEARING BRANDS
-3. **NEVER IGNORE CONTEXT** - Use prior messages to understand what the user means
-4. **BE CONVERSATIONAL** - Like ChatGPT, remember and reference earlier parts of the conversation
+## YOUR PRIMARY DIRECTIVE: MAINTAIN CONVERSATION CONTEXT
+You MUST behave like ChatGPT - understanding that follow-up questions relate to previous messages.
 
-## Your capabilities:
+## CONTEXT AWARENESS RULES (CRITICAL):
+1. If user previously asked about "bearings" and now asks "what brands?" → They want BEARING BRANDS
+2. If user asked about "laptops" and now says "show cheaper ones" → They want CHEAPER LAPTOPS
+3. SHORT MESSAGES like "yes", "ok", "add it", "compare them" → Refer to previous topic
+4. NEVER ask for clarification when context is clear from history
+
+## CURRENT CONVERSATION TOPIC: {current_topic or 'None established yet'}
+
+## INTENT CLASSIFICATION:
+- **CONTEXT_CONTINUATION**: Follow-up on previous topic (most common for short messages)
+- **CATALOG_SEARCH**: New product/service search
+- **QUOTATION_ANALYSIS**: User has a quote to analyze
+- **MANAGED_SERVICES**: Complex/strategic sourcing needs
+- **CLARIFICATION_NEEDED**: ONLY if truly ambiguous with no context
+
+## CAPABILITIES:
 - Search 30M+ industrial/MRO products and 100K+ professional services
-- Analyze uploaded quotations with AI-powered price benchmarking  
-- Connect users to the Infosys Buying Desk for complex sourcing
+- Analyze quotations with AI price benchmarking
+- Connect to Infosys Buying Desk for complex sourcing
 
-## IMPORTANT CONTEXT RULES:
-- If CONVERSATION HISTORY mentions a product/topic, ALL follow-up questions relate to that topic
-- "What brands?" = "What brands of [PREVIOUS TOPIC]?"
-- "Show cheaper options" = "Show cheaper [PREVIOUS TOPIC]"
-- "Any alternatives?" = "Alternatives for [PREVIOUS TOPIC]"
-
-## Response format (VALID JSON ONLY):
-{
-    "intent": "CATALOG_SEARCH" | "QUOTATION_ANALYSIS" | "MANAGED_SERVICES" | "FOLLOW_UP" | "CLARIFICATION_NEEDED",
-    "response_message": "Your conversational response - MUST reference prior context when applicable",
+## OUTPUT FORMAT (STRICT JSON):
+{{
+    "intent": "CONTEXT_CONTINUATION" | "CATALOG_SEARCH" | "QUOTATION_ANALYSIS" | "MANAGED_SERVICES" | "CLARIFICATION_NEEDED",
+    "response_message": "Conversational response that references prior context when applicable",
     "search_type": "product" | "service" | null,
-    "search_query": "Include the original topic + any refinements - e.g., 'industrial bearings SKF brand'",
+    "search_query": "ALWAYS include topic from history + refinement. E.g., 'industrial bearings SKF brand'",
     "confidence": 0.0-1.0,
-    "follow_up_action": "show_line_items" | "show_savings" | "add_to_cart" | "negotiate" | null,
     "references_prior_context": true | false,
-    "understood_topic": "The topic user is asking about based on history"
-}"""
+    "understood_topic": "What the user is asking about (inferred from context)"
+}}"""
 
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
-            session_id=f"agent_{session_id}_intelligent",
+            session_id=f"agent_{session_id}_router",
             system_message=intelligent_system_prompt
         ).with_model("openai", "gpt-5.2")
         
-        # Build stronger context prompt
-        topic_hint = ""
-        if current_topic:
-            topic_hint = f"\n\n## IMPORTANT: Current conversation topic is: **{current_topic}**\nThe user's follow-up questions relate to {current_topic}. DO NOT ask them to clarify what product they mean.\n"
+        # Build the user message with all context
+        follow_up_hint = ""
+        if is_likely_follow_up:
+            follow_up_hint = f"\n⚠️ THIS APPEARS TO BE A FOLLOW-UP QUESTION. Previous topic: {current_topic or 'unknown'}\n"
         
-        prompt = f"""## USER'S NEW MESSAGE: "{message}"
-{topic_hint}
+        prompt = f"""## NEW USER MESSAGE: "{message}"
+{follow_up_hint}
 {history_str}
 {context_str}
 
-## YOUR TASK:
-1. READ the conversation history above
-2. IDENTIFY what topic/product was discussed before
-3. INTERPRET this new message IN CONTEXT of prior discussion
-4. If user asks "what brands?", "any alternatives?", "cheaper options?" - these relate to the PREVIOUS TOPIC
-5. Include the understood topic in your search_query
+## ROUTING DECISION REQUIRED:
+Analyze the message, consider conversation history, and determine the user's actual intent.
+If this is clearly a follow-up about {current_topic or 'a previous topic'}, use CONTEXT_CONTINUATION intent and include the topic in search_query.
 
-RESPOND WITH VALID JSON ONLY."""
+OUTPUT VALID JSON ONLY:"""
         
         response = await chat.send_message(UserMessage(text=prompt))
-        
         response_text = str(response)
         
-        # Try to parse JSON from response
+        # Parse JSON from response
         try:
             if "```json" in response_text:
                 json_str = response_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in response_text:
+                json_str = response_text.split("```")[1].split("```")[0].strip()
             elif "{" in response_text and "}" in response_text:
                 start = response_text.find("{")
                 end = response_text.rfind("}") + 1
@@ -5370,18 +5361,45 @@ RESPOND WITH VALID JSON ONLY."""
                 raise ValueError("No JSON found")
             
             result = json.loads(json_str)
+            
+            # Ensure understood_topic is set
+            if not result.get('understood_topic') and current_topic:
+                result['understood_topic'] = current_topic
+            
             return result
-        except:
-            # If JSON parsing fails, return the response as-is
+        except Exception as parse_error:
+            logger.warning(f"JSON parse error: {parse_error}, raw response: {response_text[:200]}")
+            # Fallback: if we have context and this looks like a follow-up, use that
+            if is_likely_follow_up and current_topic:
+                return {
+                    "intent": "CONTEXT_CONTINUATION",
+                    "response_message": f"Let me help you with more information about {current_topic}.",
+                    "search_type": "product",
+                    "search_query": f"{current_topic} {message}",
+                    "confidence": 0.75,
+                    "references_prior_context": True,
+                    "understood_topic": current_topic
+                }
             return {
                 "intent": "CLARIFICATION_NEEDED",
-                "response_message": response_text,
+                "response_message": response_text if len(response_text) < 500 else "I'd be happy to help. Could you tell me more about what you're looking for?",
                 "search_type": None,
                 "search_query": None,
-                "confidence": 0.6
+                "confidence": 0.5
             }
     except Exception as e:
         logger.error(f"AI classification error: {e}")
+        # If we have context, try to use it
+        if is_likely_follow_up and conv_context.get('current_topic'):
+            return {
+                "intent": "CONTEXT_CONTINUATION",
+                "response_message": f"Let me find that for you based on our conversation about {conv_context['current_topic']}.",
+                "search_type": "product",
+                "search_query": f"{conv_context['current_topic']} {message}",
+                "confidence": 0.7,
+                "references_prior_context": True,
+                "understood_topic": conv_context['current_topic']
+            }
         return {
             "intent": "CLARIFICATION_NEEDED",
             "response_message": "I'm here to help with your procurement needs. Could you tell me more about what you're looking for?\n\n• **Products**: Tell me the item name, part number, or brand\n• **Services**: Describe the professional service you need\n• **Quotation**: If you have an existing quote to analyze\n• **Complex Sourcing**: For strategic or multi-supplier requirements",
