@@ -5470,24 +5470,26 @@ async def search_catalog_for_agent(query: str, search_type: str, user: dict, lim
         
         # 2. Search MongoDB vendor_products collection (uploaded catalogs)
         try:
-            # Build MongoDB query for text search
+            # Build MongoDB query for text search - use escaped query for regex safety
+            escaped_query = escape_regex(query_clean)
             mongo_query = {
                 "$or": [
-                    {"name": {"$regex": query_lower, "$options": "i"}},
-                    {"brand": {"$regex": query_lower, "$options": "i"}},
-                    {"sku": {"$regex": query_lower, "$options": "i"}},
-                    {"category": {"$regex": query_lower, "$options": "i"}},
-                    {"description": {"$regex": query_lower, "$options": "i"}}
+                    {"name": {"$regex": escaped_query, "$options": "i"}},
+                    {"brand": {"$regex": escaped_query, "$options": "i"}},
+                    {"sku": {"$regex": escaped_query, "$options": "i"}},
+                    {"category": {"$regex": escaped_query, "$options": "i"}},
+                    {"description": {"$regex": escaped_query, "$options": "i"}}
                 ]
             }
             
-            # Also search for individual terms
+            # Also search for individual terms (already cleaned)
             if len(query_terms) > 1:
                 term_conditions = []
                 for term in query_terms:
-                    term_conditions.append({"name": {"$regex": term, "$options": "i"}})
-                    term_conditions.append({"brand": {"$regex": term, "$options": "i"}})
-                    term_conditions.append({"sku": {"$regex": term, "$options": "i"}})
+                    escaped_term = escape_regex(term)
+                    term_conditions.append({"name": {"$regex": escaped_term, "$options": "i"}})
+                    term_conditions.append({"brand": {"$regex": escaped_term, "$options": "i"}})
+                    term_conditions.append({"sku": {"$regex": escaped_term, "$options": "i"}})
                 mongo_query["$or"].extend(term_conditions)
             
             # Execute MongoDB search
