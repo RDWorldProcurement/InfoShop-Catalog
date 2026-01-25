@@ -363,7 +363,7 @@ async def extract_quotation_data(
         logger.info(f"Extracted {len(text_content)} chars from text file")
     
     # If we have text content, use text-based AI extraction
-    if text_content and len(text_content.strip()) > 100:
+    if text_content and len(text_content.strip()) > 50:
         logger.info("Using AI text extraction")
         extracted_data = await extract_with_ai_text(text_content, session_id)
     
