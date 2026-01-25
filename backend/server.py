@@ -5834,15 +5834,23 @@ async def ai_agent_conversation(
             response["action"] = response.get("action") or "follow_up"
             response["context"]["last_action"] = "follow_up_handled"
         
-        # Step 6: Handle CLARIFICATION_NEEDED - Only when truly needed
+        # Step 6: Handle CLARIFICATION_NEEDED - Check if it's a non-catalog item
         else:
-            # Use the AI's response if available, otherwise use template
-            if response_message and len(response_message) > 20:
-                response["message"] = response_message
+            # Check if this looks like a non-catalog item that needs alternatives
+            if is_likely_not_in_catalog(user_message):
+                response["message"] = INTELLIGENT_RESPONSES["no_results_with_alternatives"].format(query=user_message)
+                response["action"] = "not_in_catalog"
+                response["show_quotation_upload"] = True
+                response["show_managed_services"] = True
+                response["context"]["last_action"] = "no_results_alternatives"
             else:
-                response["message"] = INTELLIGENT_RESPONSES["clarification_needed"].format(query=user_message)
-            response["action"] = "clarification"
-            response["context"]["last_action"] = "clarification_asked"
+                # Use the AI's response if available, otherwise use template
+                if response_message and len(response_message) > 20:
+                    response["message"] = response_message
+                else:
+                    response["message"] = INTELLIGENT_RESPONSES["clarification_needed"].format(query=user_message)
+                response["action"] = "clarification"
+                response["context"]["last_action"] = "clarification_asked"
         
         # Store conversation in database for analytics and context
         await db.ai_agent_conversations.insert_one({
