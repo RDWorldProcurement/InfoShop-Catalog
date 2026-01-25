@@ -253,10 +253,27 @@ const AIProcurementAgentPage = () => {
     setActiveEngines(["gpt", "claude", "gemini"]);
 
     try {
+      // Build enhanced context with quotation data if available
+      const enhancedContext = {
+        ...conversationContext,
+        ...(quotationAnalysisResult && {
+          quotation_analyzed: true,
+          quotation_id: quotationAnalysisResult.quotation_id,
+          supplier_name: quotationAnalysisResult.analysis?.extracted_data?.supplier?.name || 
+                         quotationAnalysisResult.extracted_data?.supplier?.name,
+          quotation_total: quotationAnalysisResult.analysis?.extracted_data?.totals?.grand_total ||
+                          quotationAnalysisResult.extracted_data?.totals?.grand_total || 0,
+          line_items_count: (quotationAnalysisResult.analysis?.extracted_data?.line_items ||
+                           quotationAnalysisResult.extracted_data?.line_items || []).length,
+          potential_savings: quotationAnalysisResult.analysis?.price_benchmark?.total_potential_savings ||
+                            quotationAnalysisResult.price_benchmark?.total_potential_savings || 0
+        })
+      };
+      
       const response = await axios.post(`${API}/ai-agent/conversation`, {
         message: userMessage,
         session_id: sessionId,
-        context: conversationContext,
+        context: enhancedContext,
         language: language,
         currency: currency.code
       }, {
@@ -274,6 +291,30 @@ const AIProcurementAgentPage = () => {
       if (aiResponse.search_results) {
         setSearchResults(aiResponse.search_results);
       }
+      
+      // Handle follow-up actions for quotation context
+      if (aiResponse.follow_up_action && quotationAnalysisResult) {
+        const analysis = quotationAnalysisResult.analysis || quotationAnalysisResult;
+        const extractedData = analysis.extracted_data || quotationAnalysisResult.extracted_data || {};
+        const lineItems = extractedData.line_items || [];
+        const priceBenchmark = analysis.price_benchmark || quotationAnalysisResult.price_benchmark || {};
+        
+        if (aiResponse.follow_up_action === 'show_line_items') {
+          // Let the AI response show, but also add line items display
+          const assistantMsg = {
+            id: Date.now() + 1,
+            type: "assistant",
+            content: aiResponse.message,
+            timestamp: new Date().toISOString(),
+            engines: aiResponse.engines_used || ["gpt"],
+            quotationAnalysis: quotationAnalysisResult,
+            showQuotationResults: true,
+            lineItemsDisplay: lineItems
+          };
+          setMessages(prev => [...prev, assistantMsg]);
+          return;
+        }
+      }
 
       // Add AI response
       const assistantMsg = {
@@ -290,7 +331,9 @@ const AIProcurementAgentPage = () => {
         unspscSuggestion: aiResponse.unspsc_suggestion,
         showQuotationUpload: aiResponse.show_quotation_upload,
         showManagedServices: aiResponse.show_managed_services,
-        intelligentGuidance: aiResponse.intelligent_guidance
+        intelligentGuidance: aiResponse.intelligent_guidance,
+        followUpAction: aiResponse.follow_up_action,
+        referencesPriorContext: aiResponse.references_prior_context
       };
       setMessages(prev => [...prev, assistantMsg]);
 
