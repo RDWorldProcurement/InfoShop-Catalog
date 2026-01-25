@@ -168,6 +168,14 @@ const UploadQuotationPage = () => {
 
     setUploading(true);
     setShowAiAnalysis(useRealAi);
+    setElapsedTime(0);
+    setOverallProgress({ phase: 'starting', percent: 0, message: 'Initializing AI engines...' });
+    
+    // Start elapsed time counter
+    const startTime = Date.now();
+    const timerInterval = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
     
     if (useRealAi) {
       // Reset AI status for real analysis
@@ -194,20 +202,56 @@ const UploadQuotationPage = () => {
       if (useRealAi) {
         // Simulate AI progress while waiting for response
         const progressPromise = (async () => {
+          // Phase 1: Document extraction (0-20%)
+          setOverallProgress({ phase: 'extracting', percent: 5, message: 'Extracting document content...' });
           setAiEngineStatus({
             openai: { status: 'analyzing', progress: 0 },
             claude: { status: 'analyzing', progress: 0 },
             gemini: { status: 'waiting', progress: 0 }
           });
-          await Promise.all([
-            simulateAiProgress('openai', 80),
-            simulateAiProgress('claude', 100)
-          ]);
+          
+          // Simulate OpenAI and Claude progress
+          for (let i = 0; i <= 100; i += 3) {
+            await new Promise(resolve => setTimeout(resolve, 150));
+            setAiEngineStatus(prev => ({
+              ...prev,
+              openai: { status: i < 100 ? 'analyzing' : 'complete', progress: Math.min(i, 100) },
+              claude: { status: Math.max(0, i - 10) < 100 ? 'analyzing' : 'complete', progress: Math.min(Math.max(0, i - 10), 100) }
+            }));
+            setOverallProgress(prev => ({
+              ...prev,
+              percent: Math.min(5 + Math.floor(i * 0.4), 45),
+              message: i < 30 ? 'Extracting line items from document...' :
+                       i < 60 ? 'Analyzing product pricing...' :
+                       i < 90 ? 'Benchmarking against market data...' :
+                       'Product analysis complete...'
+            }));
+          }
+          
+          // Phase 2: Gemini cross-validation (45-80%)
+          setOverallProgress({ phase: 'validating', percent: 50, message: 'Cross-validating with Gemini...' });
           setAiEngineStatus(prev => ({
             ...prev,
             gemini: { status: 'analyzing', progress: 0 }
           }));
-          await simulateAiProgress('gemini', 60);
+          
+          for (let i = 0; i <= 100; i += 4) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            setAiEngineStatus(prev => ({
+              ...prev,
+              gemini: { status: i < 100 ? 'analyzing' : 'complete', progress: Math.min(i, 100) }
+            }));
+            setOverallProgress(prev => ({
+              ...prev,
+              percent: Math.min(50 + Math.floor(i * 0.3), 80),
+              message: i < 50 ? 'Cross-validating price benchmarks...' :
+                       i < 80 ? 'Calculating confidence scores...' :
+                       'Finalizing analysis...'
+            }));
+          }
+          
+          // Phase 3: Waiting for server response (80-100%)
+          setOverallProgress({ phase: 'finalizing', percent: 85, message: 'Preparing results...' });
         })();
       }
 
@@ -218,6 +262,9 @@ const UploadQuotationPage = () => {
         },
         timeout: useRealAi ? 300000 : 30000 // 5 minutes for Real AI, 30s for demo
       });
+      
+      clearInterval(timerInterval);
+      setOverallProgress({ phase: 'complete', percent: 100, message: 'Analysis complete!' });
 
       if (response.data.success) {
         setAnalysisResult(response.data);
