@@ -5698,7 +5698,33 @@ Here are the closest matches I found. If these don't meet your needs:
                     }
                     break
         
-        # Step 7: Handle CLARIFICATION_NEEDED
+        # Step 7: Handle FOLLOW_UP - User is asking a follow-up question
+        elif intent == "FOLLOW_UP":
+            # This means the AI understood the context and is building on prior discussion
+            # Use the AI's generated response which should reference prior context
+            if classification.get("references_prior_context"):
+                response["message"] = response_message
+                if search_query:
+                    # Try to search with the contextual query
+                    search_results = await search_catalog_for_agent(search_query, "product", current_user, limit=5)
+                    response["products"] = search_results.get("products", [])
+                    response["services"] = search_results.get("services", [])
+                    
+                    if search_results.get("products") or search_results.get("services"):
+                        response["action"] = "show_results"
+                        response["search_results"] = search_results
+                    else:
+                        # No matches but context understood
+                        understood_topic = classification.get("understood_topic", search_query)
+                        response["message"] = f"I understand you're asking about **{understood_topic}**.\n\nUnfortunately, I couldn't find specific items matching this in our catalog. Would you like to:\n\n• **Upload a supplier quotation** for this item - I can analyze pricing and find alternatives\n• **Contact our Buying Desk** - Our specialists can source this for you"
+                        response["show_quotation_upload"] = True
+                        response["show_managed_services"] = True
+            else:
+                response["message"] = response_message
+            response["action"] = "follow_up"
+            response["context"]["last_action"] = "follow_up_handled"
+        
+        # Step 8: Handle CLARIFICATION_NEEDED
         else:
             response["message"] = INTELLIGENT_RESPONSES["clarification_needed"].format(query=user_message)
             response["action"] = "clarification"
