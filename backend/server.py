@@ -4262,6 +4262,136 @@ async def get_buying_desk_request(request_id: str, current_user: dict = Depends(
     
     return request
 
+
+class BuyingDeskEngageRequest(BaseModel):
+    request_type: str = "general_sourcing"
+    description: Optional[str] = None
+    quotation_id: Optional[str] = None
+    search_query: Optional[str] = None
+    unspsc_code: Optional[str] = None
+    category_name: Optional[str] = None
+    supplier_info: Optional[dict] = None
+    line_items: Optional[list] = []
+    potential_savings: Optional[float] = None
+    user_notes: Optional[str] = None
+    session_id: Optional[str] = None
+
+
+@api_router.post("/procurement/buying-desk/engage")
+async def engage_buying_desk_with_context(
+    request: BuyingDeskEngageRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Engage Infosys Buying Desk with full context from any screen.
+    This carries over quotation data, search context, and user requirements.
+    """
+    
+    # Get quotation details if quotation_id is provided
+    quotation_data = None
+    if request.quotation_id:
+        quotation = await db.quotation_uploads.find_one(
+            {"quotation_id": request.quotation_id},
+            {"_id": 0}
+        )
+        if quotation:
+            quotation_data = {
+                "quotation_id": request.quotation_id,
+                "supplier_name": quotation.get("supplier_name"),
+                "supplier_email": quotation.get("supplier_email"),
+                "total_amount": quotation.get("extracted_data", {}).get("totals", {}).get("grand_total", 0),
+                "line_items": quotation.get("extracted_data", {}).get("line_items", []),
+                "potential_savings": quotation.get("price_benchmark", {}).get("total_potential_savings", 0),
+                "benchmarks": quotation.get("price_benchmark", {}).get("benchmarks", [])
+            }
+    
+    # Determine priority based on context
+    priority = "standard"
+    if quotation_data and quotation_data.get("potential_savings", 0) > 5000:
+        priority = "high"
+    elif request.request_type in ["complex_sourcing", "strategic"]:
+        priority = "high"
+    
+    # Build comprehensive description
+    description_parts = []
+    if request.description:
+        description_parts.append(request.description)
+    if request.search_query:
+        description_parts.append(f"Search: {request.search_query}")
+    if request.category_name:
+        description_parts.append(f"Category: {request.category_name}")
+    if quotation_data:
+        description_parts.append(f"Quotation from {quotation_data.get('supplier_name', 'supplier')} with {len(quotation_data.get('line_items', []))} items")
+    
+    full_description = " | ".join(description_parts) if description_parts else "Procurement assistance requested"
+    
+    # Create buying desk request record
+    buying_desk_request = {
+        "request_id": f"IBD-{uuid.uuid4().hex[:8].upper()}",
+        "user_id": current_user.get("email"),
+        "user_name": current_user.get("name", "User"),
+        "user_company": current_user.get("company", ""),
+        "request_type": request.request_type,
+        "description": full_description,
+        "search_query": request.search_query,
+        "unspsc_code": request.unspsc_code,
+        "category_name": request.category_name,
+        "quotation_id": request.quotation_id,
+        "quotation_data": quotation_data,
+        "supplier_info": request.supplier_info,
+        "line_items": request.line_items or (quotation_data.get("line_items", []) if quotation_data else []),
+        "potential_savings": request.potential_savings or (quotation_data.get("potential_savings", 0) if quotation_data else 0),
+        "user_notes": request.user_notes,
+        "session_id": request.session_id,
+        "status": "submitted",
+        "priority": priority,
+        "current_stage": "submitted",
+        "stages": [
+            {"stage": "submitted", "title": "Submitted", "completed": True, "completed_at": datetime.now(timezone.utc).isoformat()},
+            {"stage": "review", "title": "Under Review", "completed": False, "completed_at": None},
+            {"stage": "supplier_identification", "title": "Supplier Identification", "completed": False, "completed_at": None},
+            {"stage": "rfq_sent", "title": "RFQ Sent", "completed": False, "completed_at": None},
+            {"stage": "quotes_received", "title": "Quotes Received", "completed": False, "completed_at": None},
+            {"stage": "negotiating", "title": "Negotiating", "completed": False, "completed_at": None},
+            {"stage": "po_ready", "title": "PO Ready", "completed": False, "completed_at": None}
+        ],
+        "assigned_to": None,
+        "submitted_at": datetime.now(timezone.utc).isoformat(),
+        "expected_response_by": (datetime.now(timezone.utc) + timedelta(hours=4)).isoformat(),
+        "notes": []
+    }
+    
+    await db.buying_desk_requests.insert_one(buying_desk_request)
+    
+    # Update quotation status if quotation_id provided
+    if request.quotation_id:
+        await db.quotation_uploads.update_one(
+            {"quotation_id": request.quotation_id},
+            {"$set": {
+                "buying_desk_engaged": True,
+                "buying_desk_request_id": buying_desk_request["request_id"],
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+    
+    # Log activity
+    await db.activity_logs.insert_one({
+        "user_id": current_user.get("email"),
+        "action": "BUYING_DESK_ENGAGED",
+        "request_id": buying_desk_request["request_id"],
+        "quotation_id": request.quotation_id,
+        "request_type": request.request_type,
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {
+        "success": True,
+        "message": "Infosys Buying Desk has been notified and will contact you shortly",
+        "request_id": buying_desk_request["request_id"],
+        "priority": priority,
+        "expected_response": "2-4 business hours"
+    }
+
 @api_router.post("/procurement/quotation/{quotation_id}/add-to-cart")
 async def add_quotation_to_cart(
     quotation_id: str,
