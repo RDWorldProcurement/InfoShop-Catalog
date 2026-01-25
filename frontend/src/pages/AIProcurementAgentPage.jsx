@@ -115,6 +115,118 @@ const AIProcurementAgentPage = () => {
     };
     setMessages(prev => [...prev, userMsg]);
     setInputValue("");
+    
+    const msgLower = userMessage.toLowerCase();
+    
+    // ===== CONTEXT-AWARE HANDLING =====
+    // Check if user is asking about existing quotation analysis
+    if (quotationAnalysisResult) {
+      const analysis = quotationAnalysisResult.analysis || quotationAnalysisResult;
+      const extractedData = analysis.extracted_data || {};
+      const lineItems = extractedData.line_items || [];
+      const priceBenchmark = analysis.price_benchmark || {};
+      const supplier = extractedData.supplier || {};
+      const totals = extractedData.totals || {};
+      
+      // User asking about line items
+      if (msgLower.includes('line item') || msgLower.includes('detail') || msgLower.includes('breakdown') || 
+          msgLower.includes('show item') || msgLower.includes('view item') || msgLower.includes('list item')) {
+        
+        let itemsContent = `## 📋 Line Items from Your Quotation\n\n**Supplier:** ${supplier.name || 'N/A'}\n**Quote #:** ${extractedData.quotation_details?.quotation_number || 'N/A'}\n\n`;
+        
+        if (lineItems.length > 0) {
+          itemsContent += `| # | Description | Qty | Unit Price | Total |\n|---|-------------|-----|------------|-------|\n`;
+          lineItems.forEach((item, idx) => {
+            itemsContent += `| ${idx + 1} | ${item.description || 'Item'} | ${item.quantity || 1} | ${currency.symbol}${(item.unit_price || 0).toLocaleString()} | ${currency.symbol}${(item.line_total || 0).toLocaleString()} |\n`;
+          });
+          itemsContent += `\n**Subtotal:** ${currency.symbol}${(totals.subtotal || 0).toLocaleString()}\n`;
+          itemsContent += `**Tax:** ${currency.symbol}${(totals.tax_amount || 0).toLocaleString()}\n`;
+          itemsContent += `**Grand Total:** ${currency.symbol}${(totals.grand_total || 0).toLocaleString()}\n`;
+        } else {
+          itemsContent += "No line items were extracted from this quotation.";
+        }
+        
+        itemsContent += `\n\nWould you like to:\n• **Start AI Negotiation** to get better pricing\n• **Add items to Cart** for procurement\n• **Contact Buying Desk** for negotiation support`;
+        
+        const assistantMsg = {
+          id: Date.now() + 1,
+          type: "assistant",
+          content: itemsContent,
+          timestamp: new Date().toISOString(),
+          engines: [],
+          quotationAnalysis: quotationAnalysisResult,
+          showQuotationResults: true
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+        return;
+      }
+      
+      // User asking about savings
+      if (msgLower.includes('saving') || msgLower.includes('benchmark') || msgLower.includes('market') || msgLower.includes('opportunity')) {
+        const benchmarks = priceBenchmark.benchmarks || [];
+        const totalSavings = priceBenchmark.total_potential_savings || 0;
+        
+        let savingsContent = `## 💰 Savings Analysis\n\n**Total Potential Savings:** ${currency.symbol}${totalSavings.toLocaleString()}\n\n`;
+        
+        if (benchmarks.length > 0) {
+          savingsContent += `### Item-Level Benchmarking\n\n`;
+          benchmarks.forEach((b, idx) => {
+            const status = b.variance_percent > 10 ? '🔴 Above Market' : b.variance_percent > -5 ? '🟡 At Market' : '🟢 Below Market';
+            savingsContent += `**${idx + 1}. ${b.item}**\n`;
+            savingsContent += `   Quoted: ${currency.symbol}${(b.quoted_price || 0).toLocaleString()} | Market: ${currency.symbol}${(b.market_avg_price || 0).toLocaleString()} | ${status}\n`;
+            savingsContent += `   Potential Savings: ${currency.symbol}${(b.potential_savings || 0).toLocaleString()}\n\n`;
+          });
+        }
+        
+        savingsContent += `\n**Ready to negotiate?** Use our AI Negotiation Agent to generate target prices and professional negotiation emails.`;
+        
+        const assistantMsg = {
+          id: Date.now() + 1,
+          type: "assistant",
+          content: savingsContent,
+          timestamp: new Date().toISOString(),
+          engines: ["gpt", "claude", "gemini"],
+          quotationAnalysis: quotationAnalysisResult,
+          showQuotationResults: true
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+        return;
+      }
+      
+      // User wants to add to cart
+      if (msgLower.includes('add to cart') || msgLower.includes('cart') || msgLower.includes('checkout') || msgLower.includes('proceed')) {
+        const assistantMsg = {
+          id: Date.now() + 1,
+          type: "assistant",
+          content: `## 🛒 Add to Cart\n\nI'll add the items from your quotation to your procurement cart.\n\n**Please select the payment entity:**`,
+          timestamp: new Date().toISOString(),
+          engines: [],
+          quotationAnalysis: quotationAnalysisResult,
+          showPaymentEntitySelection: true,
+          lineItems: lineItems
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+        return;
+      }
+      
+      // User wants negotiation help
+      if (msgLower.includes('negotiat') || msgLower.includes('buying desk') || msgLower.includes('help') || msgLower.includes('support')) {
+        const assistantMsg = {
+          id: Date.now() + 1,
+          type: "assistant",
+          content: `## 🤝 Negotiation Options\n\nI can help you get better pricing on this quotation:\n\n**Option 1: AI Negotiation Agent**\nOur AI will generate target prices and professional negotiation emails based on market data.\n\n**Option 2: Infosys Buying Desk**\nOur procurement specialists will negotiate directly with the supplier on your behalf.\n\nWhich would you prefer?`,
+          timestamp: new Date().toISOString(),
+          engines: [],
+          quotationAnalysis: quotationAnalysisResult,
+          showQuotationResults: true,
+          showManagedServices: true
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+        return;
+      }
+    }
+    
+    // ===== STANDARD AI PROCESSING =====
     setIsTyping(true);
     setActiveEngines(["gpt", "claude", "gemini"]);
 
