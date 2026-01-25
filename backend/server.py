@@ -5163,9 +5163,11 @@ async def get_conversation_context(session_id: str, limit: int = 8) -> Dict:
 def detect_follow_up_question(message: str) -> bool:
     """Detect if a message is likely a follow-up question referencing prior context"""
     message_lower = message.lower().strip()
+    words = message_lower.split()
     
     # Short messages that reference something ("it", "that", "those", "this")
-    referential_words = ['it', 'that', 'those', 'this', 'them', 'they', 'these', 'the one', 'the ones']
+    # Use word-level matching to avoid false positives (e.g., "with" contains "it")
+    referential_words = {'it', 'that', 'those', 'this', 'them', 'they', 'these'}
     
     # Common follow-up patterns
     follow_up_patterns = [
@@ -5178,24 +5180,27 @@ def detect_follow_up_question(message: str) -> bool:
         'add to cart', 'add it', 'buy it', 'order it',
         'compare', 'comparison', 'versus', 'vs',
         'what else', 'anything else', 'other', 'similar',
-        'tell me more', 'explain', 'why', 'how does',
+        'tell me more', 'explain',
         'can you', 'could you', 'would you',
-        'yes', 'no', 'sure', 'ok', 'okay', 'sounds good', 'go ahead',
-        'perfect', 'great', 'thanks'
+        'yes please', 'no thanks', 'sounds good', 'go ahead',
+        'perfect', 'great thanks'
     ]
     
-    # Check for referential words
-    words = message_lower.split()
+    # Check for referential words - must be standalone words, not substrings
     if len(words) <= 5:  # Short messages are often follow-ups
-        if any(ref in message_lower for ref in referential_words):
+        if any(word in referential_words for word in words):
             return True
+    
+    # Check for multi-word referential phrases
+    if 'the one' in message_lower or 'the ones' in message_lower:
+        return True
     
     # Check for follow-up patterns
     if any(pattern in message_lower for pattern in follow_up_patterns):
         return True
     
-    # Questions without clear subject
-    if message_lower.startswith(('what', 'which', 'how', 'where', 'when', 'why', 'can', 'could', 'is', 'are', 'do', 'does')):
+    # Questions without clear subject (very short)
+    if message_lower.startswith(('what', 'which', 'how', 'where', 'when', 'can', 'could', 'is', 'are', 'do', 'does')):
         if len(words) <= 4:  # Very short question like "what brands?" or "is it available?"
             return True
     
