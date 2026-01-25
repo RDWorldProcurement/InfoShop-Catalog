@@ -5678,8 +5678,11 @@ async def ai_agent_conversation(
         # Step 0: Check if this is clearly NOT an industrial/MRO item
         # Only do this check for fresh queries, not follow-ups
         is_follow_up = detect_follow_up_question(user_message)
+        is_consumer_item = is_likely_not_in_catalog(user_message)
         
-        if not is_follow_up and is_likely_not_in_catalog(user_message):
+        logger.info(f"Intelligent routing check: message='{user_message[:50]}', is_follow_up={is_follow_up}, is_consumer_item={is_consumer_item}")
+        
+        if not is_follow_up and is_consumer_item:
             # This is clearly a consumer/non-industrial item - route to alternatives
             response["message"] = INTELLIGENT_RESPONSES["no_results_with_alternatives"].format(query=user_message)
             response["action"] = "not_in_catalog"
