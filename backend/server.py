@@ -5568,7 +5568,10 @@ async def search_catalog_for_agent(query: str, search_type: str, user: dict, lim
     if search_type in ["service", None]:
         # Search services (similar enhanced logic)
         query_lower = query.lower()
-        query_terms = [term.strip() for term in query_lower.split() if len(term.strip()) > 2]
+        # Clean query: remove parentheses and special chars that break regex
+        query_clean = re.sub(r'[()[\]{}|\\^$.*+?]', ' ', query_lower).strip()
+        query_clean = re.sub(r'\s+', ' ', query_clean)  # Normalize whitespace
+        query_terms = [term.strip() for term in query_clean.split() if len(term.strip()) > 2]
         matched_services = []
         seen_ids = set()
         
@@ -5577,7 +5580,7 @@ async def search_catalog_for_agent(query: str, search_type: str, user: dict, lim
             cat_name_lower = category["name"].lower()
             score = 0
             
-            if query_lower in cat_name_lower:
+            if query_clean in cat_name_lower:
                 score += 100
             for term in query_terms:
                 if term in cat_name_lower:
@@ -5590,7 +5593,7 @@ async def search_catalog_for_agent(query: str, search_type: str, user: dict, lim
         # Search MongoDB vendor_services
         try:
             # Use escaped query for regex safety
-            escaped_query = escape_regex(query_clean) if 'query_clean' in dir() else escape_regex(query_lower)
+            escaped_query = escape_regex(query_clean)
             mongo_query = {
                 "$or": [
                     {"name": {"$regex": escaped_query, "$options": "i"}},
