@@ -227,10 +227,13 @@ const NegotiationAgentPage = () => {
 
   const analysis = quotation?.analysis || {};
   const extractedData = analysis.extracted_data || quotation?.extracted_data || {};
-  const supplier = extractedData.supplier || {};
+  const supplier = extractedData.supplier || quotation?.supplier || {};
   const quotationDetails = extractedData.quotation_details || {};
   const lineItems = extractedData.line_items || [];
-  const benchmarks = analysis.price_benchmark?.benchmarks || [];
+  // Price benchmark can be at top level or under analysis
+  const priceBenchmark = quotation?.price_benchmark || analysis.price_benchmark || {};
+  const benchmarks = priceBenchmark.benchmarks || [];
+  const totalPotentialSavings = priceBenchmark.total_potential_savings || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
