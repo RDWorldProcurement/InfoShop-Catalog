@@ -897,14 +897,16 @@ const UploadQuotationPage = () => {
                         <Package className="w-4 h-4" />
                         Line Items ({analysisResult.analysis?.extracted_data?.line_items?.length || 0})
                       </h4>
-                      {(analysisResult.analysis?.price_benchmark?.benchmarks || []).map((benchmark, idx) => (
+                      {(analysisResult.analysis?.price_benchmark?.benchmarks || []).map((benchmark, idx) => {
+                        const lineItem = analysisResult.analysis?.extracted_data?.line_items?.[idx];
+                        return (
                         <Card key={idx} className="border">
                           <CardContent className="p-4">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <p className="font-medium text-slate-900">{benchmark.item}</p>
                                 <div className="flex items-center gap-4 mt-2 text-sm text-slate-600">
-                                  <span>Qty: {analysisResult.analysis?.extracted_data?.line_items?.[idx]?.quantity}</span>
+                                  <span>Qty: {lineItem?.quantity}</span>
                                   <span>Unit: ${benchmark.quoted_price?.toFixed(2)}</span>
                                   <Badge variant="outline" className={
                                     benchmark.benchmark_status === 'ABOVE_MARKET' ? 'border-amber-300 text-amber-600' :
@@ -920,10 +922,19 @@ const UploadQuotationPage = () => {
                                     )}
                                   </Badge>
                                 </div>
+                                {/* UNSPSC Classification */}
+                                {lineItem?.unspsc_code && lineItem?.unspsc_code !== "00000000" && (
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <Badge variant="secondary" className="bg-purple-100 text-purple-700 font-mono text-xs">
+                                      UNSPSC: {lineItem.unspsc_code}
+                                    </Badge>
+                                    <span className="text-xs text-slate-500">{lineItem.unspsc_category}</span>
+                                  </div>
+                                )}
                               </div>
                               <div className="text-right">
                                 <p className="text-lg font-bold text-slate-900">
-                                  ${(analysisResult.analysis?.extracted_data?.line_items?.[idx]?.line_total || 0).toLocaleString()}
+                                  ${(lineItem?.line_total || 0).toLocaleString()}
                                 </p>
                                 {benchmark.potential_savings > 0 && (
                                   <p className="text-sm text-green-600 font-medium">
