@@ -769,6 +769,38 @@ const AIProcurementAgentPage = () => {
                         </p>
                       </div>
                     )}
+
+                    {/* Quotation Analysis Actions */}
+                    {msg.showQuotationResults && msg.quotationAnalysis && (
+                      <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <TrendingDown className="w-5 h-5 text-green-600" />
+                          <span className="font-semibold text-slate-900">Negotiation Opportunity Identified</span>
+                        </div>
+                        <p className="text-sm text-slate-600 mb-4">
+                          Our AI analysis found potential savings. Use the Negotiation Agent to automatically generate 
+                          target prices and negotiation emails based on market data.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <Button
+                            onClick={() => navigate(`/negotiation/${msg.quotationAnalysis.quotation_id}`)}
+                            className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                            data-testid="start-negotiation-btn"
+                          >
+                            <Target className="w-4 h-4 mr-2" />
+                            Start AI Negotiation
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => navigate("/sourcing-support")}
+                            className="flex-1"
+                          >
+                            <Handshake className="w-4 h-4 mr-2" />
+                            Escalate to Buying Desk
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Timestamp */}
                     <p className={`text-xs mt-3 ${msg.type === 'user' ? 'text-slate-400' : 'text-slate-400'}`}>
