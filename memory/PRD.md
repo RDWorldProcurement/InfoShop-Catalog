@@ -10,6 +10,56 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 
 ## What's Been Implemented
 
+### ✅ Phase 20 - AI Conversation Continuity & End-to-End Flows (January 25, 2026 - COMPLETED)
+**Major Enhancement: ChatGPT-like Conversation Continuity**
+
+Fixed the AI Procurement Agent to maintain conversation context and handle all flows end-to-end.
+
+**Features Implemented:**
+
+1. **Conversation Context Awareness:**
+   - Frontend maintains `quotationAnalysisResult` state after analysis
+   - Queries like "show line items", "show savings", "add to cart" are intercepted
+   - No need to re-upload quotation - system remembers the analyzed data
+   - Renders markdown tables with line items, costs, and savings
+
+2. **Three Complete Procurement Flows:**
+
+   **Flow 1: Buy from Catalog**
+   - Search for products/services via natural language
+   - Results displayed with Add to Cart buttons
+   - Items added to cart with toast confirmation
+
+   **Flow 2: Upload Quotation (Full Flow)**
+   - Upload quotation → Real AI Analysis (GPT-5.2, Claude, Gemini)
+   - View line items and savings by typing "show details" or "line items"
+   - Select Payment Entity: Infosys | ProPay | Direct by Customer
+   - Select PunchOut System: Coupa | SAP Ariba | SAP ERP | Ivalua | Oracle
+   - Transfer cart to selected system
+
+   **Flow 3: Managed Services**
+   - Complex sourcing requests route to Buying Desk
+   - UNSPSC classification provided
+   - Category expert notification
+
+3. **Payment Entity Selection:**
+   - Infosys - Payment handled by Infosys on behalf of customer
+   - ProPay - Payment through ProPay procurement service
+   - Direct by Customer - Customer handles payment directly
+
+4. **PunchOut System Integration:**
+   - Coupa, SAP Ariba, SAP ERP, Ivalua, Oracle
+   - Visual system selection with logos
+   - Cart transfer with confirmation
+
+**Files Modified:**
+- `/app/frontend/src/pages/AIProcurementAgentPage.jsx` - Added processMessage context handling, Payment/PunchOut selection UI
+
+**Test Results:**
+- Backend: 100% (9/9 tests passed)
+- Frontend: 100% (all 3 flows working)
+- Report: `/app/test_reports/iteration_20.json`
+
 ### ✅ Phase 19 - AI Negotiation Agent Phase 1 (January 25, 2026 - COMPLETED)
 **New Feature: AI-Powered Autonomous Negotiation**
 
