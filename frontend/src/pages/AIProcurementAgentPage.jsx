@@ -1239,11 +1239,25 @@ const AIProcurementAgentPage = () => {
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() => navigate("/sourcing-support")}
-                            className="flex-1"
+                            onClick={() => handleEngageBuyingDesk({
+                              requestType: "quotation_negotiation",
+                              quotationId: msg.quotationAnalysis.quotation_id,
+                              supplierName: msg.quotationAnalysis.supplier_name,
+                              potentialSavings: `${currency.symbol}${msg.quotationAnalysis.potential_savings?.toLocaleString() || '0'}`,
+                              lineItems: msg.quotationAnalysis.line_items,
+                              messageId: `quot_${msg.quotationAnalysis.quotation_id}`
+                            })}
+                            disabled={engagingBuyingDesk || buyingDeskEngaged[`quot_${msg.quotationAnalysis.quotation_id}`]}
+                            className={`flex-1 ${buyingDeskEngaged[`quot_${msg.quotationAnalysis.quotation_id}`] ? 'border-green-500 text-green-700' : ''}`}
                           >
-                            <Handshake className="w-4 h-4 mr-2" />
-                            Escalate to Buying Desk
+                            {engagingBuyingDesk ? (
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : buyingDeskEngaged[`quot_${msg.quotationAnalysis.quotation_id}`] ? (
+                              <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
+                            ) : (
+                              <Handshake className="w-4 h-4 mr-2" />
+                            )}
+                            {buyingDeskEngaged[`quot_${msg.quotationAnalysis.quotation_id}`] ? 'Buying Desk Notified' : 'Escalate to Buying Desk'}
                           </Button>
                         </div>
                       </div>
