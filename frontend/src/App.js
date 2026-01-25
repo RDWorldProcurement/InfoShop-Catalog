@@ -201,6 +201,14 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/negotiation/:quotationId"
+                element={
+                  <ProtectedRoute>
+                    <NegotiationAgentPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/admin" element={<AdminPortalPage />} />
             </Routes>
             <ChatBot />
