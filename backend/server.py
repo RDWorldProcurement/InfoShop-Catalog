@@ -5116,7 +5116,7 @@ def assess_requirement_complexity(query: str, search_results: dict) -> str:
         return 'simple'
 
 async def classify_user_intent_with_ai(message: str, context: Dict, session_id: str) -> Dict:
-    """Use multi-LLM approach to classify user intent and generate response"""
+    """Use multi-LLM approach to classify user intent and generate response with conversation history"""
     
     if not EMERGENT_AVAILABLE or not EMERGENT_LLM_KEY:
         # Fallback to keyword-based classification
@@ -5151,18 +5151,70 @@ async def classify_user_intent_with_ai(message: str, context: Dict, session_id: 
             "confidence": 0.70
         }
     
-    # Use LLM for intelligent classification
+    # Use LLM for intelligent classification with conversation history
     try:
-        # Build context message
-        context_str = f"\nCurrent context: {json.dumps(context)}" if context else ""
+        # Retrieve recent conversation history for context
+        recent_messages = await db.ai_agent_conversations.find(
+            {"session_id": session_id}
+        ).sort("timestamp", -1).limit(10).to_list(10)
         
+        # Build conversation history string
+        history_str = ""
+        if recent_messages:
+            recent_messages.reverse()  # Oldest first
+            history_str = "\n\n**Recent conversation:**\n"
+            for msg in recent_messages:
+                history_str += f"User: {msg.get('message', '')}\n"
+                history_str += f"Assistant: {msg.get('response', '')[:200]}...\n\n"
+        
+        # Build context message including any quotation data
+        context_str = ""
+        if context:
+            if context.get("quotation_analyzed"):
+                context_str += f"\n\n**Current quotation context:**\nQuotation ID: {context.get('quotation_id')}\nSupplier: {context.get('supplier_name')}\nTotal: ${context.get('quotation_total', 0):,.2f}\nLine items: {context.get('line_items_count', 0)}\n"
+            if context.get("cart_items"):
+                context_str += f"\n**Cart:** {len(context.get('cart_items', []))} items in cart\n"
+            if context.get("last_action"):
+                context_str += f"Last action: {context.get('last_action')}\n"
+        
+        intelligent_system_prompt = """You are an intelligent AI procurement assistant for Infosys OMNISupply.io platform.
+
+You have memory of the conversation and can reference previous exchanges. When users ask follow-up questions, connect the dots from prior context.
+
+**Your capabilities:**
+1. Search 30M+ industrial/MRO products and 100K+ professional services
+2. Analyze uploaded quotations with AI-powered price benchmarking
+3. Connect users to the Infosys Buying Desk for complex sourcing
+
+**Response rules:**
+1. Be conversational and helpful, like ChatGPT
+2. Remember what was discussed earlier and refer back to it
+3. If user asks about "line items" or "details" after a quotation was analyzed, help them based on that context
+4. Ask clarifying questions to understand needs better
+5. Guide users to the best procurement path
+
+**You MUST respond with valid JSON in this exact format:**
+{
+    "intent": "CATALOG_SEARCH" | "QUOTATION_ANALYSIS" | "MANAGED_SERVICES" | "FOLLOW_UP" | "CLARIFICATION_NEEDED",
+    "response_message": "Your conversational response here",
+    "search_type": "product" | "service" | null,
+    "search_query": "extracted search terms" | null,
+    "confidence": 0.0-1.0,
+    "follow_up_action": "show_line_items" | "show_savings" | "add_to_cart" | "negotiate" | null,
+    "references_prior_context": true | false
+}"""
+
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
-            session_id=f"agent_{session_id}",
-            system_message=AI_AGENT_SYSTEM_PROMPT
+            session_id=f"agent_{session_id}_intelligent",
+            system_message=intelligent_system_prompt
         ).with_model("openai", "gpt-5.2")
         
-        prompt = f"User message: {message}{context_str}\n\nClassify the intent and respond appropriately."
+        prompt = f"""Current user message: "{message}"
+{history_str}{context_str}
+
+Analyze this message in the context of our conversation and respond appropriately. If the user is asking a follow-up question about previously discussed items/quotations, acknowledge that context."""
+        
         response = await chat.send_message(UserMessage(text=prompt))
         
         response_text = str(response)
