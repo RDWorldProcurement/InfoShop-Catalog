@@ -311,6 +311,129 @@ const AIProcurementAgentPage = () => {
     }
   };
 
+  // Handle payment entity selection
+  const handlePaymentEntitySelect = async (entity) => {
+    setSelectedPaymentEntity(entity);
+    
+    // Add confirmation message
+    const confirmMsg = {
+      id: Date.now(),
+      type: "assistant",
+      content: `## ✅ Payment Entity Selected: ${entity.name}\n\n${entity.description}\n\n**Now select your PunchOut system to transfer the cart:**`,
+      timestamp: new Date().toISOString(),
+      engines: [],
+      showPunchoutSelection: true,
+      paymentEntity: entity
+    };
+    setMessages(prev => [...prev, confirmMsg]);
+  };
+
+  // Handle adding quotation items to cart
+  const handleAddQuotationToCart = async (lineItems, paymentEntity) => {
+    if (!lineItems || lineItems.length === 0) {
+      toast.error("No items to add to cart");
+      return;
+    }
+    
+    setAddingToCart(true);
+    try {
+      let addedCount = 0;
+      for (const item of lineItems) {
+        const cartPayload = {
+          product_id: `quot-${Date.now()}-${addedCount}`,
+          product_name: item.description || `Item ${addedCount + 1}`,
+          brand: "Supplier Quotation",
+          sku: item.part_number || `SKU-${addedCount}`,
+          unspsc_code: "43211500",
+          category: item.category || "Quotation Items",
+          quantity: item.quantity || 1,
+          unit_price: item.unit_price || 0,
+          total_price: item.line_total || (item.unit_price * (item.quantity || 1)),
+          currency_code: currency.code || "USD",
+          image_url: null,
+          is_service: false,
+          payment_entity: paymentEntity?.id || "customer"
+        };
+        
+        await axios.post(`${API}/cart/add`, cartPayload, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        addedCount++;
+      }
+      
+      toast.success(`${addedCount} items added to cart!`);
+      
+      // Add success message
+      const successMsg = {
+        id: Date.now(),
+        type: "assistant",
+        content: `## ✅ Items Added to Cart\n\n**${addedCount} items** from your quotation have been added to your procurement cart.\n\n**Payment Entity:** ${paymentEntity?.name || 'Direct'}\n\n**Ready to complete the order?** Select a PunchOut system to transfer the cart:`,
+        timestamp: new Date().toISOString(),
+        engines: [],
+        showPunchoutSelection: true,
+        cartItemsCount: addedCount
+      };
+      setMessages(prev => [...prev, successMsg]);
+      
+    } catch (error) {
+      console.error("Add to cart error:", error);
+      toast.error("Failed to add items to cart");
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
+  // Handle cart transfer to PunchOut system
+  const handleCartTransfer = async (system) => {
+    setTransferringCart(true);
+    setSelectedPunchoutSystem(system);
+    
+    try {
+      // Get cart items first
+      const cartResponse = await axios.get(`${API}/cart`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      
+      const cartItems = cartResponse.data.items || [];
+      if (cartItems.length === 0) {
+        toast.error("Cart is empty");
+        return;
+      }
+      
+      // Transfer cart
+      const transferResponse = await axios.post(`${API}/cart/transfer`, {
+        system: system.name,
+        cart_items: cartItems.map(item => item.id)
+      }, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      
+      toast.success(`Cart transferred to ${system.name}!`);
+      
+      // Add success message
+      const successMsg = {
+        id: Date.now(),
+        type: "assistant",
+        content: `## 🎉 Cart Transfer Complete!\n\n**System:** ${system.name}\n**Items Transferred:** ${cartItems.length}\n**Transfer ID:** ${transferResponse.data.transfer_id || 'N/A'}\n\nYour procurement request has been submitted. You can track its status in your ${system.name} dashboard.\n\n**What would you like to do next?**`,
+        timestamp: new Date().toISOString(),
+        engines: [],
+        transferComplete: true,
+        transferSystem: system.name
+      };
+      setMessages(prev => [...prev, successMsg]);
+      
+      // Reset state
+      setSelectedPaymentEntity(null);
+      setSelectedPunchoutSystem(null);
+      
+    } catch (error) {
+      console.error("Cart transfer error:", error);
+      toast.error(`Failed to transfer cart to ${system.name}`);
+    } finally {
+      setTransferringCart(false);
+    }
+  };
+
   // Handle quick actions
   const handleQuickAction = (actionId) => {
     const actionMessages = {
