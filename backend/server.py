@@ -6109,6 +6109,19 @@ async def health_check():
     
     return health_status
 
+
+# Root-level health check for Kubernetes (without /api prefix)
+@app.get("/health")
+async def kubernetes_health_check():
+    """Simple health check endpoint for Kubernetes liveness/readiness probes"""
+    try:
+        # Quick database ping
+        await db.command("ping")
+        return {"status": "healthy", "service": "OMNISupply.io"}
+    except Exception as e:
+        return {"status": "unhealthy", "error": str(e)}
+
+
 @app.get("/api/ready")
 async def readiness_check():
     """Readiness probe for Kubernetes"""
