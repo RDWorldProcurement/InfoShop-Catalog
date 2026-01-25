@@ -5762,33 +5762,30 @@ async def ai_agent_conversation(
         
         # Step 5: Handle FOLLOW_UP - Legacy intent for backwards compatibility
         elif intent == "FOLLOW_UP":
-            # This means the AI understood the context and is building on prior discussion
-            # Use the AI's generated response which should reference prior context
-            if classification.get("references_prior_context"):
-                response["message"] = response_message
-                if search_query:
-                    # Try to search with the contextual query
-                    search_results = await search_catalog_for_agent(search_query, "product", current_user, limit=5)
-                    response["products"] = search_results.get("products", [])
-                    response["services"] = search_results.get("services", [])
-                    
-                    if search_results.get("products") or search_results.get("services"):
-                        response["action"] = "show_results"
-                        response["search_results"] = search_results
-                    else:
-                        # No matches but context understood
-                        understood_topic = classification.get("understood_topic", search_query)
-                        response["message"] = f"I understand you're asking about **{understood_topic}**.\n\nUnfortunately, I couldn't find specific items matching this in our catalog. Would you like to:\n\n• **Upload a supplier quotation** for this item - I can analyze pricing and find alternatives\n• **Contact our Buying Desk** - Our specialists can source this for you"
-                        response["show_quotation_upload"] = True
-                        response["show_managed_services"] = True
-            else:
-                response["message"] = response_message
-            response["action"] = "follow_up"
+            # Treat similar to CONTEXT_CONTINUATION
+            response["message"] = response_message
+            if search_query:
+                search_results = await search_catalog_for_agent(search_query, "product", current_user, limit=5)
+                response["products"] = search_results.get("products", [])
+                response["services"] = search_results.get("services", [])
+                
+                if search_results.get("products") or search_results.get("services"):
+                    response["action"] = "show_results"
+                else:
+                    understood_topic = classification.get("understood_topic", search_query)
+                    response["message"] = f"I understand you're asking about **{understood_topic}**.\n\nI couldn't find exact matches in our catalog. Would you like to:\n\n• **Upload a supplier quotation** - I can analyze pricing\n• **Contact our Buying Desk** - Our specialists can source this"
+                    response["show_quotation_upload"] = True
+                    response["show_managed_services"] = True
+            response["action"] = response.get("action") or "follow_up"
             response["context"]["last_action"] = "follow_up_handled"
         
-        # Step 8: Handle CLARIFICATION_NEEDED
+        # Step 6: Handle CLARIFICATION_NEEDED - Only when truly needed
         else:
-            response["message"] = INTELLIGENT_RESPONSES["clarification_needed"].format(query=user_message)
+            # Use the AI's response if available, otherwise use template
+            if response_message and len(response_message) > 20:
+                response["message"] = response_message
+            else:
+                response["message"] = INTELLIGENT_RESPONSES["clarification_needed"].format(query=user_message)
             response["action"] = "clarification"
             response["context"]["last_action"] = "clarification_asked"
         
