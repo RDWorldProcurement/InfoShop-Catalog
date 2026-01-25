@@ -275,6 +275,8 @@ const UploadQuotationPage = () => {
       }
     } catch (error) {
       console.error("Upload error:", error);
+      clearInterval(timerInterval);
+      setOverallProgress({ phase: 'error', percent: 0, message: 'Analysis failed' });
       if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
         toast.error("AI analysis is taking longer than expected. Please try again or use the demo mode.");
       } else {
@@ -283,6 +285,8 @@ const UploadQuotationPage = () => {
     } finally {
       setUploading(false);
       setShowAiAnalysis(false);
+      setOverallProgress({ phase: 'idle', percent: 0, message: '' });
+      setElapsedTime(0);
     }
   };
 
