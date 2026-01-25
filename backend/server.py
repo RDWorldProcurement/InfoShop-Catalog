@@ -3873,6 +3873,28 @@ async def upload_quotation_with_real_ai(
                 "extracted_data": extracted_data
             }
         
+        # Step 2.5: UNSPSC Classification - AI Deep Search for category mapping
+        logging.info(f"Starting AI UNSPSC classification for {len(line_items)} items")
+        try:
+            from document_extractor import classify_unspsc_with_ai
+            line_items = await classify_unspsc_with_ai(line_items, session_id)
+            extracted_data["line_items"] = line_items
+            
+            # Generate UNSPSC summary
+            unspsc_summary = {}
+            for item in line_items:
+                code = item.get("unspsc_code", "00000000")[:4] + "0000"  # Segment level
+                category = item.get("unspsc_category", "Unclassified")
+                if code not in unspsc_summary:
+                    unspsc_summary[code] = {"category": category, "count": 0, "total_value": 0}
+                unspsc_summary[code]["count"] += 1
+                unspsc_summary[code]["total_value"] += item.get("line_total", 0)
+            
+            extracted_data["unspsc_summary"] = unspsc_summary
+            logging.info(f"UNSPSC classification complete. Categories: {list(unspsc_summary.keys())}")
+        except Exception as unspsc_error:
+            logging.warning(f"UNSPSC classification error (non-fatal): {unspsc_error}")
+        
         ai_benchmark_results = await perform_ai_price_benchmarking(
             line_items,
             session_id
