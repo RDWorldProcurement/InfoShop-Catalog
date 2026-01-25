@@ -5228,10 +5228,24 @@ async def classify_user_intent_with_ai(message: str, context: Dict, session_id: 
             system_message=intelligent_system_prompt
         ).with_model("openai", "gpt-5.2")
         
-        prompt = f"""Current user message: "{message}"
-{history_str}{context_str}
+        # Build stronger context prompt
+        topic_hint = ""
+        if current_topic:
+            topic_hint = f"\n\n## IMPORTANT: Current conversation topic is: **{current_topic}**\nThe user's follow-up questions relate to {current_topic}. DO NOT ask them to clarify what product they mean.\n"
+        
+        prompt = f"""## USER'S NEW MESSAGE: "{message}"
+{topic_hint}
+{history_str}
+{context_str}
 
-Analyze this message in the context of our conversation and respond appropriately. If the user is asking a follow-up question about previously discussed items/quotations, acknowledge that context."""
+## YOUR TASK:
+1. READ the conversation history above
+2. IDENTIFY what topic/product was discussed before
+3. INTERPRET this new message IN CONTEXT of prior discussion
+4. If user asks "what brands?", "any alternatives?", "cheaper options?" - these relate to the PREVIOUS TOPIC
+5. Include the understood topic in your search_query
+
+RESPOND WITH VALID JSON ONLY."""
         
         response = await chat.send_message(UserMessage(text=prompt))
         
