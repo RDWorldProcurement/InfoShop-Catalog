@@ -966,6 +966,86 @@ const AIProcurementAgentPage = () => {
                     {/* Search Results */}
                     {renderSearchResults(msg)}
                     
+                    {/* Payment Entity Selection */}
+                    {msg.showPaymentEntitySelection && (
+                      <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <DollarSign className="w-5 h-5 text-blue-600" />
+                          <span className="font-semibold text-slate-700">Select Payment Entity</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {PAYMENT_ENTITIES.map((entity) => (
+                            <div
+                              key={entity.id}
+                              onClick={() => {
+                                handlePaymentEntitySelect(entity);
+                                // Add items to cart with selected entity
+                                if (msg.lineItems) {
+                                  handleAddQuotationToCart(msg.lineItems, entity);
+                                }
+                              }}
+                              className={`p-4 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md ${
+                                selectedPaymentEntity?.id === entity.id
+                                  ? 'border-blue-500 bg-blue-50'
+                                  : 'border-slate-200 bg-white hover:border-blue-300'
+                              }`}
+                            >
+                              <div className="text-2xl mb-2">{entity.icon}</div>
+                              <p className="font-semibold text-slate-900">{entity.name}</p>
+                              <p className="text-xs text-slate-500 mt-1">{entity.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* PunchOut System Selection */}
+                    {msg.showPunchoutSelection && (
+                      <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <ArrowRight className="w-5 h-5 text-green-600" />
+                          <span className="font-semibold text-slate-700">Transfer to PunchOut System</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                          {PUNCHOUT_SYSTEMS.map((system) => (
+                            <div
+                              key={system.name}
+                              onClick={() => handleCartTransfer(system)}
+                              className={`p-3 rounded-xl border-2 cursor-pointer transition-all hover:shadow-md flex flex-col items-center ${
+                                selectedPunchoutSystem?.name === system.name
+                                  ? 'border-green-500 bg-green-50'
+                                  : 'border-slate-200 bg-white hover:border-green-300'
+                              } ${transferringCart ? 'opacity-50 pointer-events-none' : ''}`}
+                            >
+                              <img 
+                                src={system.logo} 
+                                alt={system.name}
+                                className="w-10 h-10 object-contain mb-2"
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                              />
+                              <p className="font-medium text-slate-900 text-sm text-center">{system.name}</p>
+                              {transferringCart && selectedPunchoutSystem?.name === system.name && (
+                                <Loader2 className="w-4 h-4 animate-spin text-green-600 mt-1" />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Transfer Complete */}
+                    {msg.transferComplete && (
+                      <div className="mt-4 p-4 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl border border-green-300">
+                        <div className="flex items-center gap-2 mb-2">
+                          <CheckCircle className="w-5 h-5 text-green-600" />
+                          <span className="font-semibold text-green-800">Transfer Successful!</span>
+                        </div>
+                        <p className="text-sm text-green-700">
+                          Your cart has been transferred to {msg.transferSystem}. Check your {msg.transferSystem} dashboard for order status.
+                        </p>
+                      </div>
+                    )}
+                    
                     {/* Intelligent Action Buttons - Show when no results or alternatives offered */}
                     {msg.type === 'assistant' && (msg.showQuotationUpload || msg.showManagedServices) && (
                       <div className="mt-4 p-4 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl border border-slate-200">
