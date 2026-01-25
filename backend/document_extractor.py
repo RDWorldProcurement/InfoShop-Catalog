@@ -351,6 +351,17 @@ async def extract_quotation_data(
         text_content = extract_text_from_excel(file_content)
         logger.info(f"Extracted {len(text_content)} chars from Excel")
     
+    # Handle plain text files
+    elif file_type in ['text/plain', 'text/csv', 'application/csv'] or file_ext in ['txt', 'csv']:
+        try:
+            text_content = file_content.decode('utf-8')
+        except UnicodeDecodeError:
+            try:
+                text_content = file_content.decode('latin-1')
+            except:
+                text_content = ""
+        logger.info(f"Extracted {len(text_content)} chars from text file")
+    
     # If we have text content, use text-based AI extraction
     if text_content and len(text_content.strip()) > 100:
         logger.info("Using AI text extraction")
