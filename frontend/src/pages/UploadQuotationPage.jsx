@@ -994,6 +994,14 @@ const UploadQuotationPage = () => {
                       )}
                       
                       <Button 
+                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                        onClick={() => navigate(`/negotiation/${analysisResult.quotation_id}`)}
+                      >
+                        <Target className="w-4 h-4 mr-2" />
+                        Start AI Negotiation
+                      </Button>
+                      
+                      <Button 
                         variant="outline" 
                         className="w-full"
                         onClick={() => setEscalateModalOpen(true)}
