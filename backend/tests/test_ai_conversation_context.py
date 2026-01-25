@@ -188,9 +188,9 @@ class TestCatalogSearch:
     
     def test_search_products(self):
         """Test product search"""
-        resp = requests.get(f"{BASE_URL}/api/catalog/search", 
+        resp = requests.get(f"{BASE_URL}/api/products/search", 
             headers=self.headers,
-            params={"q": "laptop", "type": "product"}
+            params={"q": "laptop"}
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -198,9 +198,9 @@ class TestCatalogSearch:
     
     def test_search_services(self):
         """Test service search"""
-        resp = requests.get(f"{BASE_URL}/api/catalog/search", 
+        resp = requests.get(f"{BASE_URL}/api/services/search", 
             headers=self.headers,
-            params={"q": "IT services", "type": "service"}
+            params={"q": "IT services"}
         )
         assert resp.status_code == 200
         data = resp.json()
