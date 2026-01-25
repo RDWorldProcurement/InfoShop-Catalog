@@ -4311,6 +4311,364 @@ async def add_quotation_to_cart(
     }
 
 # ============================================
+# NEGOTIATION AGENT ENDPOINTS
+# ============================================
+
+@api_router.get("/negotiation/strategies")
+async def get_negotiation_strategies(current_user: dict = Depends(get_current_user)):
+    """Get all available negotiation strategies/playbooks"""
+    return {
+        "success": True,
+        "strategies": get_all_strategies()
+    }
+
+class NegotiationTargetRequest(BaseModel):
+    quotation_id: str
+    strategy: str = "balanced"
+
+@api_router.post("/negotiation/generate-targets")
+async def generate_targets(
+    request: NegotiationTargetRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate negotiation targets for a quotation based on selected strategy"""
+    # Get quotation data
+    quotation = await db.quotation_uploads.find_one({
+        "quotation_id": request.quotation_id,
+        "user_id": current_user.get("email")
+    }, {"_id": 0})
+    
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    # Parse strategy
+    try:
+        strategy = NegotiationStrategy(request.strategy)
+    except ValueError:
+        strategy = NegotiationStrategy.BALANCED
+    
+    # Get line items and benchmarks
+    analysis = quotation.get("analysis", {})
+    extracted_data = analysis.get("extracted_data", quotation.get("extracted_data", {}))
+    line_items = extracted_data.get("line_items", [])
+    benchmarks = analysis.get("price_benchmark", {}).get("benchmarks", [])
+    
+    if not line_items:
+        raise HTTPException(status_code=400, detail="No line items found in quotation")
+    
+    # Generate targets
+    targets = generate_negotiation_targets(line_items, benchmarks, strategy)
+    
+    # Store negotiation session
+    negotiation_session = {
+        "negotiation_id": f"NEG-{datetime.now().strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6].upper()}",
+        "quotation_id": request.quotation_id,
+        "user_id": current_user.get("email"),
+        "strategy": strategy.value,
+        "targets": targets,
+        "status": "initiated",
+        "rounds": [],
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.negotiations.insert_one(negotiation_session)
+    
+    return {
+        "success": True,
+        "negotiation_id": negotiation_session["negotiation_id"],
+        "quotation_id": request.quotation_id,
+        "strategy": strategy.value,
+        "targets": targets,
+        "supplier": extracted_data.get("supplier", {}),
+        "quotation_details": extracted_data.get("quotation_details", {})
+    }
+
+class NegotiationEmailRequest(BaseModel):
+    quotation_id: str
+    negotiation_id: Optional[str] = None
+    strategy: str = "balanced"
+    buyer_name: str = "Procurement Team"
+    company_name: str = "Infosys Limited"
+
+@api_router.post("/negotiation/generate-email")
+async def generate_email(
+    request: NegotiationEmailRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Generate a negotiation email for a quotation"""
+    # Get quotation data
+    quotation = await db.quotation_uploads.find_one({
+        "quotation_id": request.quotation_id,
+        "user_id": current_user.get("email")
+    }, {"_id": 0})
+    
+    if not quotation:
+        raise HTTPException(status_code=404, detail="Quotation not found")
+    
+    # Parse strategy
+    try:
+        strategy = NegotiationStrategy(request.strategy)
+    except ValueError:
+        strategy = NegotiationStrategy.BALANCED
+    
+    # Get data
+    analysis = quotation.get("analysis", {})
+    extracted_data = analysis.get("extracted_data", quotation.get("extracted_data", {}))
+    line_items = extracted_data.get("line_items", [])
+    benchmarks = analysis.get("price_benchmark", {}).get("benchmarks", [])
+    supplier_info = extracted_data.get("supplier", {})
+    quotation_details = extracted_data.get("quotation_details", {})
+    
+    # Generate targets first
+    targets = generate_negotiation_targets(line_items, benchmarks, strategy)
+    
+    # Generate email
+    session_id = f"neg_email_{request.quotation_id}"
+    email_data = await generate_negotiation_email(
+        quotation_data=quotation_details,
+        negotiation_targets=targets,
+        strategy=strategy,
+        supplier_info=supplier_info,
+        buyer_info={
+            "name": request.buyer_name,
+            "company": request.company_name
+        },
+        session_id=session_id
+    )
+    
+    # Update negotiation session if exists
+    if request.negotiation_id:
+        await db.negotiations.update_one(
+            {"negotiation_id": request.negotiation_id},
+            {
+                "$set": {
+                    "email_generated": True,
+                    "email_data": email_data,
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                },
+                "$push": {
+                    "rounds": {
+                        "round": 1,
+                        "type": "initial_outreach",
+                        "email": email_data,
+                        "sent_at": None,
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                }
+            }
+        )
+    
+    return {
+        "success": True,
+        "email": email_data,
+        "targets": targets,
+        "supplier": supplier_info
+    }
+
+class CounterOfferRequest(BaseModel):
+    negotiation_id: str
+    their_offer: float
+    notes: Optional[str] = None
+
+@api_router.post("/negotiation/counter-offer")
+async def process_counter_offer(
+    request: CounterOfferRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    """Process a supplier's counter-offer and generate our response"""
+    # Get negotiation session
+    negotiation = await db.negotiations.find_one({
+        "negotiation_id": request.negotiation_id,
+        "user_id": current_user.get("email")
+    }, {"_id": 0})
+    
+    if not negotiation:
+        raise HTTPException(status_code=404, detail="Negotiation session not found")
+    
+    # Get current round
+    rounds = negotiation.get("rounds", [])
+    current_round = len(rounds)
+    
+    # Get strategy and targets
+    try:
+        strategy = NegotiationStrategy(negotiation.get("strategy", "balanced"))
+    except ValueError:
+        strategy = NegotiationStrategy.BALANCED
+    
+    targets = negotiation.get("targets", {})
+    summary = targets.get("summary", {})
+    target_price = summary.get("total_target", request.their_offer * 0.9)
+    
+    # Get our last offer (or initial if first counter)
+    if rounds:
+        last_round = rounds[-1]
+        our_last_offer = last_round.get("our_offer", summary.get("total_target", request.their_offer * 0.85))
+    else:
+        our_last_offer = summary.get("total_target", request.their_offer * 0.85)
+    
+    # Calculate counter-offer
+    counter = create_counter_offer(
+        current_round=current_round,
+        their_offer=request.their_offer,
+        our_last_offer=our_last_offer,
+        target_price=target_price,
+        strategy=strategy
+    )
+    
+    # Record the round
+    round_data = {
+        "round": counter["round"],
+        "their_offer": request.their_offer,
+        "our_offer": counter["our_counter"],
+        "gap": counter["gap_to_counter"],
+        "recommendation": counter["recommendation"],
+        "notes": request.notes,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Update status based on recommendation
+    new_status = "in_progress"
+    if counter["should_walk_away"]:
+        new_status = "escalate_recommended"
+    elif counter["rounds_remaining"] == 0:
+        new_status = "final_round"
+    
+    await db.negotiations.update_one(
+        {"negotiation_id": request.negotiation_id},
+        {
+            "$set": {
+                "status": new_status,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            },
+            "$push": {"rounds": round_data}
+        }
+    )
+    
+    # Calculate savings achieved so far
+    original_quoted = summary.get("total_quoted", request.their_offer)
+    savings_so_far = original_quoted - request.their_offer
+    savings_percent = (savings_so_far / original_quoted) * 100 if original_quoted > 0 else 0
+    
+    return {
+        "success": True,
+        "counter_offer": counter,
+        "round_data": round_data,
+        "status": new_status,
+        "savings_achieved": {
+            "amount": round(savings_so_far, 2),
+            "percent": round(savings_percent, 1),
+            "from_original": round(original_quoted, 2)
+        }
+    }
+
+@api_router.post("/negotiation/{negotiation_id}/close")
+async def close_negotiation(
+    negotiation_id: str,
+    outcome: str = "accepted",  # accepted, rejected, escalated
+    final_price: Optional[float] = None,
+    notes: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Close a negotiation session with final outcome"""
+    negotiation = await db.negotiations.find_one({
+        "negotiation_id": negotiation_id,
+        "user_id": current_user.get("email")
+    })
+    
+    if not negotiation:
+        raise HTTPException(status_code=404, detail="Negotiation session not found")
+    
+    targets = negotiation.get("targets", {})
+    summary = targets.get("summary", {})
+    original_quoted = summary.get("total_quoted", 0)
+    
+    # Calculate final savings
+    final_savings = 0
+    final_savings_percent = 0
+    if final_price and original_quoted > 0:
+        final_savings = original_quoted - final_price
+        final_savings_percent = (final_savings / original_quoted) * 100
+    
+    # Update negotiation
+    await db.negotiations.update_one(
+        {"negotiation_id": negotiation_id},
+        {
+            "$set": {
+                "status": f"closed_{outcome}",
+                "outcome": outcome,
+                "final_price": final_price,
+                "final_savings": round(final_savings, 2),
+                "final_savings_percent": round(final_savings_percent, 1),
+                "closed_notes": notes,
+                "closed_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            }
+        }
+    )
+    
+    # Log activity
+    await db.activity_logs.insert_one({
+        "user_id": current_user.get("email"),
+        "action": "negotiation_closed",
+        "details": {
+            "negotiation_id": negotiation_id,
+            "outcome": outcome,
+            "final_price": final_price,
+            "savings": final_savings
+        },
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return {
+        "success": True,
+        "negotiation_id": negotiation_id,
+        "outcome": outcome,
+        "final_price": final_price,
+        "savings": {
+            "amount": round(final_savings, 2),
+            "percent": round(final_savings_percent, 1)
+        },
+        "message": f"Negotiation closed with outcome: {outcome}"
+    }
+
+@api_router.get("/negotiation/history")
+async def get_negotiation_history(
+    current_user: dict = Depends(get_current_user),
+    limit: int = 20
+):
+    """Get user's negotiation history"""
+    negotiations = await db.negotiations.find(
+        {"user_id": current_user.get("email")},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return {
+        "success": True,
+        "negotiations": negotiations,
+        "count": len(negotiations)
+    }
+
+@api_router.get("/negotiation/{negotiation_id}")
+async def get_negotiation_details(
+    negotiation_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get details of a specific negotiation"""
+    negotiation = await db.negotiations.find_one({
+        "negotiation_id": negotiation_id,
+        "user_id": current_user.get("email")
+    }, {"_id": 0})
+    
+    if not negotiation:
+        raise HTTPException(status_code=404, detail="Negotiation not found")
+    
+    return {
+        "success": True,
+        "negotiation": negotiation
+    }
+
+# ============================================
 # END-TO-END SOURCING SUPPORT ENDPOINTS
 # ============================================
 
