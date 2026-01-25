@@ -3863,14 +3863,20 @@ async def upload_quotation_with_real_ai(
         line_items = extracted_data.get("line_items", [])
         
         if not line_items:
-            # Return early if no items extracted
+            # Return early if no items extracted - include more helpful message
+            error_detail = extracted_data.get("message", "") if extracted_data.get("error") else ""
             return {
                 "success": False,
                 "quotation_id": quotation_id,
-                "message": "Could not extract line items from the document. Please ensure the file is readable and contains quotation data.",
+                "message": f"Could not extract line items from the document. {error_detail}\n\nPlease ensure:\n• The file contains clear line items with descriptions and prices\n• The text is selectable (not scanned/image-only PDF)\n• Supported formats: PDF, DOCX, XLSX, TXT, CSV, or images",
                 "analysis_mode": "REAL_AI",
                 "extraction_error": True,
-                "extracted_data": extracted_data
+                "extracted_data": extracted_data,
+                "suggestions": [
+                    "Try uploading a PDF with selectable text",
+                    "Try uploading an Excel file with item details",
+                    "Try uploading a clear image of the quotation"
+                ]
             }
         
         # Step 2.5: UNSPSC Classification - AI Deep Search for category mapping
