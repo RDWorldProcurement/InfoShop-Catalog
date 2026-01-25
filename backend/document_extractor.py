@@ -67,6 +67,7 @@ IMPORTANT RULES:
 4. Identify the supplier/vendor information
 5. Extract totals, taxes, and any discounts mentioned
 6. Note the currency if specified
+7. For EACH line item, classify with UNSPSC code based on product/service description
 
 You MUST respond with ONLY valid JSON in this exact structure:
 {
