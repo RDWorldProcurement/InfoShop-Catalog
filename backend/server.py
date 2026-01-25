@@ -5115,12 +5115,119 @@ def assess_requirement_complexity(query: str, search_results: dict) -> str:
     else:
         return 'simple'
 
+async def get_conversation_context(session_id: str, limit: int = 8) -> Dict:
+    """Retrieve and structure conversation history for context-aware routing"""
+    try:
+        recent_messages = await db.ai_agent_conversations.find(
+            {"session_id": session_id}
+        ).sort("timestamp", -1).limit(limit).to_list(limit)
+        
+        if not recent_messages:
+            return {"history": [], "current_topic": None, "last_search": None, "last_intent": None}
+        
+        recent_messages.reverse()  # Oldest first for proper context flow
+        
+        history = []
+        current_topic = None
+        last_search = None
+        last_intent = None
+        
+        for msg in recent_messages:
+            history.append({
+                "user": msg.get('message', ''),
+                "assistant": msg.get('response', '')[:400],
+                "intent": msg.get('intent'),
+                "search_query": msg.get('search_query'),
+                "topic": msg.get('understood_topic')
+            })
+            
+            # Track the latest non-null values
+            if msg.get('search_query'):
+                last_search = msg.get('search_query')
+            if msg.get('understood_topic'):
+                current_topic = msg.get('understood_topic')
+            if msg.get('intent'):
+                last_intent = msg.get('intent')
+        
+        return {
+            "history": history,
+            "current_topic": current_topic or last_search,
+            "last_search": last_search,
+            "last_intent": last_intent
+        }
+    except Exception as e:
+        logger.error(f"Error fetching conversation context: {e}")
+        return {"history": [], "current_topic": None, "last_search": None, "last_intent": None}
+
+
+def detect_follow_up_question(message: str) -> bool:
+    """Detect if a message is likely a follow-up question referencing prior context"""
+    message_lower = message.lower().strip()
+    
+    # Short messages that reference something ("it", "that", "those", "this")
+    referential_words = ['it', 'that', 'those', 'this', 'them', 'they', 'these', 'the one', 'the ones']
+    
+    # Common follow-up patterns
+    follow_up_patterns = [
+        'what brand', 'which brand', 'what manufacturer', 'which manufacturer',
+        'any alternative', 'other option', 'cheaper', 'more expensive', 'better',
+        'show me more', 'see more', 'more details', 'more info',
+        'how much', 'what price', 'what\'s the price', 'pricing',
+        'in stock', 'available', 'availability', 'lead time', 'delivery',
+        'specs', 'specifications', 'features',
+        'add to cart', 'add it', 'buy it', 'order it',
+        'compare', 'comparison', 'versus', 'vs',
+        'what else', 'anything else', 'other', 'similar',
+        'tell me more', 'explain', 'why', 'how does',
+        'can you', 'could you', 'would you',
+        'yes', 'no', 'sure', 'ok', 'okay', 'sounds good', 'go ahead',
+        'perfect', 'great', 'thanks'
+    ]
+    
+    # Check for referential words
+    words = message_lower.split()
+    if len(words) <= 5:  # Short messages are often follow-ups
+        if any(ref in message_lower for ref in referential_words):
+            return True
+    
+    # Check for follow-up patterns
+    if any(pattern in message_lower for pattern in follow_up_patterns):
+        return True
+    
+    # Questions without clear subject
+    if message_lower.startswith(('what', 'which', 'how', 'where', 'when', 'why', 'can', 'could', 'is', 'are', 'do', 'does')):
+        if len(words) <= 4:  # Very short question like "what brands?" or "is it available?"
+            return True
+    
+    return False
+
+
 async def classify_user_intent_with_ai(message: str, context: Dict, session_id: str) -> Dict:
-    """Use multi-LLM approach to classify user intent and generate response with conversation history"""
+    """
+    ROUTER PATTERN: Use LLM to intelligently classify user intent with full conversation context.
+    This is the primary decision-maker for routing conversations.
+    """
+    
+    # First, get conversation history
+    conv_context = await get_conversation_context(session_id)
+    is_likely_follow_up = detect_follow_up_question(message)
     
     if not EMERGENT_AVAILABLE or not EMERGENT_LLM_KEY:
-        # Fallback to keyword-based classification
+        # Fallback to keyword-based classification WITH context awareness
         message_lower = message.lower()
+        
+        # If it's a follow-up and we have context, use context
+        if is_likely_follow_up and conv_context.get('current_topic'):
+            topic = conv_context['current_topic']
+            return {
+                "intent": "CONTEXT_CONTINUATION",
+                "response_message": f"Based on our conversation about **{topic}**, let me help you with that.",
+                "search_type": "product",
+                "search_query": f"{topic} {message}",  # Combine topic with new query
+                "confidence": 0.85,
+                "references_prior_context": True,
+                "understood_topic": topic
+            }
         
         # Check for quotation keywords
         if any(kw in message_lower for kw in ['quotation', 'quote', 'analyze', 'benchmark', 'pricing analysis']):
