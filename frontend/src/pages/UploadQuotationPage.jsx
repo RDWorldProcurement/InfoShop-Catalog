@@ -1007,7 +1007,8 @@ const UploadQuotationPage = () => {
                             )}
                           </CardContent>
                         </Card>
-                      ))}
+                        );
+                      })}
                     </div>
 
                     {/* Totals */}
