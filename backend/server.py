@@ -38,6 +38,17 @@ from ai_price_benchmark import (
 # Import real document extraction module
 from document_extractor import extract_quotation_data
 
+# Import negotiation agent module
+from negotiation_agent import (
+    NegotiationStrategy,
+    NEGOTIATION_PLAYBOOKS,
+    calculate_target_price,
+    generate_negotiation_targets,
+    generate_negotiation_email,
+    create_counter_offer,
+    get_all_strategies
+)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
