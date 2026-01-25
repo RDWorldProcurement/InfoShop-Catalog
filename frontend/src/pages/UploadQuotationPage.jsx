@@ -1037,6 +1037,35 @@ const UploadQuotationPage = () => {
                         </div>
                       )}
                     </div>
+                    
+                    {/* UNSPSC Category Summary */}
+                    {analysisResult.analysis?.extracted_data?.unspsc_summary && 
+                     Object.keys(analysisResult.analysis.extracted_data.unspsc_summary).length > 0 && (
+                      <div className="mt-6 p-4 bg-purple-50 rounded-xl border border-purple-200">
+                        <h5 className="font-semibold text-purple-900 flex items-center gap-2 mb-3">
+                          <Database className="w-4 h-4" />
+                          UNSPSC Category Classification
+                        </h5>
+                        <div className="grid gap-2">
+                          {Object.entries(analysisResult.analysis.extracted_data.unspsc_summary).map(([code, data]) => (
+                            <div key={code} className="flex items-center justify-between bg-white p-2 rounded border border-purple-100">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">{code}</span>
+                                <span className="text-sm text-slate-700">{data.category}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-sm font-medium">{data.count} items</span>
+                                <span className="text-xs text-slate-500 ml-2">(${data.total_value?.toLocaleString()})</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-xs text-purple-600 mt-3 flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" />
+                          AI-powered UNSPSC classification using GPT-5.2 deep semantic analysis
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
