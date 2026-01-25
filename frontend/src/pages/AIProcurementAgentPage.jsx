@@ -13,7 +13,7 @@ import {
   Bot, User, Sparkles, ArrowRight, Package, Briefcase, X, ChevronRight,
   Building2, Phone, Mail, Globe, MapPin, CheckCircle, AlertCircle,
   Zap, MessageSquare, RotateCcw, Home, Upload, Lightbulb, Info,
-  Target, TrendingDown
+  Target, TrendingDown, DollarSign, CreditCard
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 
