@@ -5677,12 +5677,16 @@ async def ai_agent_conversation(
         response["context"]["search_type"] = search_type
         response["context"]["search_query"] = search_query
         
-        # Step 4: Handle CATALOG_SEARCH with intelligent fallback
-        if intent == "CATALOG_SEARCH" and search_query:
+        # Step 2: Handle CATALOG_SEARCH or CONTEXT_CONTINUATION (both do catalog search)
+        if intent in ["CATALOG_SEARCH", "CONTEXT_CONTINUATION"] and search_query:
+            # Log context continuation for debugging
+            if intent == "CONTEXT_CONTINUATION":
+                logger.info(f"Context continuation detected. Topic: {classification.get('understood_topic')}, Query: {search_query}")
+            
             # Search catalog
             search_results = await search_catalog_for_agent(
                 search_query, 
-                search_type, 
+                search_type or "product",  # Default to product for context continuation
                 current_user,
                 limit=5
             )
@@ -5691,7 +5695,7 @@ async def ai_agent_conversation(
             has_services = bool(search_results.get("services"))
             
             if has_products or has_services:
-                # Found results - check relevance
+                # Found results
                 response["products"] = search_results["products"]
                 response["services"] = search_results["services"]
                 response["action"] = "show_results"
@@ -5699,56 +5703,47 @@ async def ai_agent_conversation(
                 product_count = len(search_results.get("products", []))
                 service_count = len(search_results.get("services", []))
                 
-                # Check if results are actually relevant (high match scores)
-                top_score = 0
-                if search_results["products"]:
-                    top_score = max(p.get("match_score", 0) for p in search_results["products"])
-                
-                if top_score >= 50:
-                    # Good matches found
-                    response["message"] = f"I found some matches for you:\n\n"
+                # Use AI's response if it references context, otherwise generate
+                if classification.get("references_prior_context") and response_message:
+                    # AI generated a contextual response - use it with results
+                    response["message"] = response_message
+                    if product_count > 0:
+                        response["message"] += f"\n\nHere are **{product_count} products** that match."
+                else:
+                    # Generate standard response
+                    topic = classification.get("understood_topic", search_query)
+                    response["message"] = f"Here's what I found for **{topic}**:\n\n"
                     if product_count > 0:
                         response["message"] += f"• **{product_count} Products** matching your search\n"
                     if service_count > 0:
-                        response["message"] += f"• **{service_count} Services** that may help\n"
-                    response["message"] += "\nYou can add any of these directly to your cart, or let me know if you need something different."
-                else:
-                    # Low relevance matches - offer alternatives
-                    response["message"] = f"""I found some products, but they may not be exactly what you're looking for (**"{search_query}"**).
-
-Here are the closest matches I found. If these don't meet your needs:
-
-**Option 1:** Do you have a **quotation from a supplier** who can provide this? I can analyze it for pricing and compliance.
-
-**Option 2:** Would you like our **Buying Desk team** to source this for you?"""
-                    response["show_quotation_upload"] = True
-                    response["show_managed_services"] = True
-                    response["context"]["last_action"] = "low_relevance_results"
+                        response["message"] += f"• **{service_count} Services** available\n"
+                    response["message"] += "\nClick any item to view details or add to cart."
             else:
-                # No results found - intelligent guidance
-                complexity = assess_requirement_complexity(search_query, search_results)
-                
-                if complexity == "complex":
-                    response["message"] = INTELLIGENT_RESPONSES["complex_requirement_detected"].format(query=search_query)
-                    response["action"] = "suggest_managed_services"
-                    response["show_managed_services"] = True
-                    response["managed_service_form"] = True
-                else:
+                # No results found - check if this is a consumer item
+                if is_likely_not_in_catalog(user_message):
                     response["message"] = INTELLIGENT_RESPONSES["no_results_with_alternatives"].format(query=search_query)
+                    response["action"] = "not_in_catalog"
+                else:
+                    # No results but topic understood
+                    understood_topic = classification.get("understood_topic", search_query)
+                    response["message"] = f"I understand you're looking for **{understood_topic}**, but I couldn't find exact matches in our catalog.\n\n"
+                    response["message"] += "**Would you like to:**\n"
+                    response["message"] += "• **Upload a quotation** from a supplier who has this item\n"
+                    response["message"] += "• **Contact our Buying Desk** to source this for you"
                     response["action"] = "no_results"
-                    response["show_quotation_upload"] = True
-                    response["show_managed_services"] = True
                 
+                response["show_quotation_upload"] = True
+                response["show_managed_services"] = True
                 response["context"]["last_action"] = "no_results_alternatives"
                 response["context"]["original_query"] = search_query
         
-        # Step 5: Handle QUOTATION_ANALYSIS intent
+        # Step 3: Handle QUOTATION_ANALYSIS intent
         elif intent == "QUOTATION_ANALYSIS":
             response["action"] = "navigate_quotation"
             response["show_quotation_upload"] = True
             response["message"] = response_message + "\n\n**Ready to analyze your quotation?** Click the button below to upload your document."
         
-        # Step 6: Handle MANAGED_SERVICES intent
+        # Step 4: Handle MANAGED_SERVICES intent
         elif intent == "MANAGED_SERVICES":
             response["action"] = "navigate_managed_services"
             response["managed_service_form"] = True
@@ -5765,7 +5760,7 @@ Here are the closest matches I found. If these don't meet your needs:
                     }
                     break
         
-        # Step 7: Handle FOLLOW_UP - User is asking a follow-up question
+        # Step 5: Handle FOLLOW_UP - Legacy intent for backwards compatibility
         elif intent == "FOLLOW_UP":
             # This means the AI understood the context and is building on prior discussion
             # Use the AI's generated response which should reference prior context
