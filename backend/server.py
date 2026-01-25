@@ -5671,11 +5671,50 @@ async def ai_agent_conversation(
         }
         
         # ============================================================
-        # ROUTER PATTERN: AI Classification FIRST for context awareness
+        # INTELLIGENT ROUTING: Check for non-catalog items FIRST
+        # This catches consumer items before wasting AI calls
+        # ============================================================
+        
+        # Step 0: Check if this is clearly NOT an industrial/MRO item
+        # Only do this check for fresh queries, not follow-ups
+        is_follow_up = detect_follow_up_question(user_message)
+        
+        if not is_follow_up and is_likely_not_in_catalog(user_message):
+            # This is clearly a consumer/non-industrial item - route to alternatives
+            response["message"] = INTELLIGENT_RESPONSES["no_results_with_alternatives"].format(query=user_message)
+            response["action"] = "not_in_catalog"
+            response["show_quotation_upload"] = True
+            response["show_managed_services"] = True
+            response["context"]["intent"] = "NOT_IN_CATALOG"
+            response["context"]["original_query"] = user_message
+            response["context"]["last_action"] = "no_results_alternatives"
+            response["intelligent_guidance"] = {
+                "reason": "Item appears to be outside standard industrial/IT/MRO procurement catalog",
+                "recommended_paths": ["quotation_analysis", "managed_services"],
+                "confidence": 0.90
+            }
+            
+            # Store conversation
+            await db.ai_agent_conversations.insert_one({
+                "session_id": session_id,
+                "user_id": current_user["email"],
+                "message": user_message,
+                "intent": "NOT_IN_CATALOG",
+                "response": response["message"][:500],
+                "confidence": 0.90,
+                "timestamp": datetime.now(timezone.utc),
+                "language": request.language,
+                "currency": request.currency,
+                "intelligent_detection": True
+            })
+            return response
+        
+        # ============================================================
+        # ROUTER PATTERN: AI Classification for context awareness
         # This ensures follow-up questions are handled correctly
         # ============================================================
         
-        # Step 1: Classify intent using AI (MOVED TO TOP for context awareness)
+        # Step 1: Classify intent using AI
         classification = await classify_user_intent_with_ai(
             user_message, 
             context, 
