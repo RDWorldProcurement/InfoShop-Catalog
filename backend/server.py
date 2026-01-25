@@ -5049,17 +5049,17 @@ def is_likely_not_in_catalog(query: str) -> bool:
     """
     query_lower = query.lower()
     
-    # Consumer/non-industrial indicators
+    # Consumer/non-industrial indicators - use word boundaries
     consumer_indicators = [
-        'bike', 'bicycle', 'car', 'vehicle', 'motorcycle', 'scooter',
+        'bike', 'bicycle', 'car ', ' car', 'vehicle', 'motorcycle', 'scooter',
         'food', 'grocery', 'restaurant', 'coffee', 'snack',
         'clothing', 'shirt', 'pants', 'shoes', 'dress', 'fashion',
         'toy', 'game', 'entertainment', 'movie', 'music',
-        'pet', 'dog', 'cat', 'animal',
-        'jewelry', 'watch', 'ring', 'necklace',
-        'furniture', 'sofa', 'couch', 'bed', 'mattress',
+        'pet ', ' pet', 'dog', 'cat ', ' cat', 'animal',
+        'jewelry', 'watch', ' ring ', 'necklace',  # ring with spaces to avoid "bearings"
+        'furniture', 'sofa', 'couch', ' bed ', 'mattress',
         'cosmetic', 'makeup', 'beauty', 'perfume',
-        'sports', 'gym', 'fitness', 'yoga',
+        'sports', ' gym ', 'fitness', 'yoga',
         'travel', 'vacation', 'hotel', 'flight'
     ]
     
