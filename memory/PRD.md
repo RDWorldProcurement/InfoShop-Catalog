@@ -10,6 +10,52 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 
 ## What's Been Implemented
 
+### ✅ Phase 21 - Multi-Turn AI Context & Login/Session Fixes (January 25, 2026 - COMPLETED)
+**Major Enhancement: True Multi-Turn Conversation Intelligence + UX Fixes**
+
+Fixed the AI Procurement Agent to behave like ChatGPT - maintaining deep conversation context across turns.
+
+**Features Implemented:**
+
+1. **Multi-Turn Context Router (P0 Fix):**
+   - New `get_conversation_context()` function retrieves last 8 messages with topics
+   - New `detect_follow_up_question()` identifies short/referential messages
+   - New `CONTEXT_CONTINUATION` intent type for follow-up handling
+   - AI classification now runs FIRST (before keyword matching)
+   - Follow-up questions like "what brands?" correctly reference prior topic (e.g., bearings)
+   - Improved LLM system prompt with explicit context rules
+
+2. **Login Page UI Refresh:**
+   - Completely redesigned login page with new branding
+   - Prominent green "Try Demo - Instant Access" button
+   - Feature highlights: AI Agent, Smart Quotations, Negotiation Agent, Buying Desk
+   - Statistics display: 30M+ Products, 100K+ Services, 3 LLMs
+
+3. **Session Preservation Fix:**
+   - Logo click now navigates to `/ai-agent` instead of `/`
+   - Prevents accidental session/context loss
+   - Users can click logo without losing their conversation
+
+4. **Logout Functionality:**
+   - Working logout button in sidebar
+   - Properly redirects to login page
+   - Clears authentication state
+
+5. **MongoDB Regex Fix:**
+   - Added `escape_regex()` function for safe queries
+   - Handles AI-generated queries with parentheses/special chars
+   - Prevents "missing closing parenthesis" errors
+
+**Files Modified:**
+- `/app/backend/server.py` - Major refactor of AI conversation routing
+- `/app/frontend/src/pages/LoginPage.jsx` - Complete UI rewrite
+- `/app/frontend/src/components/Sidebar.jsx` - Logo navigation fix
+
+**Test Results:**
+- Backend: 100% (10/10 tests passed)
+- Frontend: 100% (all UI tests passed)
+- Report: `/app/test_reports/iteration_22.json`
+
 ### ✅ Phase 20 - AI Conversation Continuity & End-to-End Flows (January 25, 2026 - COMPLETED)
 **Major Enhancement: ChatGPT-like Conversation Continuity**
 
