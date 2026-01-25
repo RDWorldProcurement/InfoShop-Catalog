@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../App";
 import { useLanguage } from "../i18n/LanguageContext";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
