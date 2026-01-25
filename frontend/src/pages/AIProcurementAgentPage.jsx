@@ -78,6 +78,10 @@ const AIProcurementAgentPage = () => {
   const [selectedPunchoutSystem, setSelectedPunchoutSystem] = useState(null);
   const [addingToCart, setAddingToCart] = useState(false);
   const [transferringCart, setTransferringCart] = useState(false);
+  
+  // Buying Desk engagement state
+  const [engagingBuyingDesk, setEngagingBuyingDesk] = useState(false);
+  const [buyingDeskEngaged, setBuyingDeskEngaged] = useState({});
 
   // Payment entities
   const PAYMENT_ENTITIES = [
