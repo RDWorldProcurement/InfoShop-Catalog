@@ -17,7 +17,7 @@ import {
   FileText, ArrowRight, X, Loader2, TrendingUp, TrendingDown, Minus,
   Calculator, Scale, Flag, ShoppingCart, Handshake, ChevronDown, ChevronUp,
   Building2, Mail, Phone, Receipt, Package, Sparkles, Zap, Database,
-  Search, Globe, BarChart3, CircleDot, Play
+  Search, Globe, BarChart3, CircleDot, Play, Target
 } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 
