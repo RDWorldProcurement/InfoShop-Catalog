@@ -324,7 +324,7 @@ const NegotiationAgentPage = () => {
                 <div>
                   <p className="text-xs text-slate-500">Potential Savings</p>
                   <p className="font-semibold text-green-600">
-                    {currency.symbol}{analysis.price_benchmark?.total_potential_savings?.toLocaleString() || "0"}
+                    {currency.symbol}{totalPotentialSavings?.toLocaleString() || "0"}
                   </p>
                 </div>
               </div>
