@@ -512,3 +512,197 @@ def validate_and_clean_extraction(data: Dict, supplier_name: Optional[str] = Non
     data.setdefault("error", False)
     
     return data
+
+
+# UNSPSC Code Reference for common procurement categories
+UNSPSC_REFERENCE = {
+    # MRO & Industrial
+    "31170000": {"name": "Bearings and bushings and wheels and gears", "keywords": ["bearing", "bushing", "wheel", "gear", "roller", "ball bearing"]},
+    "31171500": {"name": "Ball bearings", "keywords": ["ball bearing", "radial bearing", "angular bearing"]},
+    "31171600": {"name": "Roller bearings", "keywords": ["roller bearing", "needle bearing", "tapered roller"]},
+    "39110000": {"name": "Lamps and lightbulbs and lamp components", "keywords": ["lamp", "light", "bulb", "led", "fluorescent", "lighting"]},
+    "31160000": {"name": "Hardware and fasteners", "keywords": ["fastener", "bolt", "screw", "nut", "washer", "anchor", "rivet"]},
+    "27110000": {"name": "Hand tools", "keywords": ["wrench", "screwdriver", "plier", "hammer", "saw", "hand tool"]},
+    "27112000": {"name": "Power tools", "keywords": ["drill", "grinder", "power tool", "electric tool", "cordless"]},
+    "46180000": {"name": "Safety and protection", "keywords": ["safety", "ppe", "helmet", "glove", "goggle", "vest", "protection", "respirator"]},
+    "31190000": {"name": "Abrasives and abrasive media", "keywords": ["abrasive", "sandpaper", "grinding wheel", "polishing"]},
+    "31200000": {"name": "Adhesives and sealants", "keywords": ["adhesive", "sealant", "glue", "epoxy", "silicone"]},
+    "47130000": {"name": "Cleaning equipment and supplies", "keywords": ["cleaning", "janitorial", "mop", "broom", "cleaner", "detergent"]},
+    "40100000": {"name": "Heating and ventilation and air circulation", "keywords": ["hvac", "air conditioning", "ventilation", "heating", "fan", "blower"]},
+    "40140000": {"name": "Fluid and gas distribution", "keywords": ["hydraulic", "pneumatic", "valve", "pump", "pipe", "fitting", "plumbing"]},
+    "41110000": {"name": "Laboratory and measuring equipment", "keywords": ["laboratory", "lab", "test", "measurement", "meter", "gauge", "instrument"]},
+    "15120000": {"name": "Lubricants and oils and greases", "keywords": ["lubricant", "oil", "grease", "lubrication"]},
+    "24100000": {"name": "Material handling machinery", "keywords": ["forklift", "pallet", "conveyor", "hoist", "crane", "material handling"]},
+    "26100000": {"name": "Power sources", "keywords": ["motor", "engine", "generator", "drive", "vfd", "inverter"]},
+    "24110000": {"name": "Containers and packaging", "keywords": ["packaging", "container", "box", "crate", "pallet", "shipping"]},
+    "40170000": {"name": "Pipe fittings", "keywords": ["pipe", "fitting", "coupling", "elbow", "tee", "flange"]},
+    "40150000": {"name": "Industrial pumps and compressors", "keywords": ["pump", "compressor", "vacuum"]},
+    "11100000": {"name": "Minerals and ores and metals", "keywords": ["steel", "aluminum", "metal", "alloy", "raw material"]},
+    "23270000": {"name": "Welding and soldering equipment", "keywords": ["welding", "welder", "solder", "torch", "electrode"]},
+    "32150000": {"name": "Automation and control equipment", "keywords": ["plc", "automation", "control", "sensor", "actuator", "relay"]},
+    
+    # IT Equipment
+    "43211500": {"name": "Computers", "keywords": ["computer", "laptop", "notebook", "desktop", "pc", "workstation"]},
+    "43211900": {"name": "Computer displays", "keywords": ["monitor", "display", "screen", "lcd", "led display"]},
+    "43222600": {"name": "Network hardware", "keywords": ["router", "switch", "network", "ethernet", "wifi", "access point"]},
+    "43211800": {"name": "Computer servers", "keywords": ["server", "rack server", "blade server", "storage"]},
+    "43211700": {"name": "Computer accessories", "keywords": ["keyboard", "mouse", "webcam", "headset", "usb"]},
+    "43233000": {"name": "Software", "keywords": ["software", "license", "subscription", "saas", "application"]},
+    "43232600": {"name": "Storage devices", "keywords": ["hard drive", "ssd", "storage", "nas", "backup"]},
+    
+    # Professional Services
+    "80100000": {"name": "Management advisory services", "keywords": ["consulting", "advisory", "management", "strategy"]},
+    "80110000": {"name": "Human resources services", "keywords": ["hr", "recruitment", "staffing", "training", "human resource"]},
+    "81110000": {"name": "Computer services", "keywords": ["it services", "it support", "managed services", "technical support"]},
+    "81112000": {"name": "Software maintenance and support", "keywords": ["software support", "maintenance", "upgrade", "patch"]},
+    "82100000": {"name": "Advertising", "keywords": ["advertising", "marketing", "campaign", "media buying"]},
+    "83100000": {"name": "Utilities", "keywords": ["electricity", "gas", "water", "utility"]},
+    "84110000": {"name": "Accounting services", "keywords": ["accounting", "audit", "bookkeeping", "tax", "financial"]},
+    "85120000": {"name": "Healthcare services", "keywords": ["medical", "health", "clinical", "hospital"]},
+    "86130000": {"name": "Training services", "keywords": ["training", "education", "course", "workshop", "certification"]},
+    "90100000": {"name": "Restaurants and catering", "keywords": ["catering", "food service", "cafeteria", "meal"]},
+    "72150000": {"name": "Production and manufacturing", "keywords": ["manufacturing", "production", "assembly", "fabrication"]},
+    "78100000": {"name": "Mail and cargo transport", "keywords": ["shipping", "freight", "logistics", "transportation", "courier"]},
+}
+
+
+async def classify_unspsc_with_ai(line_items: List[Dict], session_id: str = None) -> List[Dict]:
+    """
+    Use AI to classify line items with UNSPSC codes.
+    This performs deep semantic matching beyond simple keyword search.
+    """
+    if not line_items:
+        return line_items
+    
+    if not EMERGENT_AVAILABLE or not EMERGENT_LLM_KEY:
+        # Fallback to keyword-based classification
+        return classify_unspsc_by_keywords(line_items)
+    
+    try:
+        # Prepare items for classification
+        items_text = "\n".join([
+            f"{i+1}. {item.get('description', 'Unknown')} (Qty: {item.get('quantity', 1)}, Unit: {item.get('unit', 'EA')})"
+            for i, item in enumerate(line_items)
+        ])
+        
+        unspsc_system_prompt = """You are an expert UNSPSC (United Nations Standard Products and Services Code) classifier.
+Your task is to assign the most accurate 8-digit UNSPSC code to each product or service.
+
+UNSPSC Structure:
+- Segment (2 digits): Broad category
+- Family (4 digits): Subcategory
+- Class (6 digits): Product group
+- Commodity (8 digits): Specific product
+
+Common UNSPSC Segments:
+- 10-15: Raw materials
+- 20-27: Industrial equipment and tools
+- 30-32: Components and supplies
+- 39-47: Facility maintenance and supplies
+- 43: IT equipment and software
+- 72-86: Services
+
+Return ONLY valid JSON array with this structure for each item:
+[
+    {
+        "item_index": 1,
+        "description": "original description",
+        "unspsc_code": "8-digit code",
+        "unspsc_segment": "2-digit segment",
+        "unspsc_family": "4-digit family",
+        "unspsc_class": "6-digit class",
+        "unspsc_category": "Full category name",
+        "classification_confidence": 0.0-1.0,
+        "classification_rationale": "Brief explanation"
+    }
+]"""
+
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=session_id or f"unspsc_classify_{datetime.now().timestamp()}",
+            system_message=unspsc_system_prompt
+        ).with_model("openai", "gpt-5.2")
+        
+        prompt = f"""Classify the following {len(line_items)} items with their UNSPSC codes:
+
+{items_text}
+
+For each item, determine the most specific 8-digit UNSPSC code. Consider:
+1. The exact product/service type
+2. The industry context (industrial, IT, services)
+3. Common procurement classifications
+
+Return ONLY the JSON array."""
+
+        response = await chat.send_message(UserMessage(text=prompt))
+        response_text = str(response)
+        
+        # Parse JSON response
+        try:
+            if "```json" in response_text:
+                json_str = response_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in response_text:
+                json_str = response_text.split("```")[1].split("```")[0].strip()
+            elif "[" in response_text:
+                start = response_text.find("[")
+                end = response_text.rfind("]") + 1
+                json_str = response_text[start:end]
+            else:
+                raise ValueError("No JSON found")
+            
+            classifications = json.loads(json_str)
+            
+            # Merge classifications back into line items
+            for classification in classifications:
+                idx = classification.get("item_index", 1) - 1
+                if 0 <= idx < len(line_items):
+                    line_items[idx]["unspsc_code"] = classification.get("unspsc_code", "00000000")
+                    line_items[idx]["unspsc_category"] = classification.get("unspsc_category", "Unclassified")
+                    line_items[idx]["unspsc_segment"] = classification.get("unspsc_segment")
+                    line_items[idx]["unspsc_family"] = classification.get("unspsc_family")
+                    line_items[idx]["unspsc_class"] = classification.get("unspsc_class")
+                    line_items[idx]["classification_confidence"] = classification.get("classification_confidence", 0.85)
+            
+            logger.info(f"AI UNSPSC classification completed for {len(line_items)} items")
+            return line_items
+            
+        except json.JSONDecodeError as e:
+            logger.warning(f"UNSPSC JSON parse error: {e}")
+            return classify_unspsc_by_keywords(line_items)
+            
+    except Exception as e:
+        logger.error(f"AI UNSPSC classification error: {e}")
+        return classify_unspsc_by_keywords(line_items)
+
+
+def classify_unspsc_by_keywords(line_items: List[Dict]) -> List[Dict]:
+    """
+    Fallback keyword-based UNSPSC classification.
+    Matches item descriptions against known UNSPSC categories.
+    """
+    for item in line_items:
+        description = item.get("description", "").lower()
+        best_match = None
+        best_score = 0
+        
+        for code, info in UNSPSC_REFERENCE.items():
+            score = 0
+            for keyword in info["keywords"]:
+                if keyword.lower() in description:
+                    score += len(keyword)  # Longer keyword matches score higher
+            
+            if score > best_score:
+                best_score = score
+                best_match = (code, info["name"])
+        
+        if best_match:
+            item["unspsc_code"] = best_match[0]
+            item["unspsc_category"] = best_match[1]
+            item["classification_confidence"] = min(0.6 + (best_score * 0.05), 0.85)
+        else:
+            # Default to general supplies
+            item["unspsc_code"] = "00000000"
+            item["unspsc_category"] = "Unclassified - Manual Review Required"
+            item["classification_confidence"] = 0.3
+    
+    return line_items
