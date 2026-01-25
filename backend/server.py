@@ -5690,19 +5690,21 @@ Here are the closest matches I found. If these don't meet your needs:
             response["action"] = "clarification"
             response["context"]["last_action"] = "clarification_asked"
         
-        # Store conversation in database for analytics
+        # Store conversation in database for analytics and context
         await db.ai_agent_conversations.insert_one({
             "session_id": session_id,
             "user_id": current_user["email"],
             "message": user_message,
             "intent": intent,
+            "search_query": search_query,  # Store for follow-up context
             "response": response["message"][:500],
             "confidence": classification.get("confidence", 0),
             "timestamp": datetime.now(timezone.utc),
             "language": request.language,
             "currency": request.currency,
             "has_results": bool(response.get("products") or response.get("services")),
-            "offered_alternatives": response.get("show_quotation_upload") or response.get("show_managed_services")
+            "offered_alternatives": response.get("show_quotation_upload") or response.get("show_managed_services"),
+            "understood_topic": classification.get("understood_topic", search_query)  # Store topic for context
         })
         
         return response
