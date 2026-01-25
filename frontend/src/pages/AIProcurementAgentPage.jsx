@@ -1164,12 +1164,23 @@ const AIProcurementAgentPage = () => {
                           )}
                           {msg.showManagedServices && (
                             <Button
-                              onClick={() => navigate("/sourcing-support")}
-                              className="flex-1 bg-[#FF6B00] hover:bg-[#E65000]"
+                              onClick={() => handleEngageBuyingDesk({
+                                requestType: "general_sourcing",
+                                description: conversationContext.searchQuery || msg.content?.substring(0, 200),
+                                messageId: msg.id
+                              })}
+                              disabled={engagingBuyingDesk || buyingDeskEngaged[msg.id]}
+                              className={`flex-1 ${buyingDeskEngaged[msg.id] ? 'bg-green-600' : 'bg-[#FF6B00] hover:bg-[#E65000]'}`}
                               data-testid="ai-managed-services-btn"
                             >
-                              <Handshake className="w-4 h-4 mr-2" />
-                              Request Buying Desk Support
+                              {engagingBuyingDesk ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : buyingDeskEngaged[msg.id] ? (
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                              ) : (
+                                <Handshake className="w-4 h-4 mr-2" />
+                              )}
+                              {buyingDeskEngaged[msg.id] ? 'Buying Desk Notified' : 'Request Buying Desk Support'}
                             </Button>
                           )}
                         </div>
