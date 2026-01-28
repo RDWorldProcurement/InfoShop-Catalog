@@ -483,19 +483,19 @@ const InfoShopCatalog = () => {
       )}
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-3">
+      <div className="bg-gradient-to-r from-[#007CC3] to-[#005a8c] text-white px-6 py-3">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-bold flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-400" />
               InfoShop Catalog
             </h1>
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-blue-100">
               {catalogStats?.total_products?.toLocaleString() || "0"} products
             </span>
           </div>
           <Select value={selectedCountry} onValueChange={(val) => { setSelectedCountry(val); setCurrentPage(0); }}>
-            <SelectTrigger className="w-[160px] bg-slate-700 border-slate-600 text-white">
+            <SelectTrigger className="w-[160px] bg-white/10 border-white/20 text-white">
               <Globe className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
