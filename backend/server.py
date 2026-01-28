@@ -2542,6 +2542,265 @@ async def search_services(
 async def get_service_categories():
     return {"categories": [{"name": c["name"], "unspsc": c["unspsc"], "icon": c["icon"]} for c in SERVICE_CATEGORIES]}
 
+
+# ============================================================
+# ALGOLIA CATALOG SEARCH API - World-Class B2B Product Catalog
+# ============================================================
+
+class AlgoliaSearchRequest(BaseModel):
+    query: str = ""
+    page: int = 0
+    hits_per_page: int = 24
+    filters: Optional[Dict] = None
+    sort_by: Optional[str] = None  # price_asc, price_desc, relevance
+
+
+class AlgoliaCatalogUploadRequest(BaseModel):
+    supplier: str
+    catalog_type: str = "products"  # products or services
+
+
+@api_router.post("/algolia/catalog/search")
+async def algolia_search_catalog(request: AlgoliaSearchRequest):
+    """
+    Search products using Algolia - Amazon-like search experience.
+    Supports full-text search, faceted filtering, and multi-supplier matching.
+    """
+    if not ALGOLIA_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Algolia search service not available")
+    
+    try:
+        results = search_products(
+            query=request.query,
+            filters=request.filters,
+            page=request.page,
+            hits_per_page=request.hits_per_page,
+            sort_by=request.sort_by
+        )
+        
+        # Process hits to group by product and identify lowest prices
+        processed_hits = []
+        product_groups = {}
+        
+        for hit in results.get("hits", []):
+            group_id = hit.get("product_group_id")
+            
+            # Add lowest price badge
+            if hit.get("is_lowest_price"):
+                hit["badges"] = [{"type": "lowest_price", "label": "Lowest Price", "color": "green"}]
+            elif hit.get("supplier_count", 1) > 1:
+                hit["badges"] = [{"type": "multi_supplier", "label": f"{hit['supplier_count']} Suppliers", "color": "blue"}]
+            else:
+                hit["badges"] = []
+            
+            # Add stock badge
+            if hit.get("in_stock"):
+                hit["badges"].append({"type": "in_stock", "label": "In Stock", "color": "green"})
+            
+            processed_hits.append(hit)
+        
+        return {
+            "success": True,
+            "hits": processed_hits,
+            "nbHits": results.get("nbHits", 0),
+            "page": results.get("page", 0),
+            "nbPages": results.get("nbPages", 0),
+            "hitsPerPage": results.get("hitsPerPage", 24),
+            "facets": results.get("facets", {}),
+            "processingTimeMS": results.get("processingTimeMS", 0),
+            "query": request.query
+        }
+        
+    except Exception as e:
+        logging.error(f"Algolia search error: {e}")
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+
+@api_router.get("/algolia/catalog/facets/{facet_name}")
+async def get_catalog_facets(facet_name: str, query: str = ""):
+    """Get all values for a specific facet (brand, category, supplier)"""
+    if not ALGOLIA_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Algolia service not available")
+    
+    try:
+        facet_values = get_facet_values(facet_name, query)
+        return {
+            "facet": facet_name,
+            "values": facet_values
+        }
+    except Exception as e:
+        logging.error(f"Facet retrieval error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/algolia/catalog/upload")
+async def upload_catalog_to_algolia(
+    file: UploadFile = File(...),
+    supplier: str = Form(...),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Upload product catalog from Excel/CSV file to Algolia.
+    Supports Fastenal, Grainger, Motion, and other supplier formats.
+    """
+    if not ALGOLIA_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Algolia service not available")
+    
+    # Check file type
+    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
+        raise HTTPException(status_code=400, detail="Only Excel (.xlsx, .xls) and CSV files are supported")
+    
+    try:
+        # Read file content
+        content = await file.read()
+        
+        # Parse file
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(content))
+        else:
+            df = pd.read_excel(io.BytesIO(content))
+        
+        # Convert to list of dicts
+        products = df.to_dict('records')
+        
+        if not products:
+            raise HTTPException(status_code=400, detail="No products found in file")
+        
+        # Index to Algolia
+        result = await index_products(products, supplier)
+        
+        if result.get("success"):
+            # Store upload record
+            await db.catalog_uploads.insert_one({
+                "upload_id": str(uuid.uuid4()),
+                "supplier": supplier,
+                "filename": file.filename,
+                "product_count": result.get("indexed_count", 0),
+                "uploaded_by": current_user.get("email"),
+                "uploaded_at": datetime.now(timezone.utc).isoformat(),
+                "status": "completed"
+            })
+            
+            # Trigger product grouping update (async)
+            asyncio.create_task(update_product_grouping())
+            
+            return {
+                "success": True,
+                "message": f"Successfully indexed {result['indexed_count']} products from {supplier}",
+                "indexed_count": result["indexed_count"],
+                "supplier": supplier
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result.get("error", "Indexing failed"))
+            
+    except pd.errors.EmptyDataError:
+        raise HTTPException(status_code=400, detail="File is empty or invalid")
+    except Exception as e:
+        logging.error(f"Catalog upload error: {e}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+
+@api_router.get("/algolia/catalog/stats")
+async def get_catalog_stats(current_user: dict = Depends(get_current_user)):
+    """Get catalog statistics - total products, suppliers, categories"""
+    if not ALGOLIA_AVAILABLE:
+        return {
+            "algolia_available": False,
+            "total_products": 0,
+            "suppliers": [],
+            "categories": []
+        }
+    
+    try:
+        # Get facet counts
+        brand_facets = get_facet_values("brand")
+        category_facets = get_facet_values("category")
+        supplier_facets = get_facet_values("supplier")
+        
+        # Quick search to get total count
+        result = search_products("", page=0, hits_per_page=1)
+        
+        return {
+            "algolia_available": True,
+            "total_products": result.get("nbHits", 0),
+            "brand_count": len(brand_facets) if brand_facets else 0,
+            "category_count": len(category_facets) if category_facets else 0,
+            "supplier_count": len(supplier_facets) if supplier_facets else 0,
+            "suppliers": [{"name": f.get("value"), "count": f.get("count", 0)} for f in (supplier_facets or [])],
+            "top_categories": [{"name": f.get("value"), "count": f.get("count", 0)} for f in (category_facets or [])[:20]],
+            "top_brands": [{"name": f.get("value"), "count": f.get("count", 0)} for f in (brand_facets or [])[:20]]
+        }
+    except Exception as e:
+        logging.error(f"Stats retrieval error: {e}")
+        return {"algolia_available": True, "error": str(e)}
+
+
+@api_router.get("/algolia/catalog/product/{object_id}")
+async def get_product_details(object_id: str):
+    """Get detailed product information including related products from other suppliers"""
+    if not ALGOLIA_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Algolia service not available")
+    
+    try:
+        from algolia_service import algolia_client, PRODUCTS_INDEX
+        
+        # Get the product
+        product = algolia_client.get_object(PRODUCTS_INDEX, object_id)
+        
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        
+        # Find related products from other suppliers (same product_group_id)
+        related_products = []
+        if product.get("product_group_id"):
+            search_result = search_products(
+                query="",
+                filters={"product_group_id": product["product_group_id"]},
+                hits_per_page=10
+            )
+            related_products = [
+                hit for hit in search_result.get("hits", [])
+                if hit.get("objectID") != object_id
+            ]
+        
+        return {
+            "success": True,
+            "product": product,
+            "related_suppliers": related_products,
+            "supplier_count": len(related_products) + 1
+        }
+        
+    except Exception as e:
+        logging.error(f"Product details error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.delete("/algolia/catalog/clear")
+async def clear_algolia_catalog(current_user: dict = Depends(get_current_user)):
+    """Clear all products from Algolia index (admin only)"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    if not ALGOLIA_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Algolia service not available")
+    
+    try:
+        success = clear_index()
+        return {"success": success, "message": "Catalog cleared" if success else "Failed to clear"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/algolia/config")
+async def get_algolia_config():
+    """Get Algolia configuration for frontend (search-only key)"""
+    return {
+        "app_id": os.environ.get("ALGOLIA_APP_ID", ""),
+        "search_key": os.environ.get("ALGOLIA_SEARCH_KEY", ""),
+        "index_name": "omnisupply_products"
+    }
+
+
 # Cart Routes
 @api_router.get("/cart")
 async def get_cart(current_user: dict = Depends(get_current_user)):
