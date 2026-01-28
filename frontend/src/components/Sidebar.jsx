@@ -157,6 +157,23 @@ const Sidebar = ({ activePage }) => {
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Rewards</p>
             <NavItem icon={Award} label={t.nav.rewards} path="/rewards" id="rewards" activePage={activePage} navigate={navigate} />
           </div>
+
+          {/* Admin Section - Only show for admin users */}
+          {user?.role === "admin" && (
+            <div className="py-3">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Admin</p>
+              <NavItem 
+                icon={Settings} 
+                label="Catalog Admin" 
+                path="/catalog-admin" 
+                id="catalog-admin" 
+                activePage={activePage} 
+                navigate={navigate}
+                badge="ADMIN"
+                badgeColor="bg-red-100 text-red-700"
+              />
+            </div>
+          )}
         </nav>
 
         {/* Language & Currency Selector */}
