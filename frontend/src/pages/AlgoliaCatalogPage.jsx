@@ -1391,6 +1391,80 @@ const AlgoliaCatalogPage = () => {
           onClose={() => setShowRFQSuccess(false)}
           product={rfqProduct}
         />
+
+        {/* PunchOut Cart Dialog */}
+        <Dialog open={showPunchoutCart} onOpenChange={setShowPunchoutCart}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-blue-600" />
+                PunchOut Cart
+              </DialogTitle>
+              <DialogDescription>
+                Review items before transferring to Coupa
+              </DialogDescription>
+            </DialogHeader>
+            
+            {punchoutCart.length === 0 ? (
+              <div className="py-8 text-center text-slate-500">
+                <ShoppingCart className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                <p>Your cart is empty</p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {punchoutCart.map((item) => (
+                  <div key={item.product_id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-slate-900 line-clamp-1">{item.name}</p>
+                      <p className="text-xs text-slate-500">
+                        {item.brand} • {item.part_number}
+                      </p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-sm text-slate-600">Qty: {item.quantity}</span>
+                        <span className="text-sm font-medium text-slate-900">
+                          ${(item.unit_price * item.quantity).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFromPunchoutCart(item.product_id)}
+                    >
+                      <X className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="pt-4 border-t border-slate-200">
+              <div className="flex items-center justify-between mb-4">
+                <span className="font-medium text-slate-900">Total:</span>
+                <span className="text-xl font-bold text-slate-900">
+                  ${punchoutCartTotal.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowPunchoutCart(false)}>
+                  Continue Shopping
+                </Button>
+                <Button
+                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-black font-bold"
+                  onClick={() => { setShowPunchoutCart(false); transferToCoupa(); }}
+                  disabled={punchoutCart.length === 0 || transferring}
+                >
+                  {transferring ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                  )}
+                  Transfer to Coupa
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
