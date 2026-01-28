@@ -68,6 +68,22 @@ except ImportError as e:
     logging.warning(f"Algolia service not available: {e}")
     ALGOLIA_AVAILABLE = False
 
+# Import PunchOut service for Coupa cXML integration
+from punchout_service import (
+    parse_punchout_setup_request,
+    validate_punchout_credentials,
+    create_punchout_setup_response,
+    create_punchout_order_message,
+    create_punchout_session,
+    get_punchout_session,
+    update_punchout_cart,
+    close_punchout_session,
+    log_punchout_transaction,
+    save_punchout_session_to_db,
+    get_punchout_session_from_db,
+    PUNCHOUT_CONFIG
+)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
