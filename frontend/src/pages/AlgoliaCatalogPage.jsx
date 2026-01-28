@@ -730,6 +730,12 @@ const AlgoliaCatalogPage = () => {
     return null;
   }
 
+  // Create search client with user's token - memoize to prevent re-creation
+  const searchClient = React.useMemo(
+    () => createBackendSearchClient(API, token),
+    [token]
+  );
+
   // Build country filter for Algolia
   const countryFilter = selectedCountry !== "ALL" ? `country:${selectedCountry}` : "";
 
