@@ -3219,7 +3219,7 @@ async def punchout_setup(request: Request):
         
         # Generate StartPage URL - points to catalog with punchout session
         frontend_url = os.environ.get("FRONTEND_URL", "https://algolia-catalog.preview.emergentagent.com")
-        start_page_url = f"{frontend_url}/infoshop-catalog?punchout={session_token}"
+        start_page_url = f"{frontend_url}/algolia-catalog?punchout={session_token}"
         
         logger.info(f"PunchOut session created: {session_token[:16]}... -> {start_page_url}")
         
