@@ -315,14 +315,20 @@ const ProductCard = ({ product, onAddToCart, onRequestPrice, onViewDetails, view
                     )}
                   </div>
                 ) : (
-                  <span className="text-lg font-medium text-slate-600">Price Not Available</span>
+                  <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                    <p className="text-lg font-semibold text-blue-800">Request Quote</p>
+                    <p className="text-xs text-blue-600">Get competitive pricing for your business</p>
+                  </div>
                 )}
               </div>
 
               {/* Availability */}
               <div className="flex items-center gap-2 mb-3 text-sm">
                 {product.in_stock ? (
-                  <span className="text-green-600 font-medium">In Stock</span>
+                  <span className="text-green-600 font-medium">
+                    ✓ In Stock
+                    {product.stock_quantity > 0 && ` (${product.stock_quantity} available)`}
+                  </span>
                 ) : (
                   <span className="text-orange-600">{product.availability || "Ships within 2-3 weeks"}</span>
                 )}
@@ -352,11 +358,11 @@ const ProductCard = ({ product, onAddToCart, onRequestPrice, onViewDetails, view
                   </Button>
                 ) : (
                   <Button 
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium px-6 shadow-lg"
                     onClick={() => onRequestPrice(product)}
                   >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Request Price
+                    <Send className="w-4 h-4 mr-2" />
+                    Request Quote
                   </Button>
                 )}
                 <Button 
