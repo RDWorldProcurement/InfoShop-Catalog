@@ -43,6 +43,10 @@ import axios from "axios";
 
 const API = process.env.REACT_APP_BACKEND_URL || "http://localhost:8002";
 
+// Logos
+const INFOSYS_BPM_LOGO = "https://customer-assets.emergentagent.com/job_a2ef7314-1fe0-40c0-895b-f2091948a043/artifacts/20a5az81_Infosys%20BPM%20Logo.png";
+const DANONE_LOGO = "https://customer-assets.emergentagent.com/job_a2ef7314-1fe0-40c0-895b-f2091948a043/artifacts/v1287k2p_Danone%20Logo.png";
+
 // Countries
 const COUNTRIES = [
   { code: "ALL", name: "All Countries", flag: "🌎" },
