@@ -2169,7 +2169,8 @@ async def login(user_data: UserLogin):
     return UserResponse(
         id=user["id"], email=user["email"], name=user["name"],
         country=user_data.country, currency=currency,
-        info_coins=user.get("info_coins", 0), token=token
+        info_coins=user.get("info_coins", 0), token=token,
+        role=user.get("role")
     )
 
 @api_router.get("/auth/me")
