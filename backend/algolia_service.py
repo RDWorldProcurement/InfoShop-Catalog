@@ -664,8 +664,19 @@ def search_products(
             }
         )
         
+        # Convert Hit objects to dicts
+        hits_as_dicts = []
+        for hit in response.hits:
+            if hasattr(hit, '__dict__'):
+                hit_dict = {k: v for k, v in hit.__dict__.items() if not k.startswith('_')}
+            elif hasattr(hit, 'to_dict'):
+                hit_dict = hit.to_dict()
+            else:
+                hit_dict = dict(hit)
+            hits_as_dicts.append(hit_dict)
+        
         return {
-            "hits": response.hits,
+            "hits": hits_as_dicts,
             "nbHits": response.nb_hits,
             "page": response.page,
             "nbPages": response.nb_pages,
