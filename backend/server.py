@@ -2801,6 +2801,235 @@ async def get_algolia_config():
     }
 
 
+# ============================================
+# CONTRACT & PRICING MANAGEMENT ENDPOINTS
+# ============================================
+
+class ContractUploadRequest(BaseModel):
+    supplier_name: str
+    countries: List[str] = ["Global"]
+
+@api_router.post("/algolia/contracts/upload")
+async def upload_supplier_contract(
+    file: UploadFile = File(...),
+    supplier_name: str = Form(...),
+    countries: str = Form("Global"),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Upload supplier contract with category-level discounts.
+    This sets the discount percentages for calculating Infosys pricing.
+    """
+    # Check admin access
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        raise HTTPException(status_code=400, detail="Only Excel files are supported")
+    
+    try:
+        from pricing_engine import parse_discount_file, save_supplier_contract
+        
+        content = await file.read()
+        
+        # Parse discount percentages
+        discounts = await parse_discount_file(content, file.filename)
+        
+        if not discounts:
+            raise HTTPException(status_code=400, detail="No valid discount data found in file")
+        
+        # Parse countries
+        country_list = [c.strip() for c in countries.split(",") if c.strip()]
+        
+        # Save contract
+        result = await save_supplier_contract(
+            supplier_name=supplier_name,
+            category_discounts=discounts,
+            countries=country_list,
+            contract_file=file.filename
+        )
+        
+        return {
+            "success": True,
+            "message": f"Contract uploaded for {supplier_name}",
+            "supplier": supplier_name,
+            "categories_count": len(discounts),
+            "countries": country_list,
+            "discounts_preview": dict(list(discounts.items())[:10])
+        }
+        
+    except Exception as e:
+        logging.error(f"Contract upload error: {e}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+
+@api_router.get("/algolia/contracts")
+async def get_supplier_contracts(current_user: dict = Depends(get_current_user)):
+    """Get all active supplier contracts"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    contracts = []
+    cursor = db.supplier_contracts.find({"status": "active"}, {"_id": 0})
+    async for contract in cursor:
+        contracts.append({
+            "supplier_name": contract.get("supplier_name"),
+            "categories_count": len(contract.get("category_discounts", {})),
+            "countries": contract.get("countries", []),
+            "effective_date": contract.get("effective_date"),
+            "updated_at": contract.get("updated_at")
+        })
+    
+    return {"contracts": contracts}
+
+
+@api_router.get("/algolia/contracts/{supplier_name}")
+async def get_contract_details(supplier_name: str, current_user: dict = Depends(get_current_user)):
+    """Get detailed contract discounts for a supplier"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    contract = await db.supplier_contracts.find_one(
+        {"supplier_name": {"$regex": f"^{supplier_name}$", "$options": "i"}},
+        {"_id": 0}
+    )
+    
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    
+    return contract
+
+
+@api_router.post("/algolia/catalog/upload-with-pricing")
+async def upload_catalog_with_pricing(
+    file: UploadFile = File(...),
+    supplier: str = Form(...),
+    countries: str = Form("USA"),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Upload product catalog with automatic pricing calculation.
+    
+    This endpoint:
+    1. Parses the supplier catalog file
+    2. Applies category-level discounts from contracts
+    3. Calculates Infosys pricing (List Price, Selling Price, Discount %)
+    4. Indexes products to Algolia with all price points
+    """
+    if not ALGOLIA_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Algolia service not available")
+    
+    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
+        raise HTTPException(status_code=400, detail="Only Excel and CSV files are supported")
+    
+    try:
+        from algolia_service import index_products_from_file, update_product_grouping
+        
+        content = await file.read()
+        country_list = [c.strip() for c in countries.split(",") if c.strip()]
+        
+        # Index products with pricing
+        result = await index_products_from_file(content, file.filename, supplier, country_list)
+        
+        if result.get("success"):
+            # Store upload record
+            await db.catalog_uploads.insert_one({
+                "upload_id": str(uuid.uuid4()),
+                "supplier": supplier,
+                "filename": file.filename,
+                "product_count": result.get("indexed_count", 0),
+                "countries": country_list,
+                "uploaded_by": current_user.get("email"),
+                "uploaded_at": datetime.now(timezone.utc).isoformat(),
+                "status": "completed",
+                "pricing_applied": True
+            })
+            
+            # Update product grouping
+            asyncio.create_task(update_product_grouping())
+            
+            return {
+                "success": True,
+                "message": f"Successfully indexed {result['indexed_count']} products from {supplier}",
+                "indexed_count": result["indexed_count"],
+                "supplier": supplier,
+                "countries": country_list,
+                "pricing_applied": True
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result.get("error", "Indexing failed"))
+            
+    except Exception as e:
+        logging.error(f"Catalog upload error: {e}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+
+@api_router.get("/algolia/countries")
+async def get_available_countries():
+    """Get list of countries with products in the catalog"""
+    if not ALGOLIA_AVAILABLE:
+        return {"countries": []}
+    
+    try:
+        country_facets = get_facet_values("country")
+        return {
+            "countries": [
+                {"code": f.get("value"), "name": f.get("value"), "count": f.get("count", 0)}
+                for f in (country_facets or [])
+            ]
+        }
+    except Exception as e:
+        logging.error(f"Countries retrieval error: {e}")
+        return {"countries": []}
+
+
+@api_router.post("/algolia/pricing/calculate")
+async def calculate_product_pricing(
+    list_price: float = Form(...),
+    supplier: str = Form(...),
+    category: str = Form(...),
+    unspsc_code: str = Form(None)
+):
+    """
+    Calculate Infosys pricing for a product.
+    
+    Returns:
+    - list_price: Original catalog price
+    - infosys_purchase_price: What Infosys pays (cost)
+    - selling_price: Price to customer
+    - discount_percentage: Customer savings %
+    """
+    try:
+        from pricing_engine import calculate_pricing
+        
+        pricing = await calculate_pricing(list_price, supplier, category, unspsc_code)
+        
+        return {
+            "success": True,
+            "pricing": pricing,
+            "explanation": f"List Price ${pricing['list_price']:.2f} → "
+                          f"Customer Price ${pricing['selling_price']:.2f} "
+                          f"(Save {pricing['discount_percentage']:.1f}%)"
+        }
+    except Exception as e:
+        logging.error(f"Pricing calculation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/algolia/catalog/uploads")
+async def get_catalog_uploads(current_user: dict = Depends(get_current_user)):
+    """Get history of catalog uploads"""
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    uploads = []
+    cursor = db.catalog_uploads.find({}, {"_id": 0}).sort("uploaded_at", -1).limit(50)
+    async for upload in cursor:
+        uploads.append(upload)
+    
+    return {"uploads": uploads}
+
+
 # Cart Routes
 @api_router.get("/cart")
 async def get_cart(current_user: dict = Depends(get_current_user)):
