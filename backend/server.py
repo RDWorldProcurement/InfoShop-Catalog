@@ -2723,15 +2723,23 @@ async def get_catalog_stats(current_user: dict = Depends(get_current_user)):
         # Quick search to get total count
         result = algolia_search_products("", page=0, hits_per_page=1)
         
+        # Helper to extract value/count from facet objects
+        def facet_to_dict(f):
+            if hasattr(f, 'value'):
+                return {"name": f.value, "count": getattr(f, 'count', 0)}
+            elif isinstance(f, dict):
+                return {"name": f.get("value"), "count": f.get("count", 0)}
+            return {"name": str(f), "count": 0}
+        
         return {
             "algolia_available": True,
             "total_products": result.get("nbHits", 0),
             "brand_count": len(brand_facets) if brand_facets else 0,
             "category_count": len(category_facets) if category_facets else 0,
             "supplier_count": len(supplier_facets) if supplier_facets else 0,
-            "suppliers": [{"name": f.get("value"), "count": f.get("count", 0)} for f in (supplier_facets or [])],
-            "top_categories": [{"name": f.get("value"), "count": f.get("count", 0)} for f in (category_facets or [])[:20]],
-            "top_brands": [{"name": f.get("value"), "count": f.get("count", 0)} for f in (brand_facets or [])[:20]]
+            "suppliers": [facet_to_dict(f) for f in (supplier_facets or [])],
+            "top_categories": [facet_to_dict(f) for f in (category_facets or [])[:20]],
+            "top_brands": [facet_to_dict(f) for f in (brand_facets or [])[:20]]
         }
     except Exception as e:
         logging.error(f"Stats retrieval error: {e}")
