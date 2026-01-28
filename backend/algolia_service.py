@@ -664,13 +664,15 @@ def search_products(
             }
         )
         
-        # Convert Hit objects to dicts
+        # Convert Hit objects to dicts using model_dump()
         hits_as_dicts = []
         for hit in response.hits:
-            if hasattr(hit, '__dict__'):
-                hit_dict = {k: v for k, v in hit.__dict__.items() if not k.startswith('_')}
+            if hasattr(hit, 'model_dump'):
+                hit_dict = hit.model_dump()
             elif hasattr(hit, 'to_dict'):
                 hit_dict = hit.to_dict()
+            elif hasattr(hit, '__dict__'):
+                hit_dict = {k: v for k, v in hit.__dict__.items() if not k.startswith('_')}
             else:
                 hit_dict = dict(hit)
             hits_as_dicts.append(hit_dict)
