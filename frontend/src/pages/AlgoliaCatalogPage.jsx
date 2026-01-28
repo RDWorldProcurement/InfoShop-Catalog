@@ -785,7 +785,7 @@ const AlgoliaCatalogPage = () => {
             toast.info(
               <div>
                 <p className="font-medium">PunchOut Mode Active</p>
-                <p className="text-sm">Browse and add items, then click "Transfer to Coupa" when ready</p>
+                <p className="text-sm">Browse and add items, then click Transfer to Coupa when ready</p>
               </div>,
               { duration: 6000 }
             );
