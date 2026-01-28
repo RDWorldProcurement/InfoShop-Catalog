@@ -1890,6 +1890,7 @@ class UserResponse(BaseModel):
     currency: Dict[str, Any]
     info_coins: int
     token: str
+    role: Optional[str] = None
 
 class DeliveryPartner(BaseModel):
     partner_id: str
