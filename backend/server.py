@@ -56,11 +56,12 @@ try:
     from algolia_service import (
         init_algolia,
         index_products,
+        index_products_from_file,
         search_products,
         get_facet_values,
         update_product_grouping,
         clear_index,
-        transform_product_for_algolia
+        get_index_stats
     )
     ALGOLIA_AVAILABLE = True
 except ImportError as e:
