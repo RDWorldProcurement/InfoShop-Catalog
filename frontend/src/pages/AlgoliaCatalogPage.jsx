@@ -58,6 +58,11 @@ import { useAuth } from "../App";
 const API = process.env.REACT_APP_BACKEND_URL;
 
 // Algolia client initialization
+console.log("Algolia Config:", {
+  appId: process.env.REACT_APP_ALGOLIA_APP_ID,
+  searchKey: process.env.REACT_APP_ALGOLIA_SEARCH_KEY?.substring(0, 10) + "..."
+});
+
 const searchClient = algoliasearch(
   process.env.REACT_APP_ALGOLIA_APP_ID || "",
   process.env.REACT_APP_ALGOLIA_SEARCH_KEY || ""
