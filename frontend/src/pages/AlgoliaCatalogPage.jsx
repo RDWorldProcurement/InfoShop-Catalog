@@ -1059,6 +1059,12 @@ const AlgoliaCatalogPage = () => {
     }
   };
 
+  // Calculate PunchOut cart total
+  const punchoutCartTotal = punchoutCart.reduce(
+    (sum, item) => sum + item.unit_price * item.quantity,
+    0
+  );
+
   if (!user) {
     navigate("/login");
     return null;
@@ -1066,9 +1072,53 @@ const AlgoliaCatalogPage = () => {
 
   return (
     <div className="flex min-h-screen bg-slate-100">
-      <Sidebar activePage="infoshop-catalog" />
+      {!punchoutMode && <Sidebar activePage="infoshop-catalog" />}
 
       <main className="flex-1 overflow-auto">
+        {/* PunchOut Mode Banner */}
+        {punchoutMode && (
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <Building className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="font-bold">PunchOut Session Active</p>
+                  <p className="text-sm text-blue-100">
+                    Connected from {punchoutSession?.buyer_identity || "Coupa"} • Browse and add items
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  className="text-white hover:bg-white/10"
+                  onClick={() => setShowPunchoutCart(true)}
+                >
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Cart ({punchoutCart.length})
+                  {punchoutCartTotal > 0 && (
+                    <span className="ml-2">${punchoutCartTotal.toFixed(2)}</span>
+                  )}
+                </Button>
+                <Button
+                  className="bg-amber-500 hover:bg-amber-600 text-black font-bold"
+                  onClick={transferToCoupa}
+                  disabled={transferring || punchoutCart.length === 0}
+                >
+                  {transferring ? (
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  ) : (
+                    <ExternalLink className="w-5 h-5 mr-2" />
+                  )}
+                  Transfer to Coupa
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Top Bar */}
         <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-3">
           <div className="flex items-center justify-between">
