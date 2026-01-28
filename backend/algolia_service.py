@@ -1,6 +1,7 @@
 """
 Algolia Search Service for OMNISupply.io
 World-class B2B product catalog search with multi-supplier support
+Includes pricing engine integration for Infosys discounts
 """
 
 import os
@@ -10,7 +11,9 @@ import json
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 from algoliasearch.search.client import SearchClientSync
-from algoliasearch.search.models.search_params import SearchParams
+import pandas as pd
+import io
+import aiofiles
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +29,11 @@ PRODUCTS_INDEX_PRICE_DESC = "omnisupply_products_price_desc"
 
 # Initialize Algolia client
 algolia_client = None
-products_index = None
+
 
 def init_algolia():
     """Initialize Algolia client and configure indices"""
-    global algolia_client, products_index
+    global algolia_client
     
     if not ALGOLIA_APP_ID or not ALGOLIA_ADMIN_KEY:
         logger.warning("Algolia credentials not configured")
@@ -60,12 +63,14 @@ def init_algolia():
                 "searchable(manufacturer)", 
                 "searchable(category)",
                 "searchable(supplier)",
+                "searchable(country)",
                 "filterOnly(availability)",
                 "filterOnly(in_stock)",
-                "price"
+                "price",
+                "selling_price"
             ],
             "customRanking": [
-                "asc(price)",
+                "asc(selling_price)",
                 "desc(in_stock)",
                 "desc(availability_score)"
             ],
@@ -82,12 +87,15 @@ def init_algolia():
                 "category",
                 "breadcrumb",
                 "price",
-                "original_price",
                 "list_price",
+                "selling_price",
+                "discount_percentage",
                 "availability",
                 "in_stock",
                 "stock_quantity",
                 "supplier",
+                "country",
+                "countries",
                 "images",
                 "documents",
                 "specifications",
@@ -139,153 +147,85 @@ def generate_product_group_id(brand: str, part_number: str, oem_part_number: str
     Generate a unique product group ID for matching products across suppliers.
     Products with same brand + part number are grouped together.
     """
-    # Normalize inputs
     brand_normalized = (brand or "").strip().lower()
     part_normalized = (part_number or "").strip().lower().replace("-", "").replace(" ", "")
     oem_normalized = (oem_part_number or "").strip().lower().replace("-", "").replace(" ", "")
     
-    # Use part number as primary, OEM as fallback
     identifier = part_normalized or oem_normalized or ""
     
     if not brand_normalized or not identifier:
         return None
     
-    # Create hash for grouping
     group_string = f"{brand_normalized}|{identifier}"
     return hashlib.md5(group_string.encode()).hexdigest()[:16]
 
 
-def transform_product_for_algolia(product: Dict, supplier: str) -> Dict:
-    """Transform product data to Algolia-optimized format"""
+def extract_category_from_breadcrumb(breadcrumb: str) -> str:
+    """Extract category from breadcrumb path"""
+    if not breadcrumb:
+        return ""
     
-    # Extract and normalize fields
-    product_name = (
-        product.get("Title") or 
-        product.get("Product Name") or 
-        product.get("product_name") or 
-        ""
-    ).strip()
+    parts = breadcrumb.replace(" > ", ">").replace(" / ", ">").replace(" >> ", ">").split(">")
+    parts = [p.strip() for p in parts if p.strip()]
     
-    brand = (
-        product.get("Manufacturer Brand") or 
-        product.get("Manufacturer") or 
-        product.get("Brand") or 
-        product.get("brand") or
-        ""
-    ).strip()
+    if len(parts) >= 2:
+        return parts[1] if len(parts) > 2 else parts[-1]
+    elif len(parts) == 1:
+        return parts[0]
+    return ""
+
+
+def parse_price(price_value: Any) -> float:
+    """Parse price from various formats"""
+    if not price_value:
+        return 0.0
     
-    manufacturer = (
-        product.get("Manufacturer") or 
-        product.get("Manufacturer Brand") or 
-        product.get("Brand") or
-        ""
-    ).strip()
+    price_str = str(price_value).replace("$", "").replace(",", "").replace("€", "").replace("£", "").strip()
     
-    part_number = (
-        product.get("Part No") or 
-        product.get("OEM Part No") or 
-        product.get("part_number") or
-        ""
-    ).strip()
-    
-    oem_part_number = (
-        product.get("OEM Part No") or 
-        product.get("Part No") or
-        ""
-    ).strip()
-    
-    sku = (product.get("SKU") or product.get("sku") or "").strip()
-    
-    # Parse price - handle various formats
-    price_str = str(product.get("Original Price") or product.get("List Price") or product.get("price") or "0")
-    price_str = price_str.replace("$", "").replace(",", "").strip()
     try:
-        price = float(price_str) if price_str else 0
-    except:
-        price = 0
+        return float(price_str) if price_str and price_str != "nan" else 0.0
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def transform_fastenal_product(row: Dict, countries: List[str], pricing_func=None) -> Dict:
+    """Transform Fastenal product data to Algolia format"""
+    product_name = str(row.get("Title", "") or row.get("Product Name", "")).strip()
+    brand = str(row.get("Manufacturer Brand", "") or row.get("Brand", "")).strip()
+    manufacturer = str(row.get("Manufacturer", "") or brand).strip()
+    part_number = str(row.get("Part No", "") or row.get("OEM Part No", "")).strip()
+    oem_part_number = str(row.get("OEM Part No", "") or part_number).strip()
+    sku = str(row.get("SKU", "")).strip()
     
-    # Parse availability
-    availability = (product.get("Availability") or "").strip()
-    in_stock = any(keyword in availability.lower() for keyword in ["in stock", "available", "ships"])
-    
-    # Calculate availability score for sorting
-    availability_score = 100 if in_stock else 0
-    if "same day" in availability.lower():
-        availability_score = 150
-    elif "next day" in availability.lower():
-        availability_score = 120
+    # Parse price
+    list_price = parse_price(row.get("Original Price") or row.get("List Price") or row.get("Price"))
     
     # Extract category from breadcrumb
-    breadcrumb = product.get("Breadcrumb") or product.get("Category") or ""
-    category = ""
-    if breadcrumb:
-        # Get the most specific category (usually last in breadcrumb)
-        parts = breadcrumb.replace(" > ", ">").replace(" / ", ">").split(">")
-        if len(parts) > 1:
-            category = parts[-2].strip() if len(parts) > 2 else parts[-1].strip()
-        else:
-            category = parts[0].strip()
+    breadcrumb = str(row.get("Breadcrumb", "") or row.get("Category", "")).strip()
+    category = extract_category_from_breadcrumb(breadcrumb)
     
-    # Process images - extract URLs, hide supplier domains
-    images_raw = product.get("Images") or product.get("images") or ""
+    # Parse availability
+    availability_str = str(row.get("Availability", "")).strip()
+    in_stock = any(kw in availability_str.lower() for kw in ["in stock", "available", "ships"])
+    availability_score = 100 if in_stock else 0
+    
+    # Parse images
+    images_raw = row.get("Images", "") or row.get("Product_image", "")
     images = []
     if images_raw:
-        # Parse image URLs from various formats
-        if isinstance(images_raw, list):
+        if isinstance(images_raw, str):
+            images = [img.strip() for img in images_raw.split("|") if img.strip() and "http" in img]
+        elif isinstance(images_raw, list):
             images = images_raw
-        elif isinstance(images_raw, str):
-            # Handle JSON array or pipe-separated
-            if images_raw.startswith("["):
-                try:
-                    images = json.loads(images_raw)
-                except:
-                    images = [img.strip() for img in images_raw.split("|") if img.strip()]
-            else:
-                images = [img.strip() for img in images_raw.split("|") if img.strip()]
-    
-    # Process specification documents - hide supplier URLs
-    documents_raw = product.get("Documents") or product.get("Specifications") or product.get("Compliance & Safety Data") or ""
-    documents = []
-    if documents_raw:
-        if isinstance(documents_raw, str):
-            # Parse document entries
-            doc_entries = documents_raw.split("|") if "|" in documents_raw else [documents_raw]
-            for entry in doc_entries:
-                if "http" in entry.lower():
-                    # Extract URL and create clean document entry
-                    url_start = entry.lower().find("http")
-                    url = entry[url_start:].split()[0].strip()
-                    doc_name = entry[:url_start].strip() if url_start > 0 else "Specification Document"
-                    doc_name = doc_name.replace(":", "").strip() or "Product Documentation"
-                    documents.append({
-                        "name": doc_name,
-                        "url": url,
-                        "type": "specification"
-                    })
-    
-    # Extract specifications as structured data
-    specs_raw = product.get("Product Attributes") or product.get("Specifications") or ""
-    specifications = {}
-    if specs_raw and isinstance(specs_raw, str):
-        # Parse key-value pairs
-        for pair in specs_raw.split("|"):
-            if ":" in pair:
-                key, value = pair.split(":", 1)
-                specifications[key.strip()] = value.strip()
-    
-    # Description
-    description = (
-        product.get("Short Description") or 
-        product.get("Overview") or 
-        product.get("description") or
-        ""
-    ).strip()
     
     # UNSPSC
-    unspsc = (product.get("UNSPSC") or product.get("unspsc_code") or "").strip()
+    unspsc = str(row.get("UNSPSC", "")).strip()
     
-    # Generate unique object ID and product group ID
-    object_id = f"{supplier.lower()}_{sku or part_number}_{hashlib.md5(product_name.encode()).hexdigest()[:8]}"
+    # Description
+    description = str(row.get("Short Description", "") or row.get("Overview", "")).strip()
+    
+    # Generate IDs
+    object_id = f"fastenal_{sku or part_number}_{hashlib.md5(product_name.encode()).hexdigest()[:8]}"
     product_group_id = generate_product_group_id(brand, part_number, oem_part_number)
     
     return {
@@ -300,31 +240,217 @@ def transform_product_for_algolia(product: Dict, supplier: str) -> Dict:
         "short_description": description[:200] if description else "",
         "category": category,
         "breadcrumb": breadcrumb,
-        "price": price,
-        "original_price": price,
-        "list_price": price,
+        "list_price": list_price,
+        "price": list_price,  # Will be updated with selling_price
         "currency": "USD",
-        "availability": availability,
+        "availability": availability_str,
         "in_stock": in_stock,
         "availability_score": availability_score,
-        "stock_quantity": None,  # Can be parsed if available
-        "supplier": supplier,
-        "images": images[:5],  # Limit to 5 images
+        "supplier": "Fastenal",
+        "country": countries[0] if countries else "USA",
+        "countries": countries or ["USA"],
+        "images": images[:5],
         "primary_image": images[0] if images else None,
-        "documents": documents,
-        "specifications": specifications,
+        "documents": [],
+        "specifications": {},
         "unspsc_code": unspsc,
-        "unit": product.get("unit") or "EA",
-        "min_order_qty": product.get("Minimum Purchase Quantity") or 1,
+        "unit": "EA",
+        "min_order_qty": 1,
         "product_group_id": product_group_id,
-        "is_lowest_price": False,  # Will be set during grouping
-        "supplier_count": 1,  # Will be updated during grouping
+        "is_lowest_price": False,
+        "supplier_count": 1,
         "indexed_at": datetime.now(timezone.utc).isoformat()
     }
 
 
-async def index_products(products: List[Dict], supplier: str) -> Dict:
-    """Index products to Algolia"""
+def transform_grainger_product(row: Dict, countries: List[str], pricing_func=None) -> Dict:
+    """Transform Grainger product data to Algolia format"""
+    product_name = str(row.get("Product title", "") or row.get("Product Name", "")).strip()
+    brand = str(row.get("Brand", "")).strip()
+    manufacturer = str(row.get("BrandNumber", "") or brand).strip()
+    part_number = str(row.get("ManufacturerPartNumber", "") or row.get("Sku", "")).strip()
+    sku = str(row.get("Sku", "")).strip()
+    
+    # Parse price
+    list_price = parse_price(row.get("List_Price") or row.get("Original_Price") or row.get("Price"))
+    
+    # Extract category from breadcrumb
+    breadcrumb = str(row.get("Breadcrumb", "")).strip()
+    category = extract_category_from_breadcrumb(breadcrumb)
+    
+    # Parse availability
+    stock_status = str(row.get("Stock_Status", "")).strip()
+    in_stock = "in stock" in stock_status.lower() or "available" in stock_status.lower()
+    availability_score = 100 if in_stock else 0
+    
+    # Parse images
+    images_raw = row.get("Images", "") or row.get("Product_image", "")
+    images = []
+    if images_raw:
+        if isinstance(images_raw, str):
+            images = [img.strip() for img in images_raw.split("|") if img.strip() and "http" in img]
+        elif isinstance(images_raw, list):
+            images = images_raw
+    
+    # UNSPSC
+    unspsc = str(row.get("UNSPSC", "")).strip()
+    
+    # Description from Product Details
+    description = str(row.get("Product Details", ""))[:500] if row.get("Product Details") else ""
+    
+    # Country of origin
+    country_origin = str(row.get("Country_origin", "USA")).strip()
+    
+    # Generate IDs
+    object_id = f"grainger_{sku or part_number}_{hashlib.md5(product_name.encode()).hexdigest()[:8]}"
+    product_group_id = generate_product_group_id(brand, part_number)
+    
+    return {
+        "objectID": object_id,
+        "product_name": product_name,
+        "brand": brand,
+        "manufacturer": manufacturer,
+        "part_number": part_number,
+        "oem_part_number": part_number,
+        "sku": sku,
+        "description": description,
+        "short_description": description[:200] if description else "",
+        "category": category,
+        "breadcrumb": breadcrumb,
+        "list_price": list_price,
+        "price": list_price,
+        "currency": "USD",
+        "availability": stock_status,
+        "in_stock": in_stock,
+        "availability_score": availability_score,
+        "supplier": "Grainger",
+        "country": countries[0] if countries else country_origin,
+        "countries": countries or [country_origin],
+        "images": images[:5],
+        "primary_image": images[0] if images else None,
+        "documents": [],
+        "specifications": {},
+        "unspsc_code": unspsc,
+        "unit": "EA",
+        "min_order_qty": 1,
+        "product_group_id": product_group_id,
+        "is_lowest_price": False,
+        "supplier_count": 1,
+        "indexed_at": datetime.now(timezone.utc).isoformat()
+    }
+
+
+def transform_motion_product(row: Dict, countries: List[str], pricing_func=None) -> Dict:
+    """Transform Motion Industries product data to Algolia format"""
+    product_name = str(row.get("Item Description", "") or row.get("Product Name", "")).strip()
+    brand = str(row.get("Brand Name", "") or row.get("Brand", "")).strip()
+    manufacturer = str(row.get("Manufacturer", "") or brand).strip()
+    part_number = str(row.get("Manufacturer Part Number", "") or row.get("Item Number", "")).strip()
+    sku = str(row.get("Item Number", "") or row.get("Sku", "")).strip()
+    
+    # Parse price
+    list_price = parse_price(row.get("Unit Price") or row.get("Price") or row.get("List Price"))
+    
+    # Category
+    category = str(row.get("Category", "") or row.get("Product Category", "")).strip()
+    breadcrumb = category
+    
+    # Parse availability
+    stock_status = str(row.get("Stock Status", "") or row.get("Availability", "")).strip()
+    in_stock = any(kw in stock_status.lower() for kw in ["in stock", "available", "ships"])
+    availability_score = 100 if in_stock else 0
+    
+    # Parse images
+    images_raw = row.get("Image URL", "") or row.get("Images", "")
+    images = []
+    if images_raw:
+        if isinstance(images_raw, str) and "http" in images_raw:
+            images = [images_raw.strip()]
+        elif isinstance(images_raw, list):
+            images = images_raw
+    
+    # UNSPSC
+    unspsc = str(row.get("UNSPSC", "")).strip()
+    
+    # Description
+    description = str(row.get("Long Description", "") or row.get("Description", "")).strip()
+    
+    # Generate IDs
+    object_id = f"motion_{sku or part_number}_{hashlib.md5(product_name.encode()).hexdigest()[:8]}"
+    product_group_id = generate_product_group_id(brand, part_number)
+    
+    return {
+        "objectID": object_id,
+        "product_name": product_name,
+        "brand": brand,
+        "manufacturer": manufacturer,
+        "part_number": part_number,
+        "oem_part_number": part_number,
+        "sku": sku,
+        "description": description,
+        "short_description": description[:200] if description else "",
+        "category": category,
+        "breadcrumb": breadcrumb,
+        "list_price": list_price,
+        "price": list_price,
+        "currency": "USD",
+        "availability": stock_status,
+        "in_stock": in_stock,
+        "availability_score": availability_score,
+        "supplier": "Motion",
+        "country": countries[0] if countries else "USA",
+        "countries": countries or ["USA"],
+        "images": images[:5],
+        "primary_image": images[0] if images else None,
+        "documents": [],
+        "specifications": {},
+        "unspsc_code": unspsc,
+        "unit": "EA",
+        "min_order_qty": 1,
+        "product_group_id": product_group_id,
+        "is_lowest_price": False,
+        "supplier_count": 1,
+        "indexed_at": datetime.now(timezone.utc).isoformat()
+    }
+
+
+async def apply_pricing_to_products(products: List[Dict], pricing_engine) -> List[Dict]:
+    """Apply pricing engine calculations to all products"""
+    from pricing_engine import calculate_pricing
+    
+    for product in products:
+        list_price = product.get("list_price", 0)
+        supplier = product.get("supplier", "")
+        category = product.get("category", "")
+        unspsc = product.get("unspsc_code", "")
+        
+        if list_price > 0:
+            pricing = await calculate_pricing(list_price, supplier, category, unspsc)
+            product["list_price"] = pricing["list_price"]
+            product["selling_price"] = pricing["selling_price"]
+            product["price"] = pricing["selling_price"]  # For search/sort
+            product["discount_percentage"] = pricing["discount_percentage"]
+            product["infosys_purchase_price"] = pricing["infosys_purchase_price"]
+            product["customer_savings"] = pricing["customer_discount"]
+        else:
+            product["selling_price"] = 0
+            product["discount_percentage"] = 0
+    
+    return products
+
+
+async def index_products_from_file(
+    file_content: bytes,
+    filename: str,
+    supplier: str,
+    countries: List[str] = None
+) -> Dict:
+    """
+    Index products from an uploaded Excel file to Algolia.
+    Automatically detects supplier format and applies pricing.
+    """
+    global algolia_client
+    
     if not algolia_client:
         init_algolia()
     
@@ -332,30 +458,100 @@ async def index_products(products: List[Dict], supplier: str) -> Dict:
         return {"success": False, "error": "Algolia not configured"}
     
     try:
+        # Read Excel file
+        df = pd.read_excel(io.BytesIO(file_content))
+        logger.info(f"Read {len(df)} rows from {filename}")
+        
+        # Determine supplier and transform function
+        supplier_lower = supplier.lower()
+        if "fastenal" in supplier_lower:
+            transform_func = transform_fastenal_product
+            supplier_name = "Fastenal"
+        elif "grainger" in supplier_lower:
+            transform_func = transform_grainger_product
+            supplier_name = "Grainger"
+        elif "motion" in supplier_lower:
+            transform_func = transform_motion_product
+            supplier_name = "Motion"
+        else:
+            # Generic transformation based on column names
+            transform_func = transform_fastenal_product
+            supplier_name = supplier
+        
         # Transform products
-        algolia_records = []
-        for product in products:
+        products = []
+        for _, row in df.iterrows():
             try:
-                record = transform_product_for_algolia(product, supplier)
-                if record.get("product_name"):  # Only index products with names
-                    algolia_records.append(record)
+                product = transform_func(row.to_dict(), countries or ["USA"])
+                if product.get("product_name"):
+                    products.append(product)
             except Exception as e:
-                logger.warning(f"Failed to transform product: {e}")
+                logger.warning(f"Failed to transform row: {e}")
                 continue
         
-        if not algolia_records:
-            return {"success": False, "error": "No valid products to index"}
+        if not products:
+            return {"success": False, "error": "No valid products found in file"}
         
-        # Batch save to Algolia
-        response = algolia_client.save_objects(PRODUCTS_INDEX, algolia_records)
+        # Apply pricing calculations
+        products = await apply_pricing_to_products(products, None)
         
-        logger.info(f"Indexed {len(algolia_records)} products from {supplier}")
+        # Batch save to Algolia (500 at a time)
+        batch_size = 500
+        total_indexed = 0
+        
+        for i in range(0, len(products), batch_size):
+            batch = products[i:i + batch_size]
+            try:
+                algolia_client.save_objects(PRODUCTS_INDEX, batch)
+                total_indexed += len(batch)
+                logger.info(f"Indexed batch {i//batch_size + 1}: {len(batch)} products")
+            except Exception as e:
+                logger.error(f"Failed to index batch: {e}")
+        
+        logger.info(f"Successfully indexed {total_indexed} products from {supplier_name}")
         
         return {
             "success": True,
-            "indexed_count": len(algolia_records),
-            "supplier": supplier,
-            "task_id": response[0].task_id if response else None
+            "indexed_count": total_indexed,
+            "supplier": supplier_name,
+            "countries": countries or ["USA"],
+            "filename": filename
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to index products from file: {e}")
+        return {"success": False, "error": str(e)}
+
+
+async def index_products(products: List[Dict], supplier: str) -> Dict:
+    """Index products to Algolia"""
+    global algolia_client
+    
+    if not algolia_client:
+        init_algolia()
+    
+    if not algolia_client:
+        return {"success": False, "error": "Algolia not configured"}
+    
+    try:
+        # Apply pricing
+        products = await apply_pricing_to_products(products, None)
+        
+        # Filter valid products
+        valid_products = [p for p in products if p.get("product_name")]
+        
+        if not valid_products:
+            return {"success": False, "error": "No valid products to index"}
+        
+        # Batch save
+        algolia_client.save_objects(PRODUCTS_INDEX, valid_products)
+        
+        logger.info(f"Indexed {len(valid_products)} products from {supplier}")
+        
+        return {
+            "success": True,
+            "indexed_count": len(valid_products),
+            "supplier": supplier
         }
         
     except Exception as e:
@@ -364,22 +560,16 @@ async def index_products(products: List[Dict], supplier: str) -> Dict:
 
 
 async def update_product_grouping():
-    """
-    Update product grouping to identify lowest prices across suppliers.
-    Products are grouped by brand + part number.
-    """
+    """Update product grouping to identify lowest prices across suppliers"""
+    global algolia_client
+    
     if not algolia_client:
         return
     
     try:
-        # Get all unique product groups
-        # This is a simplified approach - for millions of products,
-        # this should be done in batches or using Algolia Rules
-        
-        # Browse all products
         all_products = []
         browse_result = algolia_client.browse_objects(PRODUCTS_INDEX, {
-            "attributesToRetrieve": ["objectID", "product_group_id", "price", "in_stock", "availability_score"]
+            "attributesToRetrieve": ["objectID", "product_group_id", "selling_price", "in_stock", "availability_score"]
         })
         
         for hit in browse_result:
@@ -394,22 +584,20 @@ async def update_product_grouping():
                     groups[group_id] = []
                 groups[group_id].append(product)
         
-        # Find lowest price in each group and update
+        # Find lowest price in each group
         updates = []
         for group_id, products in groups.items():
             if len(products) > 1:
-                # Sort by price, then by availability
-                products.sort(key=lambda p: (p.get("price", float("inf")), -p.get("availability_score", 0)))
-                lowest_price = products[0].get("price", 0)
+                products.sort(key=lambda p: (p.get("selling_price", float("inf")), -p.get("availability_score", 0)))
+                lowest_price = products[0].get("selling_price", 0)
                 
                 for i, product in enumerate(products):
                     updates.append({
                         "objectID": product["objectID"],
-                        "is_lowest_price": i == 0 and product.get("price") == lowest_price,
+                        "is_lowest_price": i == 0 and product.get("selling_price") == lowest_price,
                         "supplier_count": len(products)
                     })
         
-        # Batch update
         if updates:
             algolia_client.partial_update_objects(PRODUCTS_INDEX, updates)
             logger.info(f"Updated grouping for {len(updates)} products")
@@ -425,10 +613,9 @@ def search_products(
     hits_per_page: int = 24,
     sort_by: str = None
 ) -> Dict:
-    """
-    Search products with Algolia.
-    Returns products with facets for filtering.
-    """
+    """Search products with Algolia"""
+    global algolia_client
+    
     if not algolia_client:
         init_algolia()
     
@@ -452,12 +639,14 @@ def search_products(
                 filter_parts.append(f'brand:"{filters["brand"]}"')
             if filters.get("supplier"):
                 filter_parts.append(f'supplier:"{filters["supplier"]}"')
+            if filters.get("country"):
+                filter_parts.append(f'country:"{filters["country"]}"')
             if filters.get("in_stock"):
                 filter_parts.append("in_stock:true")
             if filters.get("price_min") is not None:
-                filter_parts.append(f'price >= {filters["price_min"]}')
+                filter_parts.append(f'selling_price >= {filters["price_min"]}')
             if filters.get("price_max") is not None:
-                filter_parts.append(f'price <= {filters["price_max"]}')
+                filter_parts.append(f'selling_price <= {filters["price_max"]}')
         
         filter_string = " AND ".join(filter_parts) if filter_parts else ""
         
@@ -469,7 +658,7 @@ def search_products(
                 "page": page,
                 "hitsPerPage": hits_per_page,
                 "filters": filter_string,
-                "facets": ["brand", "category", "supplier", "in_stock"],
+                "facets": ["brand", "category", "supplier", "country", "in_stock"],
                 "attributesToHighlight": ["product_name", "brand", "description", "part_number"],
                 "getRankingInfo": True
             }
@@ -493,6 +682,8 @@ def search_products(
 
 def get_facet_values(facet_name: str, query: str = "") -> List[Dict]:
     """Get all values for a specific facet"""
+    global algolia_client
+    
     if not algolia_client:
         init_algolia()
     
@@ -514,8 +705,45 @@ def get_facet_values(facet_name: str, query: str = "") -> List[Dict]:
         return []
 
 
+def get_index_stats() -> Dict:
+    """Get statistics about the Algolia index"""
+    global algolia_client
+    
+    if not algolia_client:
+        init_algolia()
+    
+    if not algolia_client:
+        return {"error": "Algolia not configured"}
+    
+    try:
+        # Get index settings to retrieve stats
+        response = algolia_client.search_single_index(
+            PRODUCTS_INDEX,
+            {
+                "query": "",
+                "hitsPerPage": 0,
+                "facets": ["supplier", "country", "category", "brand"]
+            }
+        )
+        
+        return {
+            "total_products": response.nb_hits,
+            "suppliers": list(response.facets.get("supplier", {}).keys()) if response.facets else [],
+            "supplier_count": len(response.facets.get("supplier", {})) if response.facets else 0,
+            "countries": list(response.facets.get("country", {}).keys()) if response.facets else [],
+            "country_count": len(response.facets.get("country", {})) if response.facets else 0,
+            "categories": len(response.facets.get("category", {})) if response.facets else 0,
+            "brands": len(response.facets.get("brand", {})) if response.facets else 0,
+        }
+    except Exception as e:
+        logger.error(f"Stats error: {e}")
+        return {"error": str(e)}
+
+
 def clear_index():
     """Clear all products from the index"""
+    global algolia_client
+    
     if not algolia_client:
         init_algolia()
     
