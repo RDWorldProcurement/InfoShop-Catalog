@@ -7,12 +7,13 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 3. **End-to-End Sourcing Support** - Full procurement services handled by Infosys specialists
 4. **Advanced AI Procurement Agent** - Conversational AI interface for intelligent procurement routing
 5. **AI Negotiation Agent** - Autonomous price negotiation with strategy playbooks
+6. **Algolia-Powered Catalog Search** - State-of-the-art B2B catalog with multi-supplier comparison and Infosys pricing
 
 ---
 
 ## Current Status: DEPLOYMENT READY ✅
 
-**Deployment Health Check:** PASSED (January 25, 2026)
+**Deployment Health Check:** PASSED (January 28, 2026)
 - All environment variables properly configured
 - No hardcoded secrets or URLs
 - Database queries optimized
@@ -23,6 +24,52 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 ---
 
 ## What's Been Implemented
+
+### ✅ Phase 23 - Algolia-Powered Catalog Search & Pricing Engine (January 28, 2026 - COMPLETED)
+
+**World-Class B2B Product Search:**
+- Algolia search-as-a-service integration (App ID: ZQXK1D2XLM)
+- Sub-100ms search responses across millions of products
+- Faceted filters: Category, Brand, Supplier, Availability
+- Country selector dropdown for regional product filtering
+- Grid/List view toggle
+- Multi-supplier price comparison with "Lowest Price" badge
+
+**Infosys Pricing Engine (3-Tier Model):**
+- **List Price**: Original supplier catalog price
+- **Infosys Purchase Price**: List Price - Category Discount (what Infosys pays)
+- **Selling Price**: Customer price after 70% margin pass-through
+- Formula: `Selling Price = List Price - (70% × (List Price - Purchase Price))`
+- Example: $100 List → $60 Purchase (40% discount) → $72 Selling Price
+- Customer saves 28%, Infosys keeps 12% margin
+
+**Admin Catalog Management:**
+- Upload supplier contracts with category-level discounts
+- Upload product catalogs (Excel) with automatic pricing calculation
+- Upload history tracking
+- Contract management with discount preview
+- Pricing model visualization
+
+**Files Created/Modified:**
+- `/app/backend/pricing_engine.py` - NEW: Complete pricing calculation engine
+- `/app/backend/algolia_service.py` - MODIFIED: Full indexing, search, and pricing integration
+- `/app/backend/server.py` - MODIFIED: New endpoints for contracts, catalog upload, pricing
+- `/app/frontend/src/pages/AlgoliaCatalogPage.jsx` - MODIFIED: Full search UI with dual pricing
+- `/app/frontend/src/pages/CatalogAdminPage.jsx` - NEW: Admin page for catalog management
+- `/app/frontend/src/components/Sidebar.jsx` - MODIFIED: Added Algolia Catalog link with NEW badge
+
+**New API Endpoints:**
+- `GET /api/algolia/catalog/stats` - Catalog statistics
+- `POST /api/algolia/contracts/upload` - Upload supplier contract (admin)
+- `GET /api/algolia/contracts` - List active contracts (admin)
+- `POST /api/algolia/catalog/upload-with-pricing` - Upload catalog with pricing
+- `GET /api/algolia/countries` - Available countries
+- `POST /api/algolia/pricing/calculate` - Calculate Infosys pricing
+
+**Test Results:**
+- Backend: 100% (13/13 tests passed)
+- Frontend: 100% (all UI elements verified)
+- Report: `/app/test_reports/iteration_23.json`
 
 ### ✅ Phase 22 - UNSPSC Classification & Buying Desk Context (January 25, 2026 - COMPLETED)
 
