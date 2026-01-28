@@ -15,6 +15,8 @@ import jwt
 import random
 import hashlib
 import asyncio
+import pandas as pd
+import io
 
 # Import Emergent LLM integration
 try:
@@ -48,6 +50,22 @@ from negotiation_agent import (
     create_counter_offer,
     get_all_strategies
 )
+
+# Import Algolia service for catalog search
+try:
+    from algolia_service import (
+        init_algolia,
+        index_products,
+        search_products,
+        get_facet_values,
+        update_product_grouping,
+        clear_index,
+        transform_product_for_algolia
+    )
+    ALGOLIA_AVAILABLE = True
+except ImportError as e:
+    logging.warning(f"Algolia service not available: {e}")
+    ALGOLIA_AVAILABLE = False
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
