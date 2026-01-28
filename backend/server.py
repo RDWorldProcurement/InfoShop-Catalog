@@ -3218,7 +3218,7 @@ async def punchout_setup(request: Request):
         )
         
         # Generate StartPage URL - points to catalog with punchout session
-        frontend_url = os.environ.get("FRONTEND_URL", "https://algolia-catalog.preview.emergentagent.com")
+        frontend_url = os.environ.get("FRONTEND_URL", "https://infoshop-catalog.preview.emergentagent.com")
         start_page_url = f"{frontend_url}/algolia-catalog?punchout={session_token}"
         
         logger.info(f"PunchOut session created: {session_token[:16]}... -> {start_page_url}")
@@ -3401,7 +3401,7 @@ async def get_punchout_config():
     Get PunchOut configuration for testing and integration setup.
     Returns the information needed by a Coupa admin to configure the PunchOut.
     """
-    api_url = os.environ.get("REACT_APP_BACKEND_URL", "https://algolia-catalog.preview.emergentagent.com")
+    api_url = os.environ.get("REACT_APP_BACKEND_URL", "https://infoshop-catalog.preview.emergentagent.com")
     
     return {
         "punchout_enabled": True,

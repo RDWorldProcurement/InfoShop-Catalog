@@ -12,7 +12,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://algolia-catalog.preview.emergentagent.com/api/$1"
+      "dest": "https://infoshop-catalog.preview.emergentagent.com/api/$1"
     },
     {
       "src": "/(.*)",
