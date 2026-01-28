@@ -426,6 +426,24 @@ const InfoShopCatalog = () => {
 
   return (
     <div className="min-h-screen bg-slate-100">
+      {/* Header with Branding */}
+      <div className="bg-white border-b border-slate-200 px-6 py-3">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center gap-6">
+            <img src={INFOSYS_BPM_LOGO} alt="Infosys BPM" className="h-12 object-contain" />
+            <div className="h-8 w-px bg-slate-300" />
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-500">Powered for</span>
+              <img src={DANONE_LOGO} alt="Danone" className="h-10 object-contain" />
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-slate-500">PunchOut Enabled Catalog</p>
+            <p className="text-sm font-medium text-slate-700">Enterprise Procurement Portal</p>
+          </div>
+        </div>
+      </div>
+
       {/* PunchOut Banner */}
       {punchoutMode && (
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3">
