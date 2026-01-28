@@ -2719,7 +2719,7 @@ async def get_catalog_stats(current_user: dict = Depends(get_current_user)):
         supplier_facets = get_facet_values("supplier")
         
         # Quick search to get total count
-        result = search_products("", page=0, hits_per_page=1)
+        result = algolia_search_products("", page=0, hits_per_page=1)
         
         return {
             "algolia_available": True,
@@ -2754,7 +2754,7 @@ async def get_product_details(object_id: str):
         # Find related products from other suppliers (same product_group_id)
         related_products = []
         if product.get("product_group_id"):
-            search_result = search_products(
+            search_result = algolia_search_products(
                 query="",
                 filters={"product_group_id": product["product_group_id"]},
                 hits_per_page=10
