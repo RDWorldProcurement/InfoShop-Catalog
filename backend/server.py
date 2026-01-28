@@ -55,9 +55,9 @@ from negotiation_agent import (
 try:
     from algolia_service import (
         init_algolia,
-        index_products,
+        index_products as algolia_index_products,
         index_products_from_file,
-        search_products,
+        search_products as algolia_search_products,
         get_facet_values,
         update_product_grouping,
         clear_index,
