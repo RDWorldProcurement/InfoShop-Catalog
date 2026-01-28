@@ -439,9 +439,11 @@ async def apply_pricing_to_products(products: List[Dict], pricing_engine) -> Lis
             product["discount_percentage"] = pricing["discount_percentage"]
             product["infosys_purchase_price"] = pricing["infosys_purchase_price"]
             product["customer_savings"] = pricing["customer_discount"]
+            product["has_price"] = 1  # Products with price appear first
         else:
             product["selling_price"] = 0
             product["discount_percentage"] = 0
+            product["has_price"] = 0  # Products without price appear last
     
     return products
 
