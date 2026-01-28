@@ -149,7 +149,8 @@ class TestAlgoliaCatalogEndpoints:
     
     def test_pricing_calculation_basic(self):
         """Test pricing calculation with basic inputs"""
-        response = self.session.post(
+        # Use form data (not JSON) for this endpoint
+        response = requests.post(
             f"{BASE_URL}/api/algolia/pricing/calculate",
             data={
                 "list_price": 100.0,
@@ -182,7 +183,7 @@ class TestAlgoliaCatalogEndpoints:
         - Customer gets 70% of margin: $28
         - Selling Price: $100 - $28 = $72
         """
-        response = self.session.post(
+        response = requests.post(
             f"{BASE_URL}/api/algolia/pricing/calculate",
             data={
                 "list_price": 100.0,
@@ -233,7 +234,7 @@ class TestAlgoliaCatalogEndpoints:
         suppliers = ["Fastenal", "Grainger", "Motion"]
         
         for supplier in suppliers:
-            response = self.session.post(
+            response = requests.post(
                 f"{BASE_URL}/api/algolia/pricing/calculate",
                 data={
                     "list_price": 100.0,
@@ -255,7 +256,7 @@ class TestAlgoliaCatalogEndpoints:
     
     def test_pricing_calculation_zero_price(self):
         """Test pricing calculation with zero price"""
-        response = self.session.post(
+        response = requests.post(
             f"{BASE_URL}/api/algolia/pricing/calculate",
             data={
                 "list_price": 0,
