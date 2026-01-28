@@ -197,7 +197,8 @@ def transform_fastenal_product(row: Dict, countries: List[str], pricing_func=Non
     product_name = str(row.get("Title", "") or row.get("Product Name", "")).strip()
     brand = str(row.get("Manufacturer Brand", "") or row.get("Brand", "")).strip()
     manufacturer = str(row.get("Manufacturer", "") or brand).strip()
-    part_number = str(row.get("Part No", "") or row.get("OEM Part No", "")).strip()
+    # Fix: Use correct column name "Manufacturer Part No" from Excel
+    part_number = str(row.get("Manufacturer Part No", "") or row.get("Part No", "") or row.get("OEM Part No", "")).strip()
     oem_part_number = str(row.get("OEM Part No", "") or part_number).strip()
     sku = str(row.get("SKU", "")).strip()
     
