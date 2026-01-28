@@ -57,16 +57,80 @@ import { useAuth } from "../App";
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
-// Algolia client initialization
-console.log("Algolia Config:", {
-  appId: process.env.REACT_APP_ALGOLIA_APP_ID,
-  searchKey: process.env.REACT_APP_ALGOLIA_SEARCH_KEY?.substring(0, 10) + "..."
+// Custom search client that uses our backend API instead of direct Algolia
+// This ensures all searches go through our backend for pricing calculations
+const createBackendSearchClient = (apiUrl, token) => ({
+  search: async (requests) => {
+    try {
+      // Only handle the first request for simplicity
+      const request = requests[0];
+      const { indexName, params } = request;
+      
+      // Parse params
+      const searchParams = new URLSearchParams(params);
+      const query = searchParams.get('query') || '';
+      const page = parseInt(searchParams.get('page') || '0');
+      const hitsPerPage = parseInt(searchParams.get('hitsPerPage') || '24');
+      
+      // Get filters from facetFilters
+      const facetFilters = searchParams.get('facetFilters');
+      let filters = {};
+      if (facetFilters) {
+        try {
+          const parsed = JSON.parse(facetFilters);
+          parsed.forEach(filter => {
+            if (Array.isArray(filter)) {
+              filter.forEach(f => {
+                const [key, value] = f.split(':');
+                if (key && value) filters[key] = value;
+              });
+            } else {
+              const [key, value] = filter.split(':');
+              if (key && value) filters[key] = value;
+            }
+          });
+        } catch (e) {}
+      }
+      
+      const response = await fetch(`${apiUrl}/api/algolia/catalog/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          query,
+          page,
+          hits_per_page: hitsPerPage,
+          filters
+        })
+      });
+      
+      const data = await response.json();
+      
+      // Transform to InstantSearch format
+      return {
+        results: [{
+          hits: data.hits || [],
+          nbHits: data.nbHits || 0,
+          page: data.page || 0,
+          nbPages: data.nbPages || 0,
+          hitsPerPage: data.hitsPerPage || 24,
+          processingTimeMS: data.processingTimeMS || 0,
+          exhaustiveNbHits: true,
+          query: query,
+          params: params,
+          index: indexName,
+          facets: data.facets || {}
+        }]
+      };
+    } catch (error) {
+      console.error('Search error:', error);
+      return { results: [{ hits: [], nbHits: 0, page: 0, nbPages: 0, hitsPerPage: 24 }] };
+    }
+  },
+  searchForFacetValues: async () => ({ facetHits: [] })
 });
-
-const searchClient = algoliasearch(
-  process.env.REACT_APP_ALGOLIA_APP_ID || "",
-  process.env.REACT_APP_ALGOLIA_SEARCH_KEY || ""
-);
 
 // Available countries for filtering
 const COUNTRIES = [
