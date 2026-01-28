@@ -100,6 +100,7 @@ const ProductCard = ({ product, onAddToCart, viewMode, punchoutMode }) => {
   const [imageError, setImageError] = useState(false);
   
   const primaryImage = product.primary_image || product.images?.[0];
+  const hasValidImage = primaryImage && primaryImage.startsWith('http') && !imageError;
   const hasPrice = product.selling_price > 0 || product.price > 0;
   const hasDiscount = product.discount_percentage > 0;
   const { rating, reviews } = getProductRating(product.objectID);
@@ -109,7 +110,7 @@ const ProductCard = ({ product, onAddToCart, viewMode, punchoutMode }) => {
     <Card className="group hover:shadow-xl transition-all duration-200 border border-slate-200 hover:border-slate-300 bg-white overflow-hidden h-full flex flex-col">
       {/* Image */}
       <div className="relative aspect-square bg-white p-4 border-b border-slate-100">
-        {primaryImage && !imageError ? (
+        {hasValidImage ? (
           <img
             src={primaryImage}
             alt={product.product_name}
@@ -117,8 +118,9 @@ const ProductCard = ({ product, onAddToCart, viewMode, punchoutMode }) => {
             onError={() => setImageError(true)}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded">
-            <Package className="w-20 h-20 text-slate-300" />
+          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 rounded border-2 border-dashed border-slate-200">
+            <Package className="w-12 h-12 text-slate-300 mb-2" />
+            <p className="text-sm font-medium text-slate-400 text-center px-2">No Picture from Seller</p>
           </div>
         )}
         
@@ -138,6 +140,16 @@ const ProductCard = ({ product, onAddToCart, viewMode, punchoutMode }) => {
         <h3 className="text-sm text-slate-800 line-clamp-2 mb-2 min-h-[40px]">
           {product.product_name}
         </h3>
+
+        {/* Part Numbers */}
+        <div className="text-xs text-slate-500 mb-2 space-y-0.5">
+          {product.part_number && (
+            <p><span className="font-medium">Mfg Part #:</span> {product.part_number}</p>
+          )}
+          {product.oem_part_number && product.oem_part_number !== product.part_number && (
+            <p><span className="font-medium">OEM Part #:</span> {product.oem_part_number}</p>
+          )}
+        </div>
 
         <div className="mb-2">
           <StarRating rating={rating} reviews={reviews} />
