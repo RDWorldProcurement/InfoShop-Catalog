@@ -93,13 +93,13 @@ const Sidebar = ({ activePage }) => {
           <NavItem icon={Search} label={t.nav.catalog} path="/catalog" id="catalog" activePage={activePage} navigate={navigate} />
           <NavItem 
             icon={Sparkles} 
-            label="Algolia Catalog" 
+            label="InfoShop Catalog" 
             path="/algolia-catalog" 
-            id="algolia-catalog" 
+            id="infoshop-catalog" 
             activePage={activePage} 
             navigate={navigate}
             badge="NEW"
-            badgeColor="bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+            badgeColor="bg-gradient-to-r from-amber-500 to-orange-500 text-white"
           />
           
           <div className="py-3">
