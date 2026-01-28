@@ -6,7 +6,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://aiprocure-2.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://algolia-search.preview.emergentagent.com')
 
 class TestLoginAndAuth:
     """Test login functionality with demo and admin credentials"""

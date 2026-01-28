@@ -1,99 +1,494 @@
 <analysis>**original_problem_statement:**
-The user wants to transform OMNISupply.io into an intelligent, prompt-driven procurement platform. The primary new feature is an Advanced AI Driven Procurement Handling capability.
+The user wants to transform OMNISupply.io into an intelligent, prompt-driven procurement platform. The latest and highest-priority initiative is to build a State-of-the-Art catalog search experience, similar to Amazon.com, using Algolia as the search-as-a-service provider.
 
-**PRODUCT REQUIREMENTS:**
-*   **AI Procurement Agent:** A conversational UI where users describe needs in natural language. The agent should guide users to Catalog Search, AI-Enabled Quotation Handling, or Managed Services.
-*   **Landing Page & UI:** The UI should reflect the new AI-centric workflow. The login page must be updated, a logout feature must be present, and session history must be preserved.
-*   **Core Capabilities:**
-    *   **Real Document Extraction:** The system must parse uploaded files (PDF, DOCX, etc.) to extract quotation data, not use mock data.
-    *   **Intelligent Conversation:** The AI must maintain multi-turn conversation context, understanding follow-up questions instead of starting fresh with each message.
-    *   **Negotiation Agent:** Build a feature to assist with or automate supplier negotiations.
-*   **Multi-Currency and Language:** Support for dynamic currency and language translation.
-*   **Backend & AI:** Utilize OpenAI GPT-5.2, Claude Sonnet 4.5, and Gemini 3 Flash.
-*   **Bug Fixes:** Address issues like failing Add to Cart, incorrect data display (e.g., /bin/bash savings), and API timeouts.
+**PRODUCT REQUIREMENTS (for new Catalog):**
+*   **Search Backend:** Use Algolia to index and search millions of products from multiple supplier files (e.g., Fastenal, Grainger, Motion).
+*   **Search Capabilities:** Users must be able to search by Product Name, OEM Part Number, Brand Name, and Description.
+*   **Faceted Search:** Implement filters for Category and Brand that dynamically update the search results.
+*   **Rich Product Display:**
+    *   Render product images.
+    *   Provide links to specification documents that open in a new window, masking the original supplier URL to keep the user within the application.
+*   **Multi-Supplier Comparison:**
+    *   When multiple suppliers offer the exact same product (matched on Brand, Mfg. Part Number, OEM Name), display all options.
+    *   The cheapest product listing must be displayed first with a Lowest Price badge.
+    *   If prices are identical, prioritize the listing with the highest stock availability.
+*   **User Experience:** The overall catalog feature must be 100% accurate and provide a world-class B2B e-commerce experience.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application features a conversational AI as its main interface. A major breakthrough in this session was the implementation of **real document extraction**, replacing the previous mock data system. The AI now parses uploaded PDFs, Word docs, and Excel files to analyze actual quotation data.
+The application is a full-stack procurement platform with a conversational AI as its primary interface. Key implemented features include real document extraction for quotation analysis (PDF, DOCX, XLSX, TXT), a basic negotiation agent, and multi-turn conversation context.
 
-Phase 1 of a **Negotiation Agent** has been completed. After a quotation is analyzed, the system recommends a target price and can generate a negotiation email draft.
-
-Significant effort was put into improving the AI conversation flow. It now has some client-side context awareness (e.g., can show line items from a recent analysis) and includes a complete UI for adding items to a cart, selecting a payment entity, and choosing a punch-out system, all within the chat.
-
-Several critical bugs have been resolved, including a recurring AI analysis timeout, incorrect savings calculations on the negotiation page, and broken Add to Cart functionality. A competitive analysis against aerchain.io was performed and is stored in , which now serves as a high-level roadmap.
+Recent major improvements in this session include:
+- **Intelligent Navigation:** The AI can now distinguish between catalog and non-catalog items, correctly guiding users to either upload a quotation or engage the buying desk.
+- **Enhanced UI/UX:** The quotation upload process now has a detailed progress indicator with elapsed time and status phases. The Escalate to Buying Desk feature was fixed to carry over context automatically.
+- **UNSPSC Classification:** An AI-powered service automatically classifies products in uploaded quotations with 8-digit UNSPSC codes.
+- **Deployment Stability:** A critical deployment bug was fixed by adding a root-level  endpoint for Kubernetes.
+- **Algolia Integration Scaffolding:** The foundational work for the new catalog has begun. Dependencies are installed, credentials are in  files, and placeholder files (, ) and API routes have been created.
 
 **Last working item**:
-    - Last item agent was working: The user reported major usability issues with the login and session management. The agent addressed this by completely rewriting the  to reflect the new application capabilities and make the demo login credentials more prominent. Additionally, the agent fixed the main logo link in the  to navigate to the AI agent dashboard () instead of the landing page (), which was causing users to lose their session history.
+    - Last item agent was working: The agent was laying the groundwork for the new **Algolia-powered catalog search**. It successfully installed backend () and frontend () dependencies, added the user-provided Algolia credentials to the  files, created a new backend service module (), defined new API endpoints in  (), and created the frontend page () and its route in .
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? screenshot tool. The next agent must first verify the UI of the new login page. Then, test the end-to-end flow: confirm login works, clicking the logo preserves the session, and the logout button functions correctly.
+    - Which testing method agent to use? both. First, use  to test the new backend endpoints ( and ) after implementing the indexing and search logic. Once the backend is confirmed to be working, use the  to conduct a comprehensive test of the , verifying the search bar, faceted filtering, result rendering, and multi-supplier comparison logic.
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: AI conversation lacks deep, multi-turn context (P0)
-  - Issue 2: Verify the new Login Page UI and session preservation fixes (P1)
+  - Issue 1: Quotation analysis is a recurring point of failure (P1)
 
   Issues Detail:
   - Issue 1: 
-     - **Description**: The user feels the AI conversation is still basic and doesn't connect the dots between follow-up questions and previous context. While some history is passed to the LLM, the core logic relies on simple keyword matching and intent classification that resets with each turn.
-     - **Attempted fixes**: Stored chat history in MongoDB; passed history to the LLM; refined prompts; fixed a keyword matching bug. These were insufficient.
-     - **Next debug checklist**:
-        - **File**: 
-        - **Method**: 
-        - **Action**: Refactor the endpoint to use a router LLM pattern. The first LLM call should take the user message and history to decide the next action (e.g., , , ). This decision would then trigger a more specialized function or a second LLM call focused on generating a response. This will create a truly context-aware, multi-turn system.
-     - **Why fix this issue and what will be achieved with the fix?**: This is the core of the user's vision for an intelligent platform. Fixing it will significantly improve the primary user experience.
-     - **Status**:  IN PROGRESS
+     - **Description**: The quotation analysis feature has failed multiple times across sessions, often due to unhandled file types or content. While the most recent failure (related to  files) was fixed, this part of the application is fragile.
+     - **Attempted fixes**: Added support for  files and improved error handling in .
+     - **Next debug checklist**: If it fails again, the next agent should:
+        1. Check backend logs (==> /var/log/supervisor/backend.err.log <==
+2026-01-25 07:22:56,327 - LiteLLM - INFO - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+[92m07:23:07 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:23:07,046 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:23:07 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+2026-01-25 07:23:07,047 - LiteLLM - INFO - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+[92m07:23:19 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:23:19,899 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:23:19 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+2026-01-25 07:23:19,900 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+[92m07:23:22 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:23:22,933 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:23:22 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+2026-01-25 07:23:22,933 - LiteLLM - INFO - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+[92m07:23:35 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:23:35,363 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:23:35 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+2026-01-25 07:23:35,363 - LiteLLM - INFO - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+[92m07:23:48 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:23:48,831 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:23:48 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+2026-01-25 07:23:48,831 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+[92m07:23:50 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:23:50,886 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:23:50 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+2026-01-25 07:23:50,886 - LiteLLM - INFO - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+[92m07:24:01 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:24:01,291 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:24:01 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+2026-01-25 07:24:01,292 - LiteLLM - INFO - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+[92m07:24:13 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:24:13,544 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:24:13 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+2026-01-25 07:24:13,545 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+[92m07:24:16 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:24:16,243 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:24:16 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+2026-01-25 07:24:16,244 - LiteLLM - INFO - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+[92m07:24:29 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:24:29,722 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:24:29 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+2026-01-25 07:24:29,722 - LiteLLM - INFO - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+[92m07:24:42 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:24:42,479 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:24:42 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+2026-01-25 07:24:42,480 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+[92m07:24:44 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:24:44,765 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:26:45,264 - root - INFO - Starting REAL document extraction for BOSCH Quotation For Check Offer 4.pdf (239016 bytes)
+2026-01-25 07:26:45,264 - document_extractor - INFO - Extracting data from BOSCH Quotation For Check Offer 4.pdf (type: application/pdf)
+2026-01-25 07:26:45,282 - document_extractor - INFO - Extracted 2175 chars from PDF
+2026-01-25 07:26:45,282 - document_extractor - INFO - Using AI text extraction
+2026-01-25 07:26:45,282 - document_extractor - INFO - Starting AI text extraction with 2175 chars
+[92m07:26:45 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+2026-01-25 07:26:45,283 - LiteLLM - INFO - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+[92m07:26:54 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:26:54,601 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:26:54,601 - root - INFO - Extracted 4 line items from document
+2026-01-25 07:26:54,601 - root - INFO - Starting AI UNSPSC classification for 4 items
+[92m07:26:54 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+2026-01-25 07:26:54,602 - LiteLLM - INFO - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+[92m07:27:01 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:27:01,065 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:27:01,065 - document_extractor - INFO - AI UNSPSC classification completed for 4 items
+2026-01-25 07:27:01,065 - root - INFO - UNSPSC classification complete. Categories: ['76120000', '78100000']
+[92m07:27:01 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+2026-01-25 07:27:01,066 - LiteLLM - INFO - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+[92m07:27:09 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:27:09,761 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:27:09 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+2026-01-25 07:27:09,761 - LiteLLM - INFO - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+[92m07:27:20 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:27:20,143 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:27:20 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+2026-01-25 07:27:20,144 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+[92m07:27:22 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:27:22,037 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:27:22 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+2026-01-25 07:27:22,037 - LiteLLM - INFO - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+[92m07:27:34 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:27:34,281 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:27:34 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+2026-01-25 07:27:34,281 - LiteLLM - INFO - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+[92m07:27:44 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:27:44,402 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:27:44 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+2026-01-25 07:27:44,403 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+[92m07:27:46 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:27:46,629 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:27:46 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+2026-01-25 07:27:46,629 - LiteLLM - INFO - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+[92m07:27:55 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:27:55,478 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:27:55 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+2026-01-25 07:27:55,478 - LiteLLM - INFO - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+[92m07:28:06 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:28:06,404 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:28:06 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+2026-01-25 07:28:06,405 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+[92m07:28:08 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:28:08,534 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:28:08 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+2026-01-25 07:28:08,535 - LiteLLM - INFO - 
+LiteLLM completion() model= gpt-5.2; provider = openai
+[92m07:28:15 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:28:15,678 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:28:15 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+2026-01-25 07:28:15,679 - LiteLLM - INFO - 
+LiteLLM completion() model= claude-sonnet-4-5-20250929; provider = openai
+[92m07:28:25 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:28:25,136 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+[92m07:28:25 - LiteLLM:INFO[0m: utils.py:3427 - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+2026-01-25 07:28:25,137 - LiteLLM - INFO - 
+LiteLLM completion() model= gemini/gemini-3-flash-preview; provider = openai
+[92m07:28:27 - LiteLLM:INFO[0m: utils.py:1307 - Wrapper: Completed Call, calling success_handler
+2026-01-25 07:28:27,232 - LiteLLM - INFO - Wrapper: Completed Call, calling success_handler
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [47] using WatchFiles
+INFO:     Started server process [84]
+INFO:     Waiting for application startup.
+2026-01-28 03:43:33,637 - server - INFO - Database indexes created successfully for optimal search performance
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'algolia_service.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [84]
+INFO:     Started server process [408]
+INFO:     Waiting for application startup.
+2026-01-28 04:29:58,371 - server - INFO - Database indexes created successfully for optimal search performance
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [408]
+INFO:     Started server process [491]
+INFO:     Waiting for application startup.
+2026-01-28 04:30:19,121 - server - INFO - Database indexes created successfully for optimal search performance
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'server.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [491]
+INFO:     Started server process [667]
+INFO:     Waiting for application startup.
+2026-01-28 04:31:19,685 - server - INFO - Database indexes created successfully for optimal search performance
+INFO:     Application startup complete.
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [45] using WatchFiles
+
+==> /var/log/supervisor/backend.out.log <==
+INFO:     10.64.136.245:60060 - "GET /api/products/search?q=laptop HTTP/1.1" 200 OK
+INFO:     10.64.131.202:34292 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.138.62:41228 - "GET /api/services/search?q=IT+services HTTP/1.1" 200 OK
+INFO:     10.64.131.205:50140 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     10.64.131.202:41666 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.34:33514 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.10:48428 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.202:41666 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.205:57432 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.204:39360 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.203:46994 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.138.62:58870 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.9:53452 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.135.173:60812 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.136.226:56578 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.138.62:58870 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.9:53452 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.204:37860 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.205:47776 - "GET /api/products/search?q=laptop HTTP/1.1" 200 OK
+INFO:     10.64.136.226:56578 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.205:47776 - "GET /api/services/search?q=IT+services HTTP/1.1" 200 OK
+INFO:     10.64.129.9:53452 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     10.64.129.10:37612 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.135.173:55138 - "POST /api/procurement/quotation/upload-with-ai HTTP/1.1" 200 OK
+INFO:     10.64.136.226:40808 - "GET /api/procurement/buying-desk/requests HTTP/1.1" 200 OK
+INFO:     10.64.129.10:32874 - "GET /api/procurement/buying-desk/requests HTTP/1.1" 200 OK
+INFO:     10.64.131.34:59344 - "GET /api/services/categories HTTP/1.1" 200 OK
+INFO:     10.64.131.7:34000 - "GET /api/products/categories HTTP/1.1" 200 OK
+INFO:     10.64.129.9:47364 - "GET /api/products/brands HTTP/1.1" 200 OK
+INFO:     10.64.129.13:47432 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.138.62:57124 - "GET /api/punchout/systems HTTP/1.1" 200 OK
+INFO:     10.64.136.245:47620 - "GET /api/products/search?q=&limit=20&lang=en HTTP/1.1" 200 OK
+INFO:     10.64.138.62:57124 - "GET /api/products/brands HTTP/1.1" 200 OK
+INFO:     10.64.131.34:59344 - "GET /api/services/categories HTTP/1.1" 200 OK
+INFO:     10.64.129.7:42270 - "GET /api/products/categories HTTP/1.1" 200 OK
+INFO:     10.64.138.62:57124 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.138.62:57138 - "GET /api/punchout/systems HTTP/1.1" 200 OK
+INFO:     10.64.138.62:57124 - "GET /api/products/search?q=&limit=20&lang=en HTTP/1.1" 200 OK
+INFO:     10.64.138.62:48676 - "GET /api/services/categories HTTP/1.1" 200 OK
+INFO:     10.64.129.7:48372 - "GET /api/products/categories HTTP/1.1" 200 OK
+INFO:     10.64.131.7:46782 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.131.34:38688 - "GET /api/products/search?q=&limit=20&lang=en HTTP/1.1" 200 OK
+INFO:     10.64.131.7:46782 - "GET /api/punchout/systems HTTP/1.1" 200 OK
+INFO:     10.64.136.226:38824 - "GET /api/products/brands HTTP/1.1" 200 OK
+INFO:     10.64.131.34:38688 - "GET /api/services/categories HTTP/1.1" 200 OK
+INFO:     10.64.131.7:46782 - "GET /api/products/categories HTTP/1.1" 200 OK
+INFO:     10.64.129.10:34046 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.138.62:48676 - "GET /api/products/brands HTTP/1.1" 200 OK
+INFO:     10.64.131.34:38688 - "GET /api/products/search?q=&limit=20&lang=en HTTP/1.1" 200 OK
+INFO:     10.64.131.34:38688 - "GET /api/punchout/systems HTTP/1.1" 200 OK
+INFO:     10.64.138.62:57442 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.7:59956 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.9:58276 - "POST /api/cart/add HTTP/1.1" 200 OK
+INFO:     10.64.138.62:57928 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.7:52642 - "POST /api/cart/add HTTP/1.1" 200 OK
+INFO:     10.64.131.34:54140 - "GET /api/products/brands HTTP/1.1" 200 OK
+INFO:     10.64.131.34:54148 - "GET /api/products/search?q=&limit=20&lang=en HTTP/1.1" 200 OK
+INFO:     10.64.131.34:54164 - "GET /api/services/categories HTTP/1.1" 200 OK
+INFO:     10.64.131.7:52642 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.138.62:46766 - "GET /api/products/categories HTTP/1.1" 200 OK
+INFO:     10.64.136.226:37418 - "GET /api/punchout/systems HTTP/1.1" 200 OK
+INFO:     10.64.135.173:33812 - "GET /api/products/brands HTTP/1.1" 200 OK
+INFO:     10.64.138.62:46766 - "GET /api/services/categories HTTP/1.1" 200 OK
+INFO:     10.64.138.62:46766 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.138.62:46768 - "GET /api/products/search?q=&limit=20&lang=en HTTP/1.1" 200 OK
+INFO:     10.64.138.62:46774 - "GET /api/products/categories HTTP/1.1" 200 OK
+INFO:     10.64.136.245:37936 - "GET /api/punchout/systems HTTP/1.1" 200 OK
+INFO:     10.64.131.7:47462 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.7:58566 - "POST /api/procurement/quotation/upload-with-ai HTTP/1.1" 200 OK
+INFO:     10.64.129.7:49010 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.7:60200 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.13:53392 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.135.173:40488 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.205:38044 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.135.173:51136 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.136.245:38526 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.34:59788 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.136.226:41332 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.136.245:40162 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.136.245:40162 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.7:38716 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.9:34190 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.9:34190 - "OPTIONS /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.135.173:38282 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.206:48434 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.10:46876 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.202:58046 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.136.245:58038 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.202:43044 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.13:52584 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.7:49252 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.34:45572 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.206:49702 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.13:52486 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.135.173:41446 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.136.226:40866 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.135.173:41446 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.131.205:39690 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.206:41998 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.9:40046 - "OPTIONS /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.13:45898 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.135.173:58348 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.10:37282 - "POST /api/procurement/quotation/upload HTTP/1.1" 200 OK
+INFO:     10.64.136.226:53848 - "POST /api/procurement/quotation/upload-with-ai HTTP/1.1" 200 OK
+INFO:     10.64.136.245:41524 - "POST /api/procurement/quotation/upload-with-ai HTTP/1.1" 200 OK
+INFO:     10.64.129.7:49804 - "POST /api/procurement/quotation/upload-with-ai HTTP/1.1" 200 OK
+INFO:     10.64.131.202:39416 - "POST /api/procurement/quotation/QAI-20260125062433-E4AFCB/add-to-cart HTTP/1.1" 200 OK
+INFO:     10.64.136.245:60686 - "GET /api/products/brands HTTP/1.1" 200 OK
+INFO:     10.64.136.245:60686 - "GET /api/products/search?q=&limit=20&lang=en HTTP/1.1" 200 OK
+INFO:     10.64.129.9:44350 - "GET /api/punchout/systems HTTP/1.1" 200 OK
+INFO:     10.64.136.226:37752 - "GET /api/products/categories HTTP/1.1" 200 OK
+INFO:     10.64.129.10:41418 - "GET /api/services/categories HTTP/1.1" 200 OK
+INFO:     10.64.129.13:50310 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.136.245:60686 - "GET /api/punchout/systems HTTP/1.1" 200 OK
+INFO:     10.64.135.173:40666 - "GET /api/products/brands HTTP/1.1" 200 OK
+INFO:     10.64.129.7:37130 - "GET /api/products/search?q=&limit=20&lang=en HTTP/1.1" 200 OK
+INFO:     10.64.129.9:44350 - "GET /api/products/categories HTTP/1.1" 200 OK
+INFO:     10.64.129.7:37130 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.129.13:50310 - "GET /api/services/categories HTTP/1.1" 200 OK
+INFO:     10.64.129.13:50310 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.129.7:37130 - "POST /api/cart/transfer HTTP/1.1" 200 OK
+INFO:     10.64.136.245:52702 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.7:53568 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.204:41610 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.203:45680 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.136.226:34272 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.9:37450 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.138.62:37682 - "OPTIONS /api/procurement/quotation/demo-analysis HTTP/1.1" 200 OK
+INFO:     10.64.138.62:37682 - "GET /api/procurement/quotation/demo-analysis HTTP/1.1" 200 OK
+INFO:     10.64.136.245:58680 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.135.173:46128 - "POST /api/procurement/quotation/upload-with-ai HTTP/1.1" 200 OK
+INFO:     10.64.129.13:33128 - "GET /api/negotiation/strategies HTTP/1.1" 200 OK
+INFO:     10.64.129.7:46060 - "GET /api/negotiation/strategies HTTP/1.1" 200 OK
+INFO:     10.64.129.7:46070 - "GET /api/procurement/quotation/QAI-20260125063918-1DE3F0 HTTP/1.1" 200 OK
+INFO:     10.64.129.10:48308 - "GET /api/procurement/quotation/QAI-20260125063918-1DE3F0 HTTP/1.1" 200 OK
+INFO:     10.64.129.9:33020 - "POST /api/negotiation/generate-targets HTTP/1.1" 200 OK
+INFO:     10.64.136.245:34054 - "POST /api/negotiation/generate-targets HTTP/1.1" 200 OK
+INFO:     10.64.136.245:34064 - "POST /api/negotiation/generate-targets HTTP/1.1" 200 OK
+INFO:     10.64.129.9:40690 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.136.226:45356 - "POST /api/procurement/buying-desk/engage HTTP/1.1" 200 OK
+INFO:     10.64.136.245:38386 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.7:45762 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.10:34340 - "OPTIONS /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.13:37294 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.7:45766 - "OPTIONS /api/procurement/buying-desk/engage HTTP/1.1" 200 OK
+INFO:     10.64.129.10:34346 - "POST /api/procurement/buying-desk/engage HTTP/1.1" 200 OK
+INFO:     10.64.131.202:42284 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.206:52806 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.7:38904 - "OPTIONS /api/procurement/quotation/demo-analysis HTTP/1.1" 200 OK
+INFO:     10.64.131.34:33544 - "GET /api/procurement/quotation/demo-analysis HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43372 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43380 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43382 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     10.64.131.7:57586 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.34:56792 - "POST /api/procurement/quotation/upload-with-ai HTTP/1.1" 200 OK
+INFO:     10.64.136.245:36950 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.136.226:35618 - "POST /api/procurement/quotation/upload-with-ai HTTP/1.1" 200 OK
+INFO:     10.64.129.7:33946 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.135.173:52824 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.136.245:59708 - "OPTIONS /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.9:41902 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.10:60012 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.129.13:52892 - "POST /api/ai-agent/conversation HTTP/1.1" 200 OK
+INFO:     10.64.129.7:51988 - "POST /api/procurement/quotation/upload-with-ai HTTP/1.1" 200 OK
+INFO:     10.64.138.62:40570 - "GET /api/negotiation/strategies HTTP/1.1" 200 OK
+INFO:     10.64.138.62:40570 - "GET /api/negotiation/strategies HTTP/1.1" 200 OK
+INFO:     10.64.138.62:40570 - "GET /api/procurement/quotation/QAI-20260125072112-34EEEB HTTP/1.1" 200 OK
+INFO:     10.64.138.62:40570 - "GET /api/procurement/quotation/QAI-20260125072112-34EEEB HTTP/1.1" 200 OK
+INFO:     10.64.131.7:50542 - "POST /api/negotiation/generate-targets HTTP/1.1" 200 OK
+INFO:     10.64.129.13:33894 - "POST /api/procurement/quotation/upload-with-ai HTTP/1.1" 200 OK
+INFO:     10.64.129.13:43042 - "POST /api/procurement/quotation/QAI-20260125072645-706606/engage-tactical-buyers HTTP/1.1" 200 OK
+INFO:     10.64.129.10:50716 - "GET /api/products/categories HTTP/1.1" 200 OK
+INFO:     10.64.136.226:42816 - "GET /api/services/categories HTTP/1.1" 200 OK
+INFO:     10.64.136.226:42816 - "GET /api/products/brands HTTP/1.1" 200 OK
+INFO:     10.64.136.245:54148 - "GET /api/punchout/systems HTTP/1.1" 200 OK
+INFO:     10.64.136.226:42818 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.136.245:54148 - "GET /api/products/search?q=&limit=20&lang=en HTTP/1.1" 200 OK
+INFO:     10.64.136.245:54148 - "GET /api/products/categories HTTP/1.1" 200 OK
+INFO:     10.64.129.13:43302 - "GET /api/punchout/systems HTTP/1.1" 200 OK
+INFO:     10.64.129.7:59288 - "GET /api/cart HTTP/1.1" 200 OK
+INFO:     10.64.129.7:59288 - "GET /api/services/categories HTTP/1.1" 200 OK
+INFO:     10.64.129.9:34100 - "GET /api/products/search?q=&limit=20&lang=en HTTP/1.1" 200 OK
+INFO:     10.64.129.7:59288 - "GET /api/products/brands HTTP/1.1" 200 OK
+INFO:     10.64.129.10:55780 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     10.64.131.206:54070 - "OPTIONS /api/admin/login HTTP/1.1" 200 OK
+INFO:     10.64.131.203:54030 - "POST /api/admin/login HTTP/1.1" 200 OK
+INFO:     10.64.131.203:54030 - "GET /api/admin/delivery-partners HTTP/1.1" 200 OK
+INFO:     10.64.131.204:53622 - "GET /api/admin/buying-desk/specialists HTTP/1.1" 200 OK
+INFO:     10.64.131.204:53608 - "GET /api/admin/uploaded-catalogs HTTP/1.1" 200 OK
+INFO:     10.64.131.205:34394 - "GET /api/admin/sourcing/requests HTTP/1.1" 200 OK
+INFO:     10.64.131.205:34388 - "GET /api/admin/buying-desk/requests HTTP/1.1" 200 OK
+INFO:     10.64.131.204:53634 - "GET /api/admin/buying-desk/dashboard-stats HTTP/1.1" 200 OK
+INFO:     10.64.131.204:43612 - "OPTIONS /api/admin/login HTTP/1.1" 200 OK
+INFO:     10.64.131.205:41756 - "POST /api/admin/login HTTP/1.1" 200 OK
+INFO:     10.64.136.245:56934 - "GET /api/admin/delivery-partners HTTP/1.1" 200 OK
+INFO:     10.64.129.9:41024 - "GET /api/admin/buying-desk/specialists HTTP/1.1" 200 OK
+INFO:     10.64.129.7:55180 - "GET /api/admin/uploaded-catalogs HTTP/1.1" 200 OK
+INFO:     10.64.129.10:55830 - "GET /api/admin/buying-desk/requests HTTP/1.1" 200 OK
+INFO:     10.64.135.173:36932 - "GET /api/admin/sourcing/requests HTTP/1.1" 200 OK
+INFO:     10.64.129.13:40668 - "GET /api/admin/buying-desk/dashboard-stats HTTP/1.1" 200 OK).
+        2. Examine the file that caused the failure (type, content, size).
+        3. Review  to see if a new file type handler or a more robust parsing strategy is needed.
+     - **Why fix this issue and what will be achieved with the fix?**: This is a core feature of the application. Ensuring its stability is crucial for user trust.
+     - **Status**:  TESTING PENDING
      - **Is recurring issue?**: Y
-     - **Should Test frontend/backend/both after fix?**: Both. A full end-to-end conversational test is required.
-     - **Blocked on other issue**: None
-  - Issue 2: 
-     - **Description**: The implementation for the new  and the fix for the logo link in  are complete but have not been tested.
-     - **Attempted fixes**: The agent overwrote  and applied a  to .
-     - **Next debug checklist**:
-        1. Take a screenshot of the  page to verify the new design.
-        2. Test the login functionality with demo credentials.
-        3. After login, click the main logo and confirm the session/page remains on .
-        4. Test the logout button in the sidebar.
-     - **Why fix this issue and what will be achieved with the fix?**: This resolves a major user complaint about a confusing login process and frustrating session loss.
-     - **Status**:  IN PROGRESS
-     - **Is recurring issue?**: N
-     - **Should Test frontend/backend/both after fix?**: Frontend
+     - **Should Test frontend/backend/both after fix?**: Backend
      - **Blocked on other issue**: None
 
 **In progress Task List**:
-There are no other active tasks. The focus is on the two pending issues.
+  - Task 1: Complete the Algolia-Powered Catalog Search (P0)
+
+ Task Detail:
+  - Task 1: 
+     - **Where to resume**: 
+        1. **Backend ()**: Implement the  function. This function should read the provided sample Excel files (), normalize data from different suppliers (Fastenal, Grainger, Motion) into a single, unified schema, and then use the Algolia client to batch-upload this data to a new Algolia index.
+        2. **Backend ()**: Implement the logic for the  and  endpoints to call the corresponding search functions in .
+        3. **Frontend ()**: Build the UI using . Connect the  component to the Algolia credentials. Implement a custom ,  widgets for brand and category facets, and a custom  component to render the results according to the user's requirements (price comparison, etc.).
+        4. **Frontend ()**: Add a navigation link to the  page.
+     - **What will be achieved with this?**: This will deliver the user's top-priority request for a scalable, fast, and feature-rich product search experience, replacing the existing, less accurate MongoDB search.
+     - **Status**:  IN PROGRESS
+     - **Should Test frontend/backend/both after fix?**: Both
+     - **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks:**
-    *   **P0 - Negotiation Agent (Phase 2):** Build the autonomous negotiation capability where the AI communicates directly with suppliers via email/chat.
-    *   **P1 - Contract Agent:** Implement features to draft, track, and manage contracts.
-    *   **P1 - Vendor Onboarding Agent:** Create a self-service portal for new suppliers.
-    *   **P2 - Approval Workflows:** Develop multi-level approval matrices for purchases.
+    *   **P0 - Vendor Onboarding Agent:** Build a self-service portal for new suppliers to onboard themselves.
+    *   **P1 - Negotiation Agent (Phase 2):** Implement autonomous negotiation capabilities where the AI can communicate directly with suppliers.
+    *   **P1 - Contract Agent:** Create features for drafting, tracking, and managing contracts.
 *   **Future Tasks:**
     *   Spend Analytics Dashboard.
-    *   Side-by-side multi-supplier quote comparison UI.
-    *   Real-time notifications system.
-    *   Enterprise Readiness: Security hardening, CI/CD pipelines, scalability refactoring (), caching (Redis), and message queues (RabbitMQ).
+    *   Approval Workflows for purchases.
+    *   Enterprise Readiness (caching, message queues, advanced security).
 
 **Completed work in this session**
-- **FIXED: Core Capability - Real Document Extraction:** Replaced the mock data generator with a true AI-powered document extraction module () that parses uploaded PDF, DOCX, and XLSX files.
-- **COMPLETED: Negotiation Agent (Phase 1):** Built the backend () and frontend () to recommend negotiation target prices and generate draft emails.
-- **FIXED: Critical Bugs:**
-  - Resolved the recurring quotation analysis timeout by increasing the frontend timeout to 5 minutes and adding a real-time progress bar.
-  - Optimized two slow database queries using MongoDB aggregation pipelines.
-  - Fixed a bug causing the Negotiation Savings target to always display /bin/bash.
-  - Repaired the Add to Cart functionality from the AI chat.
-- **IMPROVED: AI Conversation Flow:** Implemented a full UI flow within the chat for catalog search, adding to cart, selecting a payment entity, and choosing a punch-out system. Added client-side logic to handle some contextual follow-up questions.
-- **CREATED: Competitive Analysis:** Scraped and analyzed , creating a feature comparison checklist saved to .
-
-**Earlier issues found/mentioned but not fixed**
-None.
+- **FIXED: AI Intelligent Navigation:** Resolved a critical bug where the AI would search for non-catalog items. The system now correctly identifies them and guides the user to appropriate actions (upload quotation, engage buying desk).
+- **IMPROVED: Quotation Upload UI:** The analysis progress screen was overhauled to provide clear, real-time feedback (elapsed time, overall progress bar, status phases), eliminating user confusion.
+- **FIXED: Buying Desk Context Loss:** The Escalate to Buying Desk feature now correctly preserves the conversation/quotation context and submits the request to the backend, showing a success confirmation in the UI.
+- **COMPLETED: AI-Powered UNSPSC Mapping:** A new feature was added to the quotation analysis pipeline that uses GPT-5.2 to automatically classify line items with 8-digit UNSPSC codes.
+- **FIXED: Deployment Failure:** Resolved a Kubernetes deployment blocker by adding a root  endpoint to the FastAPI application.
+- **CREATED: Comprehensive Documentation:** A new document outlining the application's capabilities and gaps was created at .
 
 **Known issue recurrence from previous fork**
-  - **Issue recurrence in previous fork**: Real AI quotation analysis times out and fails.
-  - **Recurrence count**: 3+
-  - **Status**: RESOLVED. The agent discovered the root cause was not just a timeout but that the backend was using mock data. A new  was created to parse real files, and the frontend timeout was increased to 5 minutes with a progress bar to handle the long but successful processing time.
+  - **Issue recurrence in previous fork**: Quotation analysis timeout/failure.
+  - **Recurrence count**: 4+
+  - **Status**: RESOLVED. The agent fixed the immediate cause by adding support for  files and improving error handling in . However, this component remains a potential source of future issues.
 
 **Code Architecture**
 
@@ -101,85 +496,85 @@ None.
 **Key Technical Concepts**
 - **Backend:** FastAPI, Python, MongoDB ().
 - **Frontend:** React, JavaScript, , TailwindCSS, Shadcn UI.
-- **AI Integration:**  for multi-LLM orchestration.
-- **Document Parsing:** Use of , ,  for real file content extraction.
-- **State Management:** React  and .
+- **Search:** Algolia (SaaS integration).
+- **AI Integration:**  for multi-LLM orchestration (GPT, Claude, Gemini).
+- **Document Parsing:** , , .
 
 **key DB schema**
-- **conversations:**  - Stores multi-turn chat history for context.
-- **negotiations:**  - Tracks negotiation attempts and rounds.
+-   **buying_desk_requests:** 
+-   **Algolia Index (Proposed Schema):** 
 
 **All files of reference**
-*   : Modified for conversation history, negotiation endpoints, and numerous bug fixes.
-*   : New module that provides the core real-data extraction capability.
-*   : New module containing the logic for negotiation recommendations.
-*   : Significantly updated to handle more complex UI flows and client-side context.
-*   : Overwritten with a completely new component for better UX.
-*   : New page for displaying negotiation actions.
-*   : Modified to fix the session-destroying logo link.
-*   : New document detailing competitive features.
+-   : **New service** for all Algolia-related logic.
+-   : **New page** to build the search UI.
+-   : **Modified** to include new Algolia endpoints, the buying desk endpoint, and the root  check.
+-   : **Modified** to fix the Escalate to Buying Desk context loss.
+-   : **Modified** with a significantly improved progress indicator UI.
+-   : **Modified** to add support for  files and improve error handling.
+-   : **New document** created at user request.
+-   , : **Modified** with Algolia credentials.
 
 **Areas that need refactoring**:
-- ****: This file is now a large monolith containing logic for conversation, search, cart, quotations, and negotiations. It urgently needs to be broken down into a structured , , and  format.
-- ****: This React component has become overly complex, managing multiple states and UI flows. It should be decomposed into smaller, specialized child components.
+- ****: This file continues to grow and is a monolith. The new Algolia endpoints should be moved to a dedicated router file (e.g., ) to improve organization.
+- ****: This component manages a large amount of state and logic. It should be broken down into smaller, more focused child components.
 
 **key api endpoints**
-- : The primary conversational endpoint. Needs a major refactor for multi-turn context.
-- : Now functional with real document extraction.
-- : (New) Fetches available negotiation playbooks.
-- : (New) Generates a recommended target price for a quotation.
-- : (New) Drafts a negotiation email to a supplier.
+-   : (New) Endpoint to trigger indexing of supplier files into Algolia.
+-   : (New) The primary search endpoint that will query Algolia.
+-   : (New) Endpoint to retrieve available filter values (e.g., all brands, all categories).
+-   : (New) Submits a request to the buying desk, preserving context.
+-   : (New) Root-level health check for Kubernetes liveness probes.
 
 **Critical Info for New Agent**
-- Your highest priority is to improve the AI conversation intelligence. The user is not satisfied with the current basic feel. The plan to refactor  using a router LLM pattern is the most critical next step.
-- Immediately after starting, you must test the recently implemented fixes for the Login Page and session preservation. This is a direct user request and needs verification.
-- The roadmap for new features is defined by the  file. The user has approved starting with the Negotiation Agent (Phase 1 is done) and wants to continue building out those capabilities.
+- Your **number one priority** is to complete the implementation of the Algolia-powered catalog search. The user has high expectations for this feature to be state-of-the-art.
+- Use the three sample Excel files (, , ) from the user artifacts to define a unified data schema and populate the Algolia index.
+- The Algolia credentials are in the environment files and should be used to initialize the clients.
+- The next feature the user wants after the catalog is the **Vendor Onboarding Agent**. Keep this in mind for future planning.
+- The agent forgot to add a link to the new  page in the . This is a small but important UI step to complete.
 
 **documents and test reports created in this job**
--  (Updated)
--  (New)
-- 
-- 
 - 
 - 
 
 **Last 10 User Messages and any pending HUMAN messages** 
-1.  **User**: Asks agent to compare the app to .
-2.  **Agent**: Provides comparison and asks what to build next.
-3.  **User**: Chooses Negotiation Agent.
-4.  **Agent**: Proposes a Phase 1 MVP for the Negotiation Agent.
-5.  **User**: Approves building Phase 1.
-6.  **User**: Reports that the AI conversation is losing context and other bugs are present.
-7.  **User**: Provides detailed steps to test the full end-to-end AI conversation flow.
-8.  **User**: Reports the AI conversation still feels basic and the negotiation savings is bugged (/bin/bash).
-9.  **User**: Complains that the login page is outdated, there is no logout, and clicking the logo breaks the session. (This is the last set of issues the agent worked on).
-10. **Agent**: Acknowledges the login/session issues and begins implementing fixes by rewriting the  and patching the .
+1.  **User**: Asks for a comprehensive document on all features and gaps.
+2.  **Agent**: Creates the document.
+3.  **User**: Reports a deployment failure with logs showing  endpoint returning 404.
+4.  **Agent**: Fixes the deployment by adding a root  endpoint.
+5.  **User**: Reports that quotation upload from the AI chat fails with an error.
+6.  **Agent**: Fixes the quotation upload by adding  support and improving error handling.
+7.  **User**: Asks how to log in and upload new products/services to the catalog.
+8.  **Agent**: Provides detailed step-by-step instructions for using the Admin Portal.
+9.  **User**: Asks if the latest version is deployed and then reports another deployment failure (which was actually a success).
+10. **User**: **(LATEST REQUEST)** Pivots focus to building a state-of-the-art catalog search using Algolia, providing requirements and sample data files.
 
 **Project Health Check:**
-- **Broken:**
-    - The AI conversation's ability to handle deep, multi-turn context is functionally broken from the user's perspective, despite technical attempts to fix it. This is the top priority.
-- **Mocked:**
-    - PunchOut functionality.
-    - Autonomous negotiation (Phase 2+ of the Negotiation Agent).
-    - Contract and Vendor Onboarding agents.
+-   **Broken:**
+    -   The current MongoDB-based product search is slow and inaccurate, failing to meet user expectations. This is the primary reason for the pivot to Algolia.
+-   **Mocked:**
+    -   Autonomous Negotiation Agent (Phase 2+)
+    -   Contract Agent
+    -   Vendor Onboarding Agent
 
 **3rd Party Integrations**
-*   **OpenAI GPT-5.2 (Text Generation)** — Uses Emergent LLM Key via .
-*   **Claude Sonnet 4.5 (Text Generation)** — Uses Emergent LLM Key via .
-*   **Gemini 3 Flash (Text Generation)** — Uses Emergent LLM Key via .
-*   **Document Parsers**: PyPDF2, python-docx, openpyxl, pillow.
+*   **Algolia (Search)** — requires User API Key.
+*   **OpenAI GPT-5.2 (Text Generation)** — Uses Emergent LLM Key.
+*   **Claude Sonnet 4.5 (Text Generation)** — Uses Emergent LLM Key.
+*   **Gemini 3 Flash (Text Generation)** — Uses Emergent LLM Key.
+*   **Document Parsers**: PyPDF2, python-docx, openpyxl.
 
 **Testing status**
-  - Testing agent used after significant changes: YES (4 times, latest is ).
+  - Testing agent used after significant changes: YES, for the multi-turn context feature ().
   - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: None.
-  - Known regressions: The AI conversation context remains a persistent issue that has not been fully resolved.
+  - Known regressions: None from this session's work.
 
 **Credentials to test flow:**
-*   **User Email:** 
-*   **User Password:** 
-*   **Admin Email:** 
-*   **Admin Password:** 
+*   **User Email:** , **Password:** 
+*   **Admin Username:** , **Password:** 
+*   **Algolia App ID:** 
+*   **Algolia Admin API Key:** 
+*   **Algolia Search-Only API Key:** 
 
 **What agent forgot to execute**
-The agent was in the middle of fixing the user-reported login and session issues. It has written the code but has not yet tested or verified that the fixes work. This verification is the immediate next step.</analysis>
+- The agent created the  and the route  in , but forgot to add a navigation link to this new page in the main  component. Users currently have no way to access the new catalog page from the UI.</analysis>
