@@ -211,6 +211,22 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/algolia-catalog"
+                element={
+                  <ProtectedRoute>
+                    <AlgoliaCatalogPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/catalog-admin"
+                element={
+                  <ProtectedRoute>
+                    <CatalogAdminPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/admin" element={<AdminPortalPage />} />
             </Routes>
             <ChatBot />
