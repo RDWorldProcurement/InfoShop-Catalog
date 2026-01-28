@@ -2668,7 +2668,7 @@ async def upload_catalog_to_algolia(
             raise HTTPException(status_code=400, detail="No products found in file")
         
         # Index to Algolia
-        result = await index_products(products, supplier)
+        result = await algolia_index_products(products, supplier)
         
         if result.get("success"):
             # Store upload record
