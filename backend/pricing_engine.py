@@ -29,133 +29,159 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ.get('DB_NAME', 'test_database')]
 
 # Default discount mappings by supplier (based on provided discount tables)
+# These are calibrated to give customers 8-22% savings (70% of margin passed to customer)
+# Customer Discount = Supplier Discount × 0.70
+# So for 8% customer discount: need ~11% supplier discount
+# For 22% customer discount: need ~31% supplier discount
+
 DEFAULT_FASTENAL_DISCOUNTS = {
-    "Abrasives": 30,
-    "Adhesives, Sealants, and Tape": 30,
-    "Adhesives & Sealants": 30,
-    "Cutting Tools and Metalworking": 30,
-    "Cutting Tools": 30,
-    "Electrical": 35,
-    "Electronics and Batteries": 30,
-    "Electronics & Batteries": 30,
-    "Fasteners": 50,
-    "Fasteners & Hardware": 50,
-    "Fleet and Automotive": 35,
-    "Fleet & Automotive": 35,
-    "HVAC and Refrigeration": 25,
-    "HVAC & Refrigeration": 25,
-    "Hardware and Building Supplies": 40,
-    "Hardware & Building Supplies": 40,
-    "Hydraulics": 30,
-    "Hydraulics & Pneumatics": 30,
-    "Janitorial and Cleaning": 35,
-    "Cleaning & Janitorial": 35,
-    "Lighting": 30,
-    "Electrical & Lighting": 30,
-    "Lubricants, Coolants, and Fluids": 30,
-    "Lubrication": 30,
-    "Machinery": 20,
-    "Material Handling, Lifting and Rigging": 25,
-    "Material Handling": 25,
-    "Motors": 20,
-    "Motors & Drives": 20,
-    "Office and Breakroom Supplies": 20,
-    "Outdoor Products and Equipment": 25,
-    "Packaging and Shipping Products": 25,
-    "Packaging & Shipping": 25,
-    "Paint and Painting Supplies": 30,
-    "Plumbing": 35,
-    "Pneumatics": 30,
-    "Power Transmission": 30,
-    "Bearings & Power Transmission": 30,
-    "Pumps": 20,
-    "Raw Materials": 25,
-    "Safety": 30,
-    "Safety & PPE": 30,
-    "Sealing": 30,
-    "Security": 30,
-    "Test and Measurement": 25,
-    "Test & Measurement": 25,
-    "Tools and Equipment": 30,
-    "Hand Tools": 30,
-    "Power Tools": 30,
-    "Corded Power Tools": 23,
-    "Cordless Power Tools": 23,
-    "Trainings, Resources and Sustainability": 30,
-    "Welding": 30,
-    "Filtration": 30,
-    "Laboratory Supplies": 25,
-    "Industrial Automation": 25,
-    "Storage & Organization": 30,
-    "IT Equipment - Laptops": 15,
-    "IT Equipment - Monitors": 15,
-    "IT Equipment - Networking": 15,
-    "IT Equipment - Servers": 15,
-    "IT Equipment - Peripherals": 15,
-    "Industrial Coding": 25,
+    # High discount categories (customer gets ~18-22% off)
+    "Fasteners": 31,  # Customer saves ~21.7%
+    "Fasteners & Hardware": 31,
+    "Hardware and Building Supplies": 30,  # Customer saves ~21%
+    "Hardware & Building Supplies": 30,
+    
+    # Medium-high discount categories (customer gets ~14-18% off)
+    "Electrical": 25,  # Customer saves ~17.5%
+    "Janitorial and Cleaning": 24,
+    "Cleaning & Janitorial": 24,  # Customer saves ~16.8%
+    "Fleet and Automotive": 24,
+    "Fleet & Automotive": 24,
+    "Plumbing": 23,  # Customer saves ~16.1%
+    
+    # Medium discount categories (customer gets ~11-14% off)
+    "Abrasives": 19,  # Customer saves ~13.3%
+    "Adhesives, Sealants, and Tape": 18,
+    "Adhesives & Sealants": 18,  # Customer saves ~12.6%
+    "Cutting Tools and Metalworking": 18,
+    "Cutting Tools": 18,
+    "Safety": 20,  # Customer saves ~14%
+    "Safety & PPE": 20,
+    "Tools and Equipment": 19,
+    "Hand Tools": 19,  # Customer saves ~13.3%
+    "Power Tools": 17,  # Customer saves ~11.9%
+    "Corded Power Tools": 16,
+    "Cordless Power Tools": 16,
+    "Welding": 18,  # Customer saves ~12.6%
+    "Paint and Painting Supplies": 18,
+    
+    # Lower discount categories (customer gets ~8-11% off)
+    "Electronics and Batteries": 15,  # Customer saves ~10.5%
+    "Electronics & Batteries": 15,
+    "HVAC and Refrigeration": 14,  # Customer saves ~9.8%
+    "HVAC & Refrigeration": 14,
+    "Hydraulics": 15,
+    "Hydraulics & Pneumatics": 15,
+    "Lighting": 14,
+    "Electrical & Lighting": 14,
+    "Lubricants, Coolants, and Fluids": 14,
+    "Lubrication": 14,
+    "Machinery": 12,  # Customer saves ~8.4%
+    "Material Handling, Lifting and Rigging": 13,
+    "Material Handling": 13,
+    "Motors": 12,
+    "Motors & Drives": 12,
+    "Office and Breakroom Supplies": 12,
+    "Outdoor Products and Equipment": 13,
+    "Packaging and Shipping Products": 14,
+    "Packaging & Shipping": 14,
+    "Pneumatics": 15,
+    "Power Transmission": 15,
+    "Bearings & Power Transmission": 16,  # Customer saves ~11.2%
+    "Pumps": 12,
+    "Raw Materials": 13,
+    "Sealing": 15,
+    "Security": 14,
+    "Test and Measurement": 13,
+    "Test & Measurement": 13,
+    "Trainings, Resources and Sustainability": 14,
+    "Filtration": 15,
+    "Laboratory Supplies": 13,
+    "Industrial Automation": 13,
+    "Storage & Organization": 15,
+    "IT Equipment - Laptops": 11,  # Customer saves ~7.7%
+    "IT Equipment - Monitors": 11,
+    "IT Equipment - Networking": 12,
+    "IT Equipment - Servers": 11,
+    "IT Equipment - Peripherals": 11,
+    "Industrial Coding": 13,
 }
 
 # Grainger has similar discounts - will be loaded from uploaded contract
 DEFAULT_GRAINGER_DISCOUNTS = {
-    "Safety": 35,
-    "Safety & PPE": 35,
-    "Electrical": 30,
-    "Electrical & Lighting": 30,
-    "Plumbing": 32,
-    "HVAC": 28,
-    "HVAC & Refrigeration": 28,
-    "Material Handling": 30,
-    "Motors": 25,
-    "Motors & Drives": 25,
-    "Power Transmission": 28,
-    "Bearings & Power Transmission": 28,
-    "Hand Tools": 35,
-    "Power Tools": 30,
-    "Abrasives": 33,
-    "Adhesives, Sealants & Tape": 30,
-    "Adhesives & Sealants": 30,
-    "Fasteners": 40,
-    "Fasteners & Hardware": 40,
-    "Lubrication": 28,
-    "Welding": 30,
-    "Cutting Tools": 32,
-    "Test & Measurement": 27,
-    "Janitorial": 35,
-    "Cleaning & Janitorial": 35,
-    "Pumps": 25,
-    "Hydraulics & Pneumatics": 30,
-    "Filtration": 32,
-    "Raw Materials": 25,
-    "Storage & Organization": 30,
-    "Packaging & Shipping": 28,
-    "IT Equipment - Laptops": 12,
-    "IT Equipment - Monitors": 12,
-    "IT Equipment - Networking": 15,
+    # High discount categories
+    "Safety": 28,  # Customer saves ~19.6%
+    "Safety & PPE": 28,
+    "Hand Tools": 27,  # Customer saves ~18.9%
+    "Fasteners": 30,  # Customer saves ~21%
+    "Fasteners & Hardware": 30,
+    "Cleaning & Janitorial": 26,  # Customer saves ~18.2%
+    "Janitorial": 26,
+    
+    # Medium-high discount categories
+    "Electrical": 22,  # Customer saves ~15.4%
+    "Electrical & Lighting": 22,
+    "Plumbing": 23,  # Customer saves ~16.1%
+    "Abrasives": 24,  # Customer saves ~16.8%
+    "Cutting Tools": 23,
+    "Power Tools": 21,  # Customer saves ~14.7%
+    "Welding": 21,
+    
+    # Medium discount categories
+    "Adhesives, Sealants & Tape": 18,  # Customer saves ~12.6%
+    "Adhesives & Sealants": 18,
+    "Lubrication": 17,  # Customer saves ~11.9%
+    "Filtration": 20,  # Customer saves ~14%
+    "Storage & Organization": 19,  # Customer saves ~13.3%
+    "Packaging & Shipping": 18,
+    
+    # Lower discount categories
+    "HVAC": 16,  # Customer saves ~11.2%
+    "HVAC & Refrigeration": 16,
+    "Material Handling": 17,
+    "Motors": 14,  # Customer saves ~9.8%
+    "Motors & Drives": 14,
+    "Power Transmission": 16,
+    "Bearings & Power Transmission": 17,
+    "Hydraulics & Pneumatics": 17,
+    "Pumps": 14,
+    "Raw Materials": 13,  # Customer saves ~9.1%
+    "Test & Measurement": 15,  # Customer saves ~10.5%
+    "IT Equipment - Laptops": 11,
+    "IT Equipment - Monitors": 11,
+    "IT Equipment - Networking": 12,
 }
 
 # Motion discounts (similar structure)
 DEFAULT_MOTION_DISCOUNTS = {
-    "Bearings": 35,
-    "Bearings & Power Transmission": 35,
-    "Power Transmission": 32,
-    "Motors": 28,
-    "Motors & Drives": 28,
-    "Electrical": 25,
-    "Electrical & Lighting": 25,
-    "Hydraulics": 30,
-    "Hydraulics & Pneumatics": 30,
-    "Pneumatics": 30,
-    "Linear Motion": 28,
-    "Material Handling": 25,
-    "Safety": 30,
-    "Safety & PPE": 30,
-    "Hand Tools": 30,
-    "Lubrication": 30,
-    "Seals": 32,
-    "Sealing": 32,
-    "Filtration": 30,
-    "Cutting Tools": 28,
-    "Abrasives": 30,
+    # High discount categories
+    "Bearings": 26,  # Customer saves ~18.2%
+    "Bearings & Power Transmission": 26,
+    "Safety": 24,  # Customer saves ~16.8%
+    "Safety & PPE": 24,
+    "Hand Tools": 22,  # Customer saves ~15.4%
+    
+    # Medium-high discount categories
+    "Power Transmission": 22,  # Customer saves ~15.4%
+    "Seals": 23,
+    "Sealing": 23,
+    "Abrasives": 21,  # Customer saves ~14.7%
+    
+    # Medium discount categories
+    "Motors": 18,  # Customer saves ~12.6%
+    "Motors & Drives": 18,
+    "Electrical": 17,  # Customer saves ~11.9%
+    "Electrical & Lighting": 17,
+    "Hydraulics": 19,  # Customer saves ~13.3%
+    "Hydraulics & Pneumatics": 19,
+    "Pneumatics": 19,
+    "Lubrication": 18,
+    "Filtration": 19,
+    "Cutting Tools": 18,
+    
+    # Lower discount categories
+    "Linear Motion": 16,  # Customer saves ~11.2%
+    "Material Handling": 15,  # Customer saves ~10.5%
 }
 
 # UNSPSC to Category mapping for AI-powered classification
