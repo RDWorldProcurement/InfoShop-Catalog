@@ -408,7 +408,7 @@ const InfoShopCatalog = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get(`${API}/api/algolia/catalog/stats`);
+        const response = await axios.get(`${API}/api/algolia/catalog/public-stats`);
         setCatalogStats(response.data);
       } catch (error) {
         console.error("Stats error:", error);
