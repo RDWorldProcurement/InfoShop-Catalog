@@ -2767,6 +2767,49 @@ async def get_catalog_stats(current_user: dict = Depends(get_current_user)):
         return {"algolia_available": True, "error": str(e)}
 
 
+@api_router.get("/algolia/catalog/public-stats")
+async def get_public_catalog_stats():
+    """Get public catalog statistics (no auth required) - for PunchOut and standalone catalogs"""
+    if not ALGOLIA_AVAILABLE:
+        return {
+            "algolia_available": False,
+            "total_products": 0,
+            "suppliers": [],
+            "categories": []
+        }
+    
+    try:
+        # Get facet counts
+        brand_facets = get_facet_values("brand")
+        category_facets = get_facet_values("category")
+        supplier_facets = get_facet_values("supplier")
+        
+        # Quick search to get total count
+        result = algolia_search_products("", page=0, hits_per_page=1)
+        
+        # Helper to extract value/count from facet objects
+        def facet_to_dict(f):
+            if hasattr(f, 'value'):
+                return {"name": f.value, "count": getattr(f, 'count', 0)}
+            elif isinstance(f, dict):
+                return {"name": f.get("value"), "count": f.get("count", 0)}
+            return {"name": str(f), "count": 0}
+        
+        return {
+            "algolia_available": True,
+            "total_products": result.get("nbHits", 0),
+            "brand_count": len(brand_facets) if brand_facets else 0,
+            "category_count": len(category_facets) if category_facets else 0,
+            "supplier_count": len(supplier_facets) if supplier_facets else 0,
+            "suppliers": [facet_to_dict(f) for f in (supplier_facets or [])],
+            "top_categories": [facet_to_dict(f) for f in (category_facets or [])[:20]],
+            "top_brands": [facet_to_dict(f) for f in (brand_facets or [])[:20]]
+        }
+    except Exception as e:
+        logging.error(f"Public stats retrieval error: {e}")
+        return {"algolia_available": True, "error": str(e)}
+
+
 @api_router.get("/algolia/catalog/product/{object_id}")
 async def get_product_details(object_id: str):
     """Get detailed product information including related products from other suppliers"""
