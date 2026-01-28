@@ -61,6 +61,8 @@ const API = process.env.REACT_APP_BACKEND_URL;
 const createBackendSearchClient = (apiUrl, token) => ({
   search: async (requests) => {
     try {
+      console.log("Search requests:", requests);
+      
       // Only handle the first request for simplicity
       const request = requests[0];
       const { indexName, params } = request;
@@ -88,8 +90,12 @@ const createBackendSearchClient = (apiUrl, token) => ({
               if (key && value) filters[key] = value;
             }
           });
-        } catch (e) {}
+        } catch (e) {
+          console.error("Filter parse error:", e);
+        }
       }
+      
+      console.log("Calling backend with:", { query, page, hitsPerPage, filters });
       
       const response = await fetch(`${apiUrl}/api/algolia/catalog/search`, {
         method: 'POST',
@@ -106,11 +112,43 @@ const createBackendSearchClient = (apiUrl, token) => ({
       });
       
       const data = await response.json();
+      console.log("Backend response:", { nbHits: data.nbHits, hitsCount: data.hits?.length });
+      
+      // Transform hits to ensure objectID is present
+      const transformedHits = (data.hits || []).map(hit => ({
+        ...hit,
+        objectID: hit.objectID || hit.object_id || `${hit.supplier}_${hit.sku}`
+      }));
+      
+      // Transform facets to InstantSearch format
+      // Backend returns: { brand: { "name": "X", "count": N }, ... }
+      // InstantSearch expects: { brand: { "X": N, ... }, ... }
+      const transformedFacets = {};
+      if (data.facets) {
+        // If facets are in array format from model_dump
+        Object.keys(data.facets).forEach(facetName => {
+          const facetData = data.facets[facetName];
+          if (typeof facetData === 'object' && facetData !== null) {
+            if (Array.isArray(facetData)) {
+              // Array of {value, count}
+              transformedFacets[facetName] = {};
+              facetData.forEach(item => {
+                if (item.value !== undefined) {
+                  transformedFacets[facetName][item.value] = item.count || 0;
+                }
+              });
+            } else {
+              // Direct object
+              transformedFacets[facetName] = facetData;
+            }
+          }
+        });
+      }
       
       // Transform to InstantSearch format
-      return {
+      const result = {
         results: [{
-          hits: data.hits || [],
+          hits: transformedHits,
           nbHits: data.nbHits || 0,
           page: data.page || 0,
           nbPages: data.nbPages || 0,
@@ -120,9 +158,12 @@ const createBackendSearchClient = (apiUrl, token) => ({
           query: query,
           params: params,
           index: indexName,
-          facets: data.facets || {}
+          facets: transformedFacets
         }]
       };
+      
+      console.log("Returning to InstantSearch:", { nbHits: result.results[0].nbHits, hitsCount: result.results[0].hits.length });
+      return result;
     } catch (error) {
       console.error('Search error:', error);
       return { results: [{ hits: [], nbHits: 0, page: 0, nbPages: 0, hitsPerPage: 24 }] };
