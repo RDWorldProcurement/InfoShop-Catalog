@@ -3416,6 +3416,8 @@ async def get_punchout_config():
         "supported_operations": ["create", "edit", "inspect"],
         "note": "Credentials (Identity, Domain, SharedSecret) must be configured in Coupa supplier settings"
     }
+
+# RFQ Routes
 @api_router.post("/rfq/submit")
 async def submit_rfq(rfq: RFQCreate, current_user: dict = Depends(get_current_user)):
     rfq_doc = {
