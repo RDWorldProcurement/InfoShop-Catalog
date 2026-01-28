@@ -9,6 +9,7 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 5. **AI Negotiation Agent** - Autonomous price negotiation with strategy playbooks
 6. **Algolia-Powered Catalog Search** - State-of-the-art B2B catalog with multi-supplier comparison and Infosys pricing
 7. **Coupa cXML PunchOut** - Enterprise procurement system integration
+8. **Standalone InfoShop Catalog** - Extracted catalog for independent Vercel deployment (Danone branding)
 
 ---
 
@@ -25,6 +26,30 @@ Build an enterprise-grade unified procurement platform called OMNISupply.io for 
 ---
 
 ## What's Been Implemented
+
+### ✅ Phase 25 - InfoShop Catalog UI Improvements (January 28, 2026 - COMPLETED)
+
+**UI Improvements for Vercel Deployment:**
+- "No Picture from Seller" text displayed for products without valid images
+- Mfg Part Number and OEM Part Number shown on product cards
+- Brand name prominently displayed on each card
+- Correct API endpoints: `/api/algolia/catalog/search` and `/api/algolia/catalog/public-stats`
+
+**Backend Enhancements:**
+- Added `has_image` field to Algolia customRanking (products with images sorted first)
+- Created `/api/algolia/catalog/public-stats` endpoint (no auth required for PunchOut catalogs)
+- Updated all product transformers (Fastenal, Grainger, Motion) to include `has_image` field
+
+**Files Modified:**
+- `/app/infoshop-standalone/frontend/src/pages/InfoShopCatalog.jsx` - UI improvements
+- `/app/backend/algolia_service.py` - Added has_image to ranking and transformers
+- `/app/backend/server.py` - Added public-stats endpoint
+
+**Test Results:**
+- Backend: 100% (11/11 tests passed)
+- Report: `/app/test_reports/iteration_25.json`
+
+**Note:** Existing Algolia products need re-indexing to populate `has_image` field. New uploads will have this field automatically.
 
 ### ✅ Phase 24 - Coupa cXML PunchOut Integration (January 28, 2026 - COMPLETED)
 
