@@ -2571,7 +2571,7 @@ async def algolia_search_catalog(request: AlgoliaSearchRequest):
         raise HTTPException(status_code=503, detail="Algolia search service not available")
     
     try:
-        results = search_products(
+        results = algolia_search_products(
             query=request.query,
             filters=request.filters,
             page=request.page,
