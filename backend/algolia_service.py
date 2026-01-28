@@ -70,6 +70,7 @@ def init_algolia():
                 "selling_price"
             ],
             "customRanking": [
+                "desc(has_image)",
                 "desc(has_price)",
                 "asc(selling_price)",
                 "desc(in_stock)",
@@ -98,6 +99,8 @@ def init_algolia():
                 "country",
                 "countries",
                 "images",
+                "primary_image",
+                "has_image",
                 "documents",
                 "specifications",
                 "unspsc_code",
