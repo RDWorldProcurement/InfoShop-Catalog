@@ -3126,7 +3126,296 @@ async def get_cart_transfers(current_user: dict = Depends(get_current_user)):
 async def get_punchout_systems():
     return {"systems": PUNCHOUT_SYSTEMS}
 
-# RFQ Routes
+# ============================================
+# Coupa cXML PunchOut Integration Routes
+# ============================================
+
+@api_router.post("/punchout/setup")
+async def punchout_setup(request: Request):
+    """
+    Handle cXML PunchOutSetupRequest from Coupa or other procurement systems.
+    
+    This is the entry point for the PunchOut flow:
+    1. Coupa sends a cXML PunchOutSetupRequest
+    2. We validate the credentials (SharedSecret: Infoshop@2026)
+    3. We create a session and return a StartPage URL
+    4. User browses the catalog in PunchOut mode
+    """
+    try:
+        # Get raw XML body
+        body = await request.body()
+        xml_content = body.decode("utf-8")
+        
+        logger.info(f"PunchOut setup request received, length: {len(xml_content)}")
+        
+        # Parse the cXML request
+        try:
+            parsed = parse_punchout_setup_request(xml_content)
+        except ValueError as e:
+            error_response = create_punchout_setup_response(
+                success=False,
+                error_message=f"Invalid cXML format: {str(e)}"
+            )
+            return Response(
+                content=error_response,
+                media_type="application/xml",
+                status_code=400
+            )
+        
+        # Validate credentials (SharedSecret)
+        if not validate_punchout_credentials(parsed.get("sender_shared_secret", "")):
+            logger.warning(f"PunchOut authentication failed for {parsed.get('from_identity', 'unknown')}")
+            
+            # Log the failed attempt
+            await log_punchout_transaction(
+                db,
+                transaction_type="setup_failed",
+                session_token="",
+                buyer_identity=parsed.get("from_identity", "unknown"),
+                status="authentication_failed",
+                details={"reason": "Invalid shared secret"}
+            )
+            
+            error_response = create_punchout_setup_response(
+                success=False,
+                error_message="Authentication failed: Invalid credentials"
+            )
+            return Response(
+                content=error_response,
+                media_type="application/xml",
+                status_code=401
+            )
+        
+        # Create PunchOut session
+        session_token = create_punchout_session(
+            buyer_cookie=parsed.get("buyer_cookie", ""),
+            browser_form_post_url=parsed.get("browser_form_post_url", ""),
+            from_identity=parsed.get("from_identity", ""),
+            deployment_mode=parsed.get("deployment_mode", "production"),
+            user_email=parsed.get("user_email", "")
+        )
+        
+        # Save session to database for persistence
+        session_data = get_punchout_session(session_token)
+        if session_data:
+            await save_punchout_session_to_db(db, session_token, session_data)
+        
+        # Log successful setup
+        await log_punchout_transaction(
+            db,
+            transaction_type="setup_success",
+            session_token=session_token,
+            buyer_identity=parsed.get("from_identity", ""),
+            status="session_created",
+            details={
+                "operation": parsed.get("operation", "create"),
+                "deployment_mode": parsed.get("deployment_mode", "production")
+            }
+        )
+        
+        # Generate StartPage URL - points to catalog with punchout session
+        frontend_url = os.environ.get("FRONTEND_URL", "https://algolia-catalog.preview.emergentagent.com")
+        start_page_url = f"{frontend_url}/infoshop-catalog?punchout={session_token}"
+        
+        logger.info(f"PunchOut session created: {session_token[:16]}... -> {start_page_url}")
+        
+        # Create success response
+        success_response = create_punchout_setup_response(
+            success=True,
+            start_page_url=start_page_url,
+            buyer_cookie=parsed.get("buyer_cookie", "")
+        )
+        
+        return Response(
+            content=success_response,
+            media_type="application/xml",
+            status_code=200
+        )
+        
+    except Exception as e:
+        logger.error(f"PunchOut setup error: {e}", exc_info=True)
+        error_response = create_punchout_setup_response(
+            success=False,
+            error_message=f"Internal server error: {str(e)}"
+        )
+        return Response(
+            content=error_response,
+            media_type="application/xml",
+            status_code=500
+        )
+
+
+@api_router.get("/punchout/session/{session_token}")
+async def get_punchout_session_info(session_token: str):
+    """
+    Get PunchOut session information.
+    Used by the frontend to verify punchout mode and get session details.
+    """
+    # Try memory first
+    session = get_punchout_session(session_token)
+    
+    # Fall back to database
+    if not session:
+        session = await get_punchout_session_from_db(db, session_token)
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="PunchOut session not found or expired")
+    
+    return {
+        "valid": True,
+        "buyer_identity": session.get("from_identity", ""),
+        "deployment_mode": session.get("deployment_mode", "production"),
+        "created_at": session.get("created_at", ""),
+        "cart_items_count": len(session.get("cart_items", []))
+    }
+
+
+class PunchOutCartItem(BaseModel):
+    """Model for a cart item in PunchOut mode"""
+    product_id: str
+    supplier_part_id: str
+    name: str
+    description: Optional[str] = ""
+    quantity: int = 1
+    unit_price: float
+    unit_of_measure: str = "EA"
+    brand: Optional[str] = ""
+    part_number: Optional[str] = ""
+    unspsc_code: Optional[str] = ""
+
+
+class PunchOutCartUpdate(BaseModel):
+    """Model for updating the cart in a PunchOut session"""
+    session_token: str
+    items: List[PunchOutCartItem]
+
+
+@api_router.post("/punchout/cart/update")
+async def update_punchout_session_cart(cart_update: PunchOutCartUpdate):
+    """
+    Update the cart items in a PunchOut session.
+    Called when user adds/removes items while in PunchOut mode.
+    """
+    session_token = cart_update.session_token
+    
+    # Get session from memory or database
+    session = get_punchout_session(session_token)
+    if not session:
+        session = await get_punchout_session_from_db(db, session_token)
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="PunchOut session not found")
+    
+    # Convert items to dict format
+    cart_items = [item.model_dump() for item in cart_update.items]
+    
+    # Update in memory
+    update_punchout_cart(session_token, cart_items)
+    
+    # Update in database
+    await db.punchout_sessions.update_one(
+        {"session_token": session_token},
+        {"$set": {"cart_items": cart_items, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Calculate total
+    total = sum(item["unit_price"] * item["quantity"] for item in cart_items)
+    
+    return {
+        "success": True,
+        "items_count": len(cart_items),
+        "total_amount": round(total, 2),
+        "currency": "USD"
+    }
+
+
+@api_router.post("/punchout/order")
+async def create_punchout_order(request: Request, session_token: str = Query(...)):
+    """
+    Create PunchOutOrderMessage to return cart to Coupa.
+    
+    This is called when user clicks "Transfer to Coupa" button.
+    Returns cXML that gets POSTed to Coupa's BrowserFormPost URL.
+    """
+    # Get session
+    session = get_punchout_session(session_token)
+    if not session:
+        session = await get_punchout_session_from_db(db, session_token)
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="PunchOut session not found or expired")
+    
+    cart_items = session.get("cart_items", [])
+    buyer_cookie = session.get("buyer_cookie", "")
+    browser_form_post_url = session.get("browser_form_post_url", "")
+    
+    if not cart_items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+    
+    # Calculate total
+    total_amount = sum(item.get("unit_price", 0) * item.get("quantity", 1) for item in cart_items)
+    
+    # Create the cXML PunchOutOrderMessage
+    order_message = create_punchout_order_message(
+        cart_items=cart_items,
+        buyer_cookie=buyer_cookie,
+        total_amount=total_amount,
+        currency="USD"
+    )
+    
+    # Log the order
+    await log_punchout_transaction(
+        db,
+        transaction_type="order_created",
+        session_token=session_token,
+        buyer_identity=session.get("from_identity", ""),
+        status="cart_transferred",
+        details={
+            "items_count": len(cart_items),
+            "total_amount": total_amount,
+            "browser_form_post_url": browser_form_post_url[:50] + "..." if browser_form_post_url else ""
+        }
+    )
+    
+    # Close the session
+    close_punchout_session(session_token)
+    await db.punchout_sessions.delete_one({"session_token": session_token})
+    
+    return {
+        "success": True,
+        "cxml": order_message,
+        "browser_form_post_url": browser_form_post_url,
+        "total_amount": total_amount,
+        "items_count": len(cart_items),
+        "instructions": "POST the cxml content to browser_form_post_url to complete the transfer"
+    }
+
+
+@api_router.get("/punchout/config")
+async def get_punchout_config():
+    """
+    Get PunchOut configuration for testing and integration setup.
+    Returns the information needed by a Coupa admin to configure the PunchOut.
+    """
+    api_url = os.environ.get("REACT_APP_BACKEND_URL", "https://algolia-catalog.preview.emergentagent.com")
+    
+    return {
+        "punchout_enabled": True,
+        "supplier_info": {
+            "supplier_domain": PUNCHOUT_CONFIG["supplier_domain"],
+            "supplier_identity": PUNCHOUT_CONFIG["supplier_identity"],
+            "from_domain": PUNCHOUT_CONFIG["from_domain"],
+            "from_identity": PUNCHOUT_CONFIG["from_identity"]
+        },
+        "endpoints": {
+            "setup_url": f"{api_url}/api/punchout/setup",
+            "order_url": f"{api_url}/api/punchout/order",
+            "session_url": f"{api_url}/api/punchout/session/{{session_token}}"
+        },
+        "cxml_version": "1.2.014",
+        "supported_operations": ["create", "edit", "inspect"],
+        "note": "Credentials (Identity, Domain, SharedSecret) must be configured in Coupa supplier settings"
+    }
 @api_router.post("/rfq/submit")
 async def submit_rfq(rfq: RFQCreate, current_user: dict = Depends(get_current_user)):
     rfq_doc = {
