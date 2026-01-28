@@ -91,6 +91,16 @@ const Sidebar = ({ activePage }) => {
         <nav className="space-y-1 flex-1">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Catalog</p>
           <NavItem icon={Search} label={t.nav.catalog} path="/catalog" id="catalog" activePage={activePage} navigate={navigate} />
+          <NavItem 
+            icon={Sparkles} 
+            label="Algolia Catalog" 
+            path="/algolia-catalog" 
+            id="algolia-catalog" 
+            activePage={activePage} 
+            navigate={navigate}
+            badge="NEW"
+            badgeColor="bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+          />
           
           <div className="py-3">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-4 mb-2">Procurement</p>
