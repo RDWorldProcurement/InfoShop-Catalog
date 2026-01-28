@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import algoliasearch from "algoliasearch/lite";
 import {
   InstantSearch,
@@ -12,18 +12,11 @@ import {
   ClearRefinements,
   CurrentRefinements,
   Configure,
-  useInstantSearch,
-  useSearchBox,
-  useHits,
-  useRefinementList,
-  usePagination,
-  useStats,
 } from "react-instantsearch-dom";
 import Sidebar from "../components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Input } from "../components/ui/input";
 import {
   Select,
   SelectContent,
@@ -40,31 +33,23 @@ import {
 import {
   Search,
   Filter,
-  Grid3X3,
-  List,
   ShoppingCart,
-  Star,
   Check,
-  ChevronDown,
-  ChevronRight,
   X,
   FileText,
-  ExternalLink,
   Package,
   Building2,
   Tag,
-  Truck,
-  DollarSign,
   Loader2,
-  ImageOff,
   Award,
   Users,
   Sparkles,
   SlidersHorizontal,
   LayoutGrid,
   LayoutList,
-  ArrowUpDown,
-  RefreshCw,
+  Globe,
+  Percent,
+  TrendingDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
@@ -78,7 +63,32 @@ const searchClient = algoliasearch(
   process.env.REACT_APP_ALGOLIA_SEARCH_KEY || ""
 );
 
-// Product Card Component
+// Available countries for filtering
+const COUNTRIES = [
+  { code: "ALL", name: "All Countries", flag: "🌎" },
+  { code: "USA", name: "United States", flag: "🇺🇸" },
+  { code: "Canada", name: "Canada", flag: "🇨🇦" },
+  { code: "Mexico", name: "Mexico", flag: "🇲🇽" },
+  { code: "Germany", name: "Germany", flag: "🇩🇪" },
+  { code: "UK", name: "United Kingdom", flag: "🇬🇧" },
+  { code: "France", name: "France", flag: "🇫🇷" },
+  { code: "India", name: "India", flag: "🇮🇳" },
+  { code: "China", name: "China", flag: "🇨🇳" },
+  { code: "Japan", name: "Japan", flag: "🇯🇵" },
+  { code: "Brazil", name: "Brazil", flag: "🇧🇷" },
+  { code: "Australia", name: "Australia", flag: "🇦🇺" },
+];
+
+// Format price with currency symbol
+const formatPrice = (price) => {
+  if (!price || price === 0) return "Contact for Price";
+  return `$${parseFloat(price).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};
+
+// Product Card Component with Dual Pricing Display
 const ProductCard = ({ hit, onAddToCart, onViewDetails, viewMode }) => {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -86,14 +96,7 @@ const ProductCard = ({ hit, onAddToCart, onViewDetails, viewMode }) => {
   const primaryImage = hit.primary_image || hit.images?.[0];
   const hasMultipleSuppliers = hit.supplier_count > 1;
   const isLowestPrice = hit.is_lowest_price;
-
-  const formatPrice = (price) => {
-    if (!price || price === 0) return "Contact for Price";
-    return `$${parseFloat(price).toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  };
+  const hasDiscount = hit.discount_percentage > 0;
 
   if (viewMode === "list") {
     return (
@@ -101,6 +104,7 @@ const ProductCard = ({ hit, onAddToCart, onViewDetails, viewMode }) => {
         className="group hover:shadow-lg transition-all duration-300 border-slate-200 hover:border-blue-300"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        data-testid={`product-card-${hit.objectID}`}
       >
         <CardContent className="p-4">
           <div className="flex gap-4">
@@ -144,6 +148,12 @@ const ProductCard = ({ hit, onAddToCart, onViewDetails, viewMode }) => {
                         In Stock
                       </Badge>
                     )}
+                    {hasDiscount && (
+                      <Badge className="bg-orange-500 text-white text-xs">
+                        <TrendingDown className="w-3 h-3 mr-1" />
+                        Save {hit.discount_percentage}%
+                      </Badge>
+                    )}
                   </div>
 
                   {/* Title */}
@@ -174,28 +184,44 @@ const ProductCard = ({ hit, onAddToCart, onViewDetails, viewMode }) => {
                         {hit.supplier}
                       </span>
                     )}
+                    {hit.country && (
+                      <span className="flex items-center gap-1">
+                        <Globe className="w-3 h-3" />
+                        {hit.country}
+                      </span>
+                    )}
                   </div>
-
-                  {/* Description */}
-                  {hit.description && (
-                    <p className="text-sm text-slate-600 mt-2 line-clamp-2">
-                      {hit.description}
-                    </p>
-                  )}
                 </div>
 
                 {/* Price & Actions */}
-                <div className="text-right flex-shrink-0">
-                  <p className="text-2xl font-bold text-slate-900">
-                    {formatPrice(hit.price)}
+                <div className="text-right flex-shrink-0 min-w-[140px]">
+                  {/* Selling Price (Infosys Price) */}
+                  <p className="text-2xl font-bold text-green-600" data-testid="selling-price">
+                    {formatPrice(hit.selling_price || hit.price)}
                   </p>
+                  
+                  {/* List Price (strikethrough if discounted) */}
+                  {hasDiscount && hit.list_price && (
+                    <p className="text-sm text-slate-400 line-through" data-testid="list-price">
+                      List: {formatPrice(hit.list_price)}
+                    </p>
+                  )}
+                  
                   {hit.unit && (
                     <p className="text-xs text-slate-500">per {hit.unit}</p>
                   )}
+                  
+                  {hasDiscount && (
+                    <p className="text-xs text-orange-600 font-medium mt-1">
+                      You Save {formatPrice(hit.list_price - (hit.selling_price || hit.price))}
+                    </p>
+                  )}
+                  
                   <Button
                     size="sm"
                     className="mt-3 bg-blue-600 hover:bg-blue-700"
                     onClick={() => onAddToCart(hit)}
+                    data-testid={`add-to-cart-${hit.objectID}`}
                   >
                     <ShoppingCart className="w-4 h-4 mr-1" />
                     Add to Cart
@@ -215,6 +241,7 @@ const ProductCard = ({ hit, onAddToCart, onViewDetails, viewMode }) => {
       className="group hover:shadow-xl transition-all duration-300 border-slate-200 hover:border-blue-300 overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      data-testid={`product-card-${hit.objectID}`}
     >
       {/* Image Container */}
       <div className="relative aspect-square bg-slate-50 overflow-hidden">
@@ -246,6 +273,15 @@ const ProductCard = ({ hit, onAddToCart, onViewDetails, viewMode }) => {
             </Badge>
           )}
         </div>
+
+        {/* Discount Badge - Top Right */}
+        {hasDiscount && (
+          <div className="absolute top-2 right-2">
+            <Badge className="bg-orange-500 text-white text-xs shadow-md font-bold">
+              -{hit.discount_percentage}%
+            </Badge>
+          </div>
+        )}
 
         {/* Quick Actions Overlay */}
         <div
@@ -304,30 +340,49 @@ const ProductCard = ({ hit, onAddToCart, onViewDetails, viewMode }) => {
           )}
         </div>
 
-        {/* Price */}
+        {/* Price Section */}
         <div className="mt-3 pt-3 border-t border-slate-100">
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-2xl font-bold text-slate-900">
-                {formatPrice(hit.price)}
+              {/* Infosys Selling Price */}
+              <p className="text-2xl font-bold text-green-600" data-testid="selling-price">
+                {formatPrice(hit.selling_price || hit.price)}
               </p>
+              
+              {/* Original List Price */}
+              {hasDiscount && hit.list_price && (
+                <p className="text-xs text-slate-400 line-through">
+                  List: {formatPrice(hit.list_price)}
+                </p>
+              )}
+              
               {hit.unit && <p className="text-xs text-slate-500">per {hit.unit}</p>}
             </div>
+            
             <Button
               size="sm"
               className="bg-blue-600 hover:bg-blue-700"
               onClick={() => onAddToCart(hit)}
+              data-testid={`add-to-cart-${hit.objectID}`}
             >
               <ShoppingCart className="w-4 h-4" />
             </Button>
           </div>
+          
+          {/* Savings highlight */}
+          {hasDiscount && (
+            <p className="text-xs text-orange-600 font-medium mt-2 flex items-center gap-1">
+              <TrendingDown className="w-3 h-3" />
+              Save {formatPrice(hit.list_price - (hit.selling_price || hit.price))} ({hit.discount_percentage}%)
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>
   );
 };
 
-// Product Detail Modal
+// Product Detail Modal with Dual Pricing
 const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
   const [activeImage, setActiveImage] = useState(0);
   const [showSpecDoc, setShowSpecDoc] = useState(null);
@@ -337,6 +392,8 @@ const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
   const images = product.images || [];
   const documents = product.documents || [];
   const specifications = product.specifications || {};
+  const hasDiscount = product.discount_percentage > 0;
+  const sellingPrice = product.selling_price || product.price;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -397,14 +454,41 @@ const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
                 </Badge>
               )}
               <Badge variant="outline">{product.supplier}</Badge>
+              {product.country && (
+                <Badge variant="outline">
+                  <Globe className="w-3 h-3 mr-1" />
+                  {product.country}
+                </Badge>
+              )}
             </div>
 
-            {/* Price */}
-            <div className="mb-4">
-              <p className="text-3xl font-bold text-slate-900">
-                ${product.price?.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            {/* Pricing Section */}
+            <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+              <div className="flex items-baseline gap-3">
+                <span className="text-3xl font-bold text-green-600">
+                  {formatPrice(sellingPrice)}
+                </span>
+                {hasDiscount && (
+                  <Badge className="bg-orange-500 text-white">
+                    Save {product.discount_percentage}%
+                  </Badge>
+                )}
+              </div>
+              
+              {hasDiscount && product.list_price && (
+                <>
+                  <p className="text-sm text-slate-500 mt-1">
+                    <span className="line-through">List Price: {formatPrice(product.list_price)}</span>
+                  </p>
+                  <p className="text-sm text-green-700 font-medium mt-1">
+                    Your Savings: {formatPrice(product.list_price - sellingPrice)}
+                  </p>
+                </>
+              )}
+              
+              <p className="text-xs text-slate-500 mt-2">
+                per {product.unit || "EA"} • Infosys Preferred Pricing
               </p>
-              <p className="text-sm text-slate-500">per {product.unit || "EA"}</p>
             </div>
 
             {/* Key Info */}
@@ -521,12 +605,12 @@ const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
 const AlgoliaCatalogPage = () => {
   const navigate = useNavigate();
   const { user, token } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
 
   const [viewMode, setViewMode] = useState("grid");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showFilters, setShowFilters] = useState(true);
   const [catalogStats, setCatalogStats] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState("ALL");
   const [loading, setLoading] = useState(false);
 
   // Fetch catalog stats
@@ -557,10 +641,12 @@ const AlgoliaCatalogPage = () => {
           brand: product.brand,
           sku: product.sku || product.part_number,
           quantity: 1,
-          unit_price: product.price,
-          total_price: product.price,
+          unit_price: product.selling_price || product.price,
+          total_price: product.selling_price || product.price,
           supplier: product.supplier,
           image: product.primary_image,
+          list_price: product.list_price,
+          discount_percentage: product.discount_percentage,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -575,16 +661,22 @@ const AlgoliaCatalogPage = () => {
     return null;
   }
 
+  // Build country filter for Algolia
+  const countryFilter = selectedCountry !== "ALL" ? `country:${selectedCountry}` : "";
+
   return (
     <div className="flex min-h-screen bg-slate-50">
-      <Sidebar activePage="catalog" />
+      <Sidebar activePage="algolia-catalog" />
 
       <main className="flex-1 p-6 overflow-auto">
         <InstantSearch
           searchClient={searchClient}
           indexName="omnisupply_products"
         >
-          <Configure hitsPerPage={24} />
+          <Configure 
+            hitsPerPage={24} 
+            filters={countryFilter}
+          />
 
           {/* Header */}
           <div className="mb-6">
@@ -600,21 +692,46 @@ const AlgoliaCatalogPage = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                >
-                  <LayoutList className="w-4 h-4" />
-                </Button>
+              <div className="flex items-center gap-3">
+                {/* Country Selector */}
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-slate-500" />
+                  <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                    <SelectTrigger className="w-[180px]" data-testid="country-selector">
+                      <SelectValue placeholder="Select Country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRIES.map((country) => (
+                        <SelectItem key={country.code} value={country.code}>
+                          <span className="flex items-center gap-2">
+                            <span>{country.flag}</span>
+                            <span>{country.name}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* View Mode Toggle */}
+                <div className="flex items-center gap-1 border rounded-lg p-1">
+                  <Button
+                    variant={viewMode === "grid" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("grid")}
+                    data-testid="view-grid-btn"
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "list" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("list")}
+                    data-testid="view-list-btn"
+                  >
+                    <LayoutList className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -774,6 +891,7 @@ const AlgoliaCatalogPage = () => {
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowFilters(!showFilters)}
+                    data-testid="toggle-filters-btn"
                   >
                     <Filter className="w-4 h-4 mr-1" />
                     {showFilters ? "Hide Filters" : "Show Filters"}
