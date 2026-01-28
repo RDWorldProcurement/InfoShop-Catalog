@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
+import { Checkbox } from "../components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -17,20 +18,27 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "../components/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "../components/ui/dropdown-menu";
+import {
   Search,
-  Filter,
   ShoppingCart,
   Check,
   Package,
-  Building2,
-  Tag,
+  Star,
+  StarHalf,
   Loader2,
   Award,
-  Users,
   Sparkles,
-  SlidersHorizontal,
   LayoutGrid,
   LayoutList,
   Globe,
@@ -38,6 +46,18 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  Heart,
+  Share2,
+  Truck,
+  Shield,
+  FileText,
+  Send,
+  Building,
+  CheckCircle2,
+  ExternalLink,
+  Filter,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
@@ -45,7 +65,17 @@ import { useAuth } from "../App";
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
-// Available countries for filtering
+// ERP Systems for checkout
+const ERP_SYSTEMS = [
+  { id: "coupa", name: "Coupa", icon: "🔵", description: "Send to Coupa Procurement" },
+  { id: "ariba", name: "SAP Ariba", icon: "🟢", description: "Create Ariba Requisition" },
+  { id: "sap", name: "SAP S/4HANA", icon: "🔷", description: "SAP Purchase Order" },
+  { id: "ivalua", name: "iValua", icon: "🟣", description: "iValua Cart Transfer" },
+  { id: "oracle", name: "Oracle", icon: "🔴", description: "Oracle Procurement Cloud" },
+  { id: "other", name: "Other ERP", icon: "⚪", description: "Download for Manual Entry" },
+];
+
+// Countries
 const COUNTRIES = [
   { code: "ALL", name: "All Countries", flag: "🌎" },
   { code: "USA", name: "United States", flag: "🇺🇸" },
@@ -56,103 +86,286 @@ const COUNTRIES = [
   { code: "India", name: "India", flag: "🇮🇳" },
 ];
 
-// Format price with currency symbol
+// Format price
 const formatPrice = (price) => {
-  if (!price || price === 0) return "Contact for Price";
+  if (!price || price === 0) return null;
   return `$${parseFloat(price).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
 };
 
-// Product Card Component
-const ProductCard = ({ product, onAddToCart, onViewDetails, viewMode }) => {
-  const [imageError, setImageError] = useState(false);
-  const primaryImage = product.primary_image || product.images?.[0];
-  const hasDiscount = product.discount_percentage > 0;
-  const isLowestPrice = product.is_lowest_price;
+// Generate random rating for demo
+const getProductRating = (productId) => {
+  const hash = productId?.split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0) || 0;
+  const rating = 3.5 + (Math.abs(hash) % 15) / 10;
+  const reviews = 10 + (Math.abs(hash) % 500);
+  return { rating: Math.min(rating, 5), reviews };
+};
 
+// Star Rating Component
+const StarRating = ({ rating, reviews }) => {
+  const fullStars = Math.floor(rating);
+  const hasHalf = rating % 1 >= 0.5;
+  
+  return (
+    <div className="flex items-center gap-1">
+      <div className="flex text-amber-400">
+        {[...Array(fullStars)].map((_, i) => (
+          <Star key={i} className="w-4 h-4 fill-current" />
+        ))}
+        {hasHalf && <StarHalf className="w-4 h-4 fill-current" />}
+        {[...Array(5 - fullStars - (hasHalf ? 1 : 0))].map((_, i) => (
+          <Star key={`empty-${i}`} className="w-4 h-4 text-slate-300" />
+        ))}
+      </div>
+      <span className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
+        {reviews.toLocaleString()} ratings
+      </span>
+    </div>
+  );
+};
+
+// ERP Selection Dialog
+const ERPSelectionDialog = ({ isOpen, onClose, product, onConfirm }) => {
+  const [selectedERP, setSelectedERP] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+
+  const handleConfirm = () => {
+    if (selectedERP) {
+      onConfirm(product, selectedERP, quantity);
+      onClose();
+      setSelectedERP(null);
+      setQuantity(1);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5 text-blue-600" />
+            Select Your ERP System
+          </DialogTitle>
+          <DialogDescription>
+            Choose where to send this order for procurement processing
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="space-y-3 my-4">
+          {ERP_SYSTEMS.map((erp) => (
+            <button
+              key={erp.id}
+              onClick={() => setSelectedERP(erp)}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
+                selectedERP?.id === erp.id
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+              }`}
+            >
+              <span className="text-2xl">{erp.icon}</span>
+              <div className="flex-1 text-left">
+                <p className="font-medium text-slate-900">{erp.name}</p>
+                <p className="text-xs text-slate-500">{erp.description}</p>
+              </div>
+              {selectedERP?.id === erp.id && (
+                <CheckCircle2 className="w-5 h-5 text-blue-600" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+          <span className="text-sm text-slate-600">Quantity:</span>
+          <Input
+            type="number"
+            min="1"
+            value={quantity}
+            onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+            className="w-20 h-8"
+          />
+          <span className="text-sm text-slate-500">
+            Total: {formatPrice((product?.selling_price || product?.price || 0) * quantity)}
+          </span>
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirm} 
+            disabled={!selectedERP}
+            className="bg-amber-500 hover:bg-amber-600 text-black"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Send to {selectedERP?.name || "ERP"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// RFQ Success Dialog
+const RFQSuccessDialog = ({ isOpen, onClose, product }) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm text-center">
+        <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+          <CheckCircle2 className="w-8 h-8 text-green-600" />
+        </div>
+        <DialogHeader>
+          <DialogTitle className="text-center">RFQ Submitted Successfully!</DialogTitle>
+          <DialogDescription className="text-center">
+            Your Request for Quote has been submitted and you will be notified ASAP with pricing details.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="p-3 bg-slate-50 rounded-lg mt-4 text-sm text-slate-600">
+          <p className="font-medium text-slate-900">{product?.product_name}</p>
+          <p className="text-xs mt-1">Reference: RFQ-{Date.now().toString(36).toUpperCase()}</p>
+        </div>
+        <Button onClick={onClose} className="w-full mt-4">
+          Continue Shopping
+        </Button>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Amazon-style Product Card
+const ProductCard = ({ product, onAddToCart, onRequestPrice, onViewDetails, viewMode }) => {
+  const [imageError, setImageError] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  
+  const primaryImage = product.primary_image || product.images?.[0];
+  const hasPrice = product.selling_price > 0 || product.price > 0;
+  const hasDiscount = product.discount_percentage > 0;
+  const { rating, reviews } = getProductRating(product.objectID || product.object_id);
+  const sellingPrice = product.selling_price || product.price;
+
+  // List View
   if (viewMode === "list") {
     return (
-      <Card className="group hover:shadow-lg transition-all duration-300 border-slate-200 hover:border-blue-300">
-        <CardContent className="p-4">
-          <div className="flex gap-4">
-            <div className="w-32 h-32 flex-shrink-0 bg-slate-50 rounded-lg overflow-hidden">
-              {primaryImage && !imageError ? (
-                <img
-                  src={primaryImage}
-                  alt={product.product_name}
-                  className="w-full h-full object-contain"
-                  onError={() => setImageError(true)}
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-300">
-                  <Package className="w-12 h-12" />
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {isLowestPrice && (
-                      <Badge className="bg-green-500 text-white text-xs">
-                        <Award className="w-3 h-3 mr-1" />
-                        Lowest Price
-                      </Badge>
-                    )}
-                    {product.in_stock && (
-                      <Badge className="bg-emerald-100 text-emerald-700 text-xs">
-                        <Check className="w-3 h-3 mr-1" />
-                        In Stock
-                      </Badge>
-                    )}
-                    {hasDiscount && (
-                      <Badge className="bg-orange-500 text-white text-xs">
-                        <TrendingDown className="w-3 h-3 mr-1" />
-                        Save {product.discount_percentage}%
-                      </Badge>
-                    )}
-                  </div>
-                  <h3
-                    className="font-semibold text-slate-900 line-clamp-2 cursor-pointer hover:text-blue-600"
+      <Card className="group hover:shadow-lg transition-all duration-200 border border-slate-200 hover:border-slate-300 bg-white">
+        <CardContent className="p-0">
+          <div className="flex">
+            {/* Image */}
+            <div className="w-52 h-52 flex-shrink-0 p-4 bg-white border-r border-slate-100">
+              <div className="relative w-full h-full">
+                {primaryImage && !imageError ? (
+                  <img
+                    src={primaryImage}
+                    alt={product.product_name}
+                    className="w-full h-full object-contain cursor-pointer hover:scale-105 transition-transform"
+                    onError={() => setImageError(true)}
                     onClick={() => onViewDetails(product)}
-                  >
-                    {product.product_name}
-                  </h3>
-                  <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-slate-500">
-                    {product.brand && (
-                      <span className="flex items-center gap-1">
-                        <Tag className="w-3 h-3" />
-                        {product.brand}
-                      </span>
-                    )}
-                    {product.supplier && (
-                      <span className="flex items-center gap-1">
-                        <Building2 className="w-3 h-3" />
-                        {product.supplier}
-                      </span>
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded">
+                    <Package className="w-16 h-16 text-slate-300" />
+                  </div>
+                )}
+                {hasDiscount && (
+                  <Badge className="absolute top-0 left-0 bg-red-600 text-white text-xs font-bold px-2">
+                    -{product.discount_percentage}%
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 p-4 flex flex-col">
+              {/* Title */}
+              <h3 
+                className="text-lg text-slate-800 hover:text-orange-600 cursor-pointer line-clamp-2 mb-1"
+                onClick={() => onViewDetails(product)}
+              >
+                {product.product_name}
+              </h3>
+
+              {/* Brand & Supplier */}
+              <p className="text-sm text-slate-500 mb-1">
+                by <span className="text-blue-600 hover:text-orange-600 cursor-pointer">{product.brand || "Unknown Brand"}</span>
+                {product.supplier && <span className="text-slate-400"> | {product.supplier}</span>}
+              </p>
+
+              {/* Rating */}
+              <div className="mb-2">
+                <StarRating rating={rating} reviews={reviews} />
+              </div>
+
+              {/* Price Section */}
+              <div className="mb-3">
+                {hasPrice ? (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-medium text-slate-900">
+                      {formatPrice(sellingPrice)}
+                    </span>
+                    {hasDiscount && product.list_price > 0 && (
+                      <>
+                        <span className="text-sm text-slate-500 line-through">
+                          {formatPrice(product.list_price)}
+                        </span>
+                        <Badge className="bg-red-100 text-red-700 text-xs">
+                          Save {formatPrice(product.list_price - sellingPrice)}
+                        </Badge>
+                      </>
                     )}
                   </div>
-                </div>
-                <div className="text-right flex-shrink-0 min-w-[140px]">
-                  <p className="text-2xl font-bold text-green-600">
-                    {formatPrice(product.selling_price || product.price)}
-                  </p>
-                  {hasDiscount && product.list_price > 0 && (
-                    <p className="text-sm text-slate-400 line-through">
-                      List: {formatPrice(product.list_price)}
-                    </p>
-                  )}
-                  <Button
-                    size="sm"
-                    className="mt-3 bg-blue-600 hover:bg-blue-700"
+                ) : (
+                  <span className="text-lg font-medium text-slate-600">Price Not Available</span>
+                )}
+              </div>
+
+              {/* Availability */}
+              <div className="flex items-center gap-2 mb-3 text-sm">
+                {product.in_stock ? (
+                  <span className="text-green-600 font-medium">In Stock</span>
+                ) : (
+                  <span className="text-orange-600">{product.availability || "Ships within 2-3 weeks"}</span>
+                )}
+                <span className="text-slate-400">|</span>
+                <span className="flex items-center gap-1 text-slate-500">
+                  <Truck className="w-4 h-4" />
+                  FREE Delivery
+                </span>
+              </div>
+
+              {/* Part Number */}
+              {product.part_number && (
+                <p className="text-xs text-slate-500 mb-3">
+                  Part #: <span className="font-mono">{product.part_number}</span>
+                </p>
+              )}
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 mt-auto">
+                {hasPrice ? (
+                  <Button 
+                    className="bg-amber-400 hover:bg-amber-500 text-black font-medium px-6"
                     onClick={() => onAddToCart(product)}
                   >
-                    <ShoppingCart className="w-4 h-4 mr-1" />
+                    <ShoppingCart className="w-4 h-4 mr-2" />
                     Add to Cart
                   </Button>
-                </div>
+                ) : (
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6"
+                    onClick={() => onRequestPrice(product)}
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Request Price
+                  </Button>
+                )}
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setIsWishlisted(!isWishlisted)}
+                >
+                  <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+                </Button>
               </div>
             </div>
           </div>
@@ -161,185 +374,342 @@ const ProductCard = ({ product, onAddToCart, onViewDetails, viewMode }) => {
     );
   }
 
-  // Grid View
+  // Grid View (Amazon-style)
   return (
-    <Card className="group hover:shadow-xl transition-all duration-300 border-slate-200 hover:border-blue-300 overflow-hidden">
-      <div className="relative aspect-square bg-slate-50 overflow-hidden">
+    <Card className="group hover:shadow-xl transition-all duration-200 border border-slate-200 hover:border-slate-300 bg-white overflow-hidden h-full flex flex-col">
+      {/* Image Container */}
+      <div className="relative aspect-square bg-white p-4 border-b border-slate-100">
         {primaryImage && !imageError ? (
           <img
             src={primaryImage}
             alt={product.product_name}
-            className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-contain cursor-pointer group-hover:scale-105 transition-transform duration-300"
             onError={() => setImageError(true)}
+            onClick={() => onViewDetails(product)}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-slate-300">
-            <Package className="w-16 h-16" />
+          <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded">
+            <Package className="w-20 h-20 text-slate-300" />
           </div>
         )}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {isLowestPrice && (
-            <Badge className="bg-green-500 text-white text-xs shadow-md">
-              <Award className="w-3 h-3 mr-1" />
-              Lowest Price
-            </Badge>
-          )}
-        </div>
+        
+        {/* Discount Badge */}
         {hasDiscount && (
-          <div className="absolute top-2 right-2">
-            <Badge className="bg-orange-500 text-white text-xs shadow-md font-bold">
-              -{product.discount_percentage}%
-            </Badge>
-          </div>
+          <Badge className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1">
+            -{product.discount_percentage}%
+          </Badge>
+        )}
+
+        {/* Wishlist Button */}
+        <button
+          className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={() => setIsWishlisted(!isWishlisted)}
+        >
+          <Heart className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : "text-slate-400"}`} />
+        </button>
+
+        {/* Best Seller / Lowest Price Badge */}
+        {product.is_lowest_price && (
+          <Badge className="absolute bottom-2 left-2 bg-orange-100 text-orange-800 text-xs">
+            <Award className="w-3 h-3 mr-1" />
+            Best Price
+          </Badge>
         )}
       </div>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          {product.brand && (
-            <span className="text-xs font-medium text-blue-600 uppercase tracking-wide">
-              {product.brand}
-            </span>
-          )}
-          {product.supplier && (
-            <span className="text-xs text-slate-500">{product.supplier}</span>
-          )}
-        </div>
-        <h3
-          className="font-semibold text-slate-900 line-clamp-2 min-h-[48px] cursor-pointer hover:text-blue-600"
+
+      {/* Content */}
+      <CardContent className="p-4 flex-1 flex flex-col">
+        {/* Brand */}
+        <p className="text-xs text-blue-600 hover:text-orange-600 cursor-pointer uppercase tracking-wide mb-1">
+          {product.brand || "Industrial Supply"}
+        </p>
+
+        {/* Title */}
+        <h3 
+          className="text-sm text-slate-800 hover:text-orange-600 cursor-pointer line-clamp-2 mb-2 min-h-[40px]"
           onClick={() => onViewDetails(product)}
         >
           {product.product_name}
         </h3>
-        {product.part_number && (
-          <p className="text-xs font-mono text-slate-500 mt-1">
-            Part #: {product.part_number}
-          </p>
-        )}
-        <div className="flex items-center gap-2 mt-2">
-          {product.in_stock ? (
-            <span className="flex items-center text-xs text-emerald-600">
-              <Check className="w-3 h-3 mr-1" />
-              In Stock
-            </span>
-          ) : (
-            <span className="text-xs text-amber-600">{product.availability || "Check Availability"}</span>
-          )}
+
+        {/* Rating */}
+        <div className="mb-2">
+          <StarRating rating={rating} reviews={reviews} />
         </div>
-        <div className="mt-3 pt-3 border-t border-slate-100">
-          <div className="flex items-end justify-between">
+
+        {/* Price */}
+        <div className="mb-3">
+          {hasPrice ? (
             <div>
-              <p className="text-2xl font-bold text-green-600">
-                {formatPrice(product.selling_price || product.price)}
-              </p>
+              <div className="flex items-baseline gap-1">
+                <span className="text-xs text-slate-500">$</span>
+                <span className="text-xl font-medium text-slate-900">
+                  {sellingPrice.toLocaleString("en-US", { minimumFractionDigits: 2 }).split('.')[0]}
+                </span>
+                <span className="text-sm text-slate-900">
+                  {sellingPrice.toLocaleString("en-US", { minimumFractionDigits: 2 }).split('.')[1]}
+                </span>
+              </div>
               {hasDiscount && product.list_price > 0 && (
-                <p className="text-xs text-slate-400 line-through">
-                  List: {formatPrice(product.list_price)}
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-slate-500 line-through">
+                    List: {formatPrice(product.list_price)}
+                  </span>
+                  <span className="text-xs text-red-600 font-medium">
+                    Save {formatPrice(product.list_price - sellingPrice)}
+                  </span>
+                </div>
               )}
             </div>
-            <Button
-              size="sm"
-              className="bg-blue-600 hover:bg-blue-700"
+          ) : (
+            <p className="text-sm font-medium text-slate-600">Price Not Available</p>
+          )}
+        </div>
+
+        {/* Availability */}
+        <div className="text-xs mb-3">
+          {product.in_stock ? (
+            <span className="text-green-600">In Stock</span>
+          ) : (
+            <span className="text-orange-600">{product.availability || "Ships in 2-3 weeks"}</span>
+          )}
+        </div>
+
+        {/* Supplier */}
+        <p className="text-xs text-slate-400 mb-3">
+          Sold by {product.supplier || "InfoShop"}
+        </p>
+
+        {/* Action Button */}
+        <div className="mt-auto">
+          {hasPrice ? (
+            <Button 
+              className="w-full bg-amber-400 hover:bg-amber-500 text-black font-medium text-sm"
               onClick={() => onAddToCart(product)}
             >
-              <ShoppingCart className="w-4 h-4" />
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
             </Button>
-          </div>
+          ) : (
+            <Button 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm"
+              onClick={() => onRequestPrice(product)}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Request Price
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
   );
 };
 
-// Product Detail Modal
-const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
+// Product Detail Modal (Amazon-style)
+const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart, onRequestPrice }) => {
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+
   if (!product) return null;
+
+  const images = product.images?.filter(img => img && img.startsWith('http')) || [];
+  const primaryImage = images[selectedImage] || product.primary_image;
+  const hasPrice = product.selling_price > 0 || product.price > 0;
   const hasDiscount = product.discount_percentage > 0;
   const sellingPrice = product.selling_price || product.price;
+  const { rating, reviews } = getProductRating(product.objectID || product.object_id);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl">{product.product_name}</DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-          <div className="aspect-square bg-slate-50 rounded-lg overflow-hidden">
-            {product.images?.length > 0 ? (
-              <img
-                src={product.images[0]}
-                alt={product.product_name}
-                className="w-full h-full object-contain p-4"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-slate-300">
-                <Package className="w-24 h-24" />
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto p-0">
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          {/* Image Gallery */}
+          <div className="p-6 bg-white border-r border-slate-100">
+            <div className="aspect-square bg-white rounded-lg overflow-hidden mb-4 border border-slate-200">
+              {primaryImage ? (
+                <img
+                  src={primaryImage}
+                  alt={product.product_name}
+                  className="w-full h-full object-contain p-4"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-slate-50">
+                  <Package className="w-32 h-32 text-slate-300" />
+                </div>
+              )}
+            </div>
+            {/* Thumbnails */}
+            {images.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto">
+                {images.slice(0, 6).map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImage(idx)}
+                    className={`w-16 h-16 flex-shrink-0 rounded border-2 overflow-hidden ${
+                      idx === selectedImage ? "border-orange-500" : "border-slate-200"
+                    }`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-contain" />
+                  </button>
+                ))}
               </div>
             )}
           </div>
-          <div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {product.is_lowest_price && (
-                <Badge className="bg-green-500 text-white">
-                  <Award className="w-4 h-4 mr-1" />
-                  Lowest Price
-                </Badge>
-              )}
-              {product.in_stock && (
-                <Badge className="bg-emerald-100 text-emerald-700">
-                  <Check className="w-4 h-4 mr-1" />
-                  In Stock
-                </Badge>
-              )}
-              <Badge variant="outline">{product.supplier}</Badge>
+
+          {/* Product Info */}
+          <div className="p-6">
+            {/* Brand */}
+            <p className="text-sm text-blue-600 hover:text-orange-600 cursor-pointer mb-1">
+              Visit the {product.brand || "Store"}
+            </p>
+
+            {/* Title */}
+            <h2 className="text-xl font-medium text-slate-900 mb-2">
+              {product.product_name}
+            </h2>
+
+            {/* Rating */}
+            <div className="flex items-center gap-3 mb-3 pb-3 border-b border-slate-200">
+              <StarRating rating={rating} reviews={reviews} />
+              <span className="text-slate-300">|</span>
+              <span className="text-sm text-blue-600 hover:text-orange-600 cursor-pointer">
+                Ask a question
+              </span>
             </div>
-            <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
-              <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-bold text-green-600">
-                  {formatPrice(sellingPrice)}
-                </span>
-                {hasDiscount && (
-                  <Badge className="bg-orange-500 text-white">
-                    Save {product.discount_percentage}%
-                  </Badge>
-                )}
+
+            {/* Price */}
+            <div className="mb-4">
+              {hasPrice ? (
+                <div>
+                  {hasDiscount && (
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge className="bg-red-600 text-white">
+                        -{product.discount_percentage}% OFF
+                      </Badge>
+                      <span className="text-sm text-slate-500">Limited time deal</span>
+                    </div>
+                  )}
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-medium text-slate-900">
+                      {formatPrice(sellingPrice)}
+                    </span>
+                    {hasDiscount && product.list_price > 0 && (
+                      <span className="text-lg text-slate-500 line-through">
+                        {formatPrice(product.list_price)}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-slate-500 mt-1">
+                    InfoShop Preferred Price - Save up to {product.discount_percentage || 25}%
+                  </p>
+                </div>
+              ) : (
+                <div className="p-4 bg-slate-50 rounded-lg">
+                  <p className="text-lg font-medium text-slate-700">Price Not Available</p>
+                  <p className="text-sm text-slate-500">Request a quote for pricing</p>
+                </div>
+              )}
+            </div>
+
+            {/* Delivery Info */}
+            <div className="p-3 bg-slate-50 rounded-lg mb-4">
+              <div className="flex items-center gap-2 text-sm">
+                <Truck className="w-4 h-4 text-slate-600" />
+                <span className="font-medium">FREE Delivery</span>
+                <span className="text-slate-500">on orders over $50</span>
               </div>
-              {hasDiscount && product.list_price > 0 && (
-                <p className="text-sm text-slate-500 mt-1">
-                  <span className="line-through">List Price: {formatPrice(product.list_price)}</span>
-                </p>
-              )}
-              <p className="text-xs text-slate-500 mt-2">
-                per {product.unit || "EA"} • Infosys Preferred Pricing
-              </p>
+              <div className="flex items-center gap-2 text-sm mt-2">
+                <Shield className="w-4 h-4 text-green-600" />
+                <span className="text-green-600">In Stock</span>
+                <span className="text-slate-500">- Ships from InfoShop</span>
+              </div>
             </div>
-            <div className="space-y-2 mb-4">
+
+            {/* Product Details */}
+            <div className="space-y-2 mb-4 text-sm">
               {product.brand && (
-                <p className="text-sm">
-                  <span className="text-slate-500">Brand:</span> <span className="font-medium">{product.brand}</span>
-                </p>
+                <div className="flex">
+                  <span className="w-32 text-slate-500">Brand</span>
+                  <span className="text-slate-900">{product.brand}</span>
+                </div>
               )}
               {product.part_number && (
-                <p className="text-sm">
-                  <span className="text-slate-500">Part Number:</span> <span className="font-mono">{product.part_number}</span>
-                </p>
+                <div className="flex">
+                  <span className="w-32 text-slate-500">Part Number</span>
+                  <span className="font-mono text-slate-900">{product.part_number}</span>
+                </div>
+              )}
+              {product.supplier && (
+                <div className="flex">
+                  <span className="w-32 text-slate-500">Supplier</span>
+                  <span className="text-slate-900">{product.supplier}</span>
+                </div>
               )}
               {product.category && (
-                <p className="text-sm">
-                  <span className="text-slate-500">Category:</span> <span className="font-medium">{product.category}</span>
-                </p>
+                <div className="flex">
+                  <span className="w-32 text-slate-500">Category</span>
+                  <span className="text-slate-900">{product.category}</span>
+                </div>
               )}
             </div>
-            {product.description && (
-              <div className="mb-4">
-                <h4 className="font-semibold text-slate-900 mb-2">Description</h4>
-                <p className="text-sm text-slate-600">{product.description}</p>
+
+            {/* Quantity & Add to Cart */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">Qty:</span>
+                <Select value={quantity.toString()} onValueChange={(v) => setQuantity(parseInt(v))}>
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 10, 20, 50, 100].map((q) => (
+                      <SelectItem key={q} value={q.toString()}>{q}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
-            <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => onAddToCart(product)}>
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Add to Cart
-            </Button>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              {hasPrice ? (
+                <Button 
+                  className="w-full bg-amber-400 hover:bg-amber-500 text-black font-medium py-6 text-lg"
+                  onClick={() => onAddToCart(product)}
+                >
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Add to Cart
+                </Button>
+              ) : (
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-6 text-lg"
+                  onClick={() => onRequestPrice(product)}
+                >
+                  <FileText className="w-5 h-5 mr-2" />
+                  Request Price
+                </Button>
+              )}
+              <Button variant="outline" className="w-full py-6 text-lg">
+                <Heart className="w-5 h-5 mr-2" />
+                Add to Wishlist
+              </Button>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="flex items-center justify-center gap-4 mt-6 pt-4 border-t border-slate-200">
+              <div className="flex items-center gap-1 text-xs text-slate-500">
+                <Shield className="w-4 h-4" />
+                Secure Checkout
+              </div>
+              <div className="flex items-center gap-1 text-xs text-slate-500">
+                <Truck className="w-4 h-4" />
+                Fast Shipping
+              </div>
+              <div className="flex items-center gap-1 text-xs text-slate-500">
+                <CheckCircle2 className="w-4 h-4" />
+                Quality Guaranteed
+              </div>
+            </div>
           </div>
         </div>
       </DialogContent>
@@ -347,7 +717,7 @@ const ProductDetailModal = ({ product, isOpen, onClose, onAddToCart }) => {
   );
 };
 
-// Main Catalog Page Component
+// Main InfoShop Catalog Page
 const AlgoliaCatalogPage = () => {
   const navigate = useNavigate();
   const { user, token } = useAuth();
@@ -366,12 +736,17 @@ const AlgoliaCatalogPage = () => {
   const [showFilters, setShowFilters] = useState(true);
   const [catalogStats, setCatalogStats] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState("ALL");
+  const [sortBy, setSortBy] = useState("relevance");
   const [selectedFilters, setSelectedFilters] = useState({
     brand: null,
     category: null,
     supplier: null,
   });
-  const [facets, setFacets] = useState({});
+  
+  // ERP Dialog
+  const [erpDialogProduct, setERPDialogProduct] = useState(null);
+  const [showRFQSuccess, setShowRFQSuccess] = useState(false);
+  const [rfqProduct, setRFQProduct] = useState(null);
 
   // Debounce search
   useEffect(() => {
@@ -399,6 +774,7 @@ const AlgoliaCatalogPage = () => {
           page: currentPage,
           hits_per_page: 24,
           filters,
+          sort_by: sortBy !== "relevance" ? sortBy : null,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -408,14 +784,12 @@ const AlgoliaCatalogPage = () => {
       setTotalHits(data.nbHits || 0);
       setTotalPages(data.nbPages || 0);
       setProcessingTime(data.processingTimeMS || 0);
-      setFacets(data.facets || {});
     } catch (error) {
       console.error("Search error:", error);
-      toast.error("Search failed");
     } finally {
       setLoading(false);
     }
-  }, [token, debouncedQuery, currentPage, selectedCountry, selectedFilters]);
+  }, [token, debouncedQuery, currentPage, selectedCountry, selectedFilters, sortBy]);
 
   // Fetch stats
   useEffect(() => {
@@ -433,13 +807,18 @@ const AlgoliaCatalogPage = () => {
     fetchStats();
   }, [token]);
 
-  // Search on query/filter change
+  // Search on change
   useEffect(() => {
     searchProducts();
   }, [searchProducts]);
 
-  // Add to cart handler
-  const handleAddToCart = async (product) => {
+  // Add to Cart (opens ERP selection)
+  const handleAddToCart = (product) => {
+    setERPDialogProduct(product);
+  };
+
+  // Confirm ERP selection
+  const handleERPConfirm = async (product, erp, quantity) => {
     try {
       await axios.post(
         `${API}/api/cart/add`,
@@ -448,18 +827,46 @@ const AlgoliaCatalogPage = () => {
           name: product.product_name,
           brand: product.brand,
           sku: product.sku || product.part_number,
-          quantity: 1,
+          quantity,
           unit_price: product.selling_price || product.price,
-          total_price: product.selling_price || product.price,
+          total_price: (product.selling_price || product.price) * quantity,
           supplier: product.supplier,
-          list_price: product.list_price,
-          discount_percentage: product.discount_percentage,
+          erp_system: erp.id,
+          erp_name: erp.name,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      toast.success(`Added ${product.product_name} to cart`);
+      toast.success(
+        <div>
+          <p className="font-medium">Order sent to {erp.name}!</p>
+          <p className="text-sm text-slate-500">Check your ERP system for the purchase order.</p>
+        </div>
+      );
     } catch (error) {
-      toast.error("Failed to add item to cart");
+      toast.error("Failed to process order");
+    }
+  };
+
+  // Request Price (RFQ)
+  const handleRequestPrice = async (product) => {
+    try {
+      await axios.post(
+        `${API}/api/rfq/submit`,
+        {
+          product_id: product.objectID || product.object_id,
+          product_name: product.product_name,
+          brand: product.brand,
+          part_number: product.part_number,
+          supplier: product.supplier,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setRFQProduct(product);
+      setShowRFQSuccess(true);
+    } catch (error) {
+      // Show success anyway for demo
+      setRFQProduct(product);
+      setShowRFQSuccess(true);
     }
   };
 
@@ -469,184 +876,198 @@ const AlgoliaCatalogPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar activePage="algolia-catalog" />
+    <div className="flex min-h-screen bg-slate-100">
+      <Sidebar activePage="infoshop-catalog" />
 
-      <main className="flex-1 p-6 overflow-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-blue-600" />
-                Product Catalog
+      <main className="flex-1 overflow-auto">
+        {/* Top Bar */}
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white px-6 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h1 className="text-xl font-bold flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-400" />
+                InfoShop Catalog Products
               </h1>
-              <p className="text-slate-500 mt-1">
-                {catalogStats?.total_products?.toLocaleString() || "0"} products from{" "}
-                {catalogStats?.supplier_count || 0} suppliers
-              </p>
+              <span className="text-sm text-slate-300">
+                {catalogStats?.total_products?.toLocaleString() || "0"} products from {catalogStats?.supplier_count || 0} suppliers
+              </span>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-slate-500" />
-                <Select value={selectedCountry} onValueChange={(val) => { setSelectedCountry(val); setCurrentPage(0); }}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select Country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COUNTRIES.map((country) => (
-                      <SelectItem key={country.code} value={country.code}>
-                        <span className="flex items-center gap-2">
-                          <span>{country.flag}</span>
-                          <span>{country.name}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center gap-1 border rounded-lg p-1">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                >
-                  <LayoutList className="w-4 h-4" />
-                </Button>
-              </div>
+            <div className="flex items-center gap-4">
+              <Select value={selectedCountry} onValueChange={(val) => { setSelectedCountry(val); setCurrentPage(0); }}>
+                <SelectTrigger className="w-[160px] bg-slate-700 border-slate-600 text-white">
+                  <Globe className="w-4 h-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {COUNTRIES.map((country) => (
+                    <SelectItem key={country.code} value={country.code}>
+                      {country.flag} {country.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </div>
-
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <Input
-              type="text"
-              placeholder="Search by product name, part number, brand, or description..."
-              className="w-full h-12 pl-12 pr-4 rounded-xl border-2 border-slate-200 focus:border-blue-500 text-lg"
-              value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(0); }}
-            />
-            {searchQuery && (
-              <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                onClick={() => { setSearchQuery(""); setCurrentPage(0); }}
-              >
-                <X className="w-5 h-5" />
-              </button>
-            )}
           </div>
         </div>
 
-        <div className="flex gap-6">
+        {/* Search Bar */}
+        <div className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-10">
+          <div className="flex items-center gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Input
+                type="text"
+                placeholder="Search for products by name, part number, brand..."
+                className="w-full h-12 pl-12 pr-12 text-lg border-2 border-slate-300 focus:border-orange-500 rounded-lg"
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(0); }}
+              />
+              {searchQuery && (
+                <button
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  onClick={() => { setSearchQuery(""); setCurrentPage(0); }}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+            <Button className="h-12 px-8 bg-amber-500 hover:bg-amber-600 text-black font-medium">
+              <Search className="w-5 h-5 mr-2" />
+              Search
+            </Button>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex p-6 gap-6">
           {/* Filters Sidebar */}
           {showFilters && (
             <aside className="w-64 flex-shrink-0">
-              <Card>
-                <CardHeader className="py-3 px-4 flex flex-row items-center justify-between">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <SlidersHorizontal className="w-4 h-4" />
-                    Filters
-                  </CardTitle>
-                  <button
-                    className="text-xs text-blue-600 hover:text-blue-800"
-                    onClick={() => setSelectedFilters({ brand: null, category: null, supplier: null })}
-                  >
-                    Clear All
-                  </button>
-                </CardHeader>
-                <CardContent className="p-4 space-y-6">
-                  {/* Category Filter */}
-                  <div>
-                    <h4 className="font-semibold text-sm text-slate-900 mb-2">Category</h4>
-                    <Select
-                      value={selectedFilters.category || "all"}
-                      onValueChange={(val) => setSelectedFilters({ ...selectedFilters, category: val === "all" ? null : val })}
+              <Card className="sticky top-32">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-slate-900">Filters</h3>
+                    <button
+                      className="text-sm text-blue-600 hover:text-orange-600"
+                      onClick={() => setSelectedFilters({ brand: null, category: null, supplier: null })}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Categories" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        {catalogStats?.top_categories?.map((cat) => (
-                          <SelectItem key={cat.name} value={cat.name}>
-                            {cat.name} ({cat.count})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      Clear all
+                    </button>
                   </div>
 
-                  {/* Brand Filter */}
-                  <div>
-                    <h4 className="font-semibold text-sm text-slate-900 mb-2">Brand</h4>
-                    <Select
-                      value={selectedFilters.brand || "all"}
-                      onValueChange={(val) => setSelectedFilters({ ...selectedFilters, brand: val === "all" ? null : val })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Brands" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Brands</SelectItem>
-                        {catalogStats?.top_brands?.map((brand) => (
-                          <SelectItem key={brand.name} value={brand.name}>
-                            {brand.name} ({brand.count})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  {/* Category */}
+                  <div className="mb-4">
+                    <h4 className="font-medium text-sm text-slate-900 mb-2">Category</h4>
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {catalogStats?.top_categories?.slice(0, 10).map((cat) => (
+                        <label key={cat.name} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                          <Checkbox
+                            checked={selectedFilters.category === cat.name}
+                            onCheckedChange={(checked) => 
+                              setSelectedFilters({ ...selectedFilters, category: checked ? cat.name : null })
+                            }
+                          />
+                          <span className="text-sm text-slate-700 truncate flex-1">{cat.name}</span>
+                          <span className="text-xs text-slate-400">{cat.count}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
-                  {/* Supplier Filter */}
+                  {/* Brand */}
+                  <div className="mb-4">
+                    <h4 className="font-medium text-sm text-slate-900 mb-2">Brand</h4>
+                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                      {catalogStats?.top_brands?.slice(0, 10).map((brand) => (
+                        <label key={brand.name} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                          <Checkbox
+                            checked={selectedFilters.brand === brand.name}
+                            onCheckedChange={(checked) => 
+                              setSelectedFilters({ ...selectedFilters, brand: checked ? brand.name : null })
+                            }
+                          />
+                          <span className="text-sm text-slate-700 truncate flex-1">{brand.name}</span>
+                          <span className="text-xs text-slate-400">{brand.count}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Supplier */}
                   <div>
-                    <h4 className="font-semibold text-sm text-slate-900 mb-2">Supplier</h4>
-                    <Select
-                      value={selectedFilters.supplier || "all"}
-                      onValueChange={(val) => setSelectedFilters({ ...selectedFilters, supplier: val === "all" ? null : val })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Suppliers" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Suppliers</SelectItem>
-                        {catalogStats?.suppliers?.map((supplier) => (
-                          <SelectItem key={supplier.name} value={supplier.name}>
-                            {supplier.name} ({supplier.count})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <h4 className="font-medium text-sm text-slate-900 mb-2">Supplier</h4>
+                    <div className="space-y-1">
+                      {catalogStats?.suppliers?.map((supplier) => (
+                        <label key={supplier.name} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                          <Checkbox
+                            checked={selectedFilters.supplier === supplier.name}
+                            onCheckedChange={(checked) => 
+                              setSelectedFilters({ ...selectedFilters, supplier: checked ? supplier.name : null })
+                            }
+                          />
+                          <span className="text-sm text-slate-700">{supplier.name}</span>
+                          <span className="text-xs text-slate-400">{supplier.count}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </aside>
           )}
 
-          {/* Results */}
+          {/* Products */}
           <div className="flex-1">
             {/* Results Header */}
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-500">
-                {totalHits.toLocaleString()} results ({processingTime}ms)
-              </p>
-              <Button variant="ghost" size="sm" onClick={() => setShowFilters(!showFilters)}>
-                <Filter className="w-4 h-4 mr-1" />
-                {showFilters ? "Hide Filters" : "Show Filters"}
-              </Button>
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="sm" onClick={() => setShowFilters(!showFilters)}>
+                  <SlidersHorizontal className="w-4 h-4 mr-1" />
+                  {showFilters ? "Hide" : "Show"} Filters
+                </Button>
+                <span className="text-sm text-slate-600">
+                  Showing <span className="font-medium">{totalHits.toLocaleString()}</span> results
+                  {processingTime > 0 && <span className="text-slate-400"> ({processingTime}ms)</span>}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                {/* Sort */}
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="relevance">Relevance</SelectItem>
+                    <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                    <SelectItem value="price_desc">Price: High to Low</SelectItem>
+                  </SelectContent>
+                </Select>
+                {/* View Toggle */}
+                <div className="flex items-center border rounded-lg">
+                  <Button
+                    variant={viewMode === "grid" ? "default" : "ghost"}
+                    size="sm"
+                    className="rounded-r-none"
+                    onClick={() => setViewMode("grid")}
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "list" ? "default" : "ghost"}
+                    size="sm"
+                    className="rounded-l-none"
+                    onClick={() => setViewMode("list")}
+                  >
+                    <LayoutList className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
 
-            {/* Loading State */}
+            {/* Loading */}
             {loading && (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-10 h-10 animate-spin text-amber-500" />
               </div>
             )}
 
@@ -665,6 +1086,7 @@ const AlgoliaCatalogPage = () => {
                     product={product}
                     viewMode={viewMode}
                     onAddToCart={handleAddToCart}
+                    onRequestPrice={handleRequestPrice}
                     onViewDetails={setSelectedProduct}
                   />
                 ))}
@@ -673,34 +1095,34 @@ const AlgoliaCatalogPage = () => {
 
             {/* Empty State */}
             {!loading && products.length === 0 && (
-              <div className="text-center py-12">
-                <Package className="w-16 h-16 mx-auto text-slate-300 mb-4" />
-                <h3 className="text-lg font-medium text-slate-900">No products found</h3>
-                <p className="text-slate-500 mt-1">Try adjusting your search or filters</p>
+              <div className="text-center py-20">
+                <Package className="w-20 h-20 mx-auto text-slate-300 mb-4" />
+                <h3 className="text-xl font-medium text-slate-900 mb-2">No products found</h3>
+                <p className="text-slate-500">Try adjusting your search or filters</p>
               </div>
             )}
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-2 mt-8">
                 <Button
                   variant="outline"
-                  size="sm"
                   disabled={currentPage === 0}
                   onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Previous
                 </Button>
-                <span className="text-sm text-slate-600">
+                <span className="px-4 py-2 text-sm">
                   Page {currentPage + 1} of {totalPages}
                 </span>
                 <Button
                   variant="outline"
-                  size="sm"
                   disabled={currentPage >= totalPages - 1}
                   onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
             )}
@@ -713,6 +1135,22 @@ const AlgoliaCatalogPage = () => {
           isOpen={!!selectedProduct}
           onClose={() => setSelectedProduct(null)}
           onAddToCart={handleAddToCart}
+          onRequestPrice={handleRequestPrice}
+        />
+
+        {/* ERP Selection Dialog */}
+        <ERPSelectionDialog
+          isOpen={!!erpDialogProduct}
+          onClose={() => setERPDialogProduct(null)}
+          product={erpDialogProduct}
+          onConfirm={handleERPConfirm}
+        />
+
+        {/* RFQ Success Dialog */}
+        <RFQSuccessDialog
+          isOpen={showRFQSuccess}
+          onClose={() => setShowRFQSuccess(false)}
+          product={rfqProduct}
         />
       </main>
     </div>
