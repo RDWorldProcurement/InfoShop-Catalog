@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd frontend && yarn build",
+  "outputDirectory": "frontend/build",
+  "installCommand": "cd frontend && yarn install",
+  "framework": "create-react-app",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://algolia-catalog.preview.emergentagent.com/api/$1" }
+  ]
+}
