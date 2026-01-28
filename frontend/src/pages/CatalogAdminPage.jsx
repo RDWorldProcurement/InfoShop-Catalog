@@ -49,7 +49,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../App";
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
