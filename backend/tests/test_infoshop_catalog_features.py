@@ -131,9 +131,9 @@ class TestSearchEndpointFields:
         if not token:
             pytest.skip("Could not get auth token")
         
-        response = self.session.get(
+        response = self.session.post(
             f"{BASE_URL}/api/algolia/catalog/search",
-            params={"q": "", "page": 0, "hitsPerPage": 10},
+            json={"query": "", "page": 0, "hits_per_page": 10},
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -161,9 +161,9 @@ class TestSearchEndpointFields:
         if not token:
             pytest.skip("Could not get auth token")
         
-        response = self.session.get(
+        response = self.session.post(
             f"{BASE_URL}/api/algolia/catalog/search",
-            params={"q": "", "page": 0, "hitsPerPage": 10},
+            json={"query": "", "page": 0, "hits_per_page": 10},
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -191,9 +191,9 @@ class TestSearchEndpointFields:
         if not token:
             pytest.skip("Could not get auth token")
         
-        response = self.session.get(
+        response = self.session.post(
             f"{BASE_URL}/api/algolia/catalog/search",
-            params={"q": "", "page": 0, "hitsPerPage": 10},
+            json={"query": "", "page": 0, "hits_per_page": 10},
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -226,9 +226,9 @@ class TestSearchEndpointFields:
         if not token:
             pytest.skip("Could not get auth token")
         
-        response = self.session.get(
+        response = self.session.post(
             f"{BASE_URL}/api/algolia/catalog/search",
-            params={"q": "", "page": 0, "hitsPerPage": 20},
+            json={"query": "", "page": 0, "hits_per_page": 20},
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -259,9 +259,9 @@ class TestSearchEndpointFields:
         if not token:
             pytest.skip("Could not get auth token")
         
-        response = self.session.get(
+        response = self.session.post(
             f"{BASE_URL}/api/algolia/catalog/search",
-            params={"q": "", "page": 0, "hitsPerPage": 10},
+            json={"query": "", "page": 0, "hits_per_page": 10},
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -310,9 +310,9 @@ class TestImageSortingBehavior:
             pytest.skip("Could not get auth token")
         
         # Get a larger sample to check sorting
-        response = self.session.get(
+        response = self.session.post(
             f"{BASE_URL}/api/algolia/catalog/search",
-            params={"q": "", "page": 0, "hitsPerPage": 50},
+            json={"query": "", "page": 0, "hits_per_page": 50},
             headers={"Authorization": f"Bearer {token}"}
         )
         
