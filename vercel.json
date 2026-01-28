@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "infoshop-standalone/frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://algolia-catalog.preview.emergentagent.com/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/infoshop-standalone/frontend/build/$1"
+    }
+  ]
+}
