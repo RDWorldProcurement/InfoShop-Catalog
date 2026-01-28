@@ -987,9 +987,15 @@ const AlgoliaCatalogPage = () => {
     searchProducts();
   }, [searchProducts]);
 
-  // Add to Cart (opens ERP selection)
+  // Add to Cart (opens ERP selection or adds to PunchOut cart)
   const handleAddToCart = (product) => {
-    setERPDialogProduct(product);
+    if (punchoutMode) {
+      // In PunchOut mode, add directly to PunchOut cart
+      addToPunchoutCart(product);
+    } else {
+      // Normal mode - open ERP selection dialog
+      setERPDialogProduct(product);
+    }
   };
 
   // Confirm ERP selection
