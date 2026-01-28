@@ -1067,14 +1067,19 @@ const AlgoliaCatalogPage = () => {
     0
   );
 
-  if (!user) {
+  // Check if we're in punchout mode via URL param (before requiring login)
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasPunchoutToken = urlParams.has("punchout");
+
+  // Allow access in PunchOut mode without login, otherwise require auth
+  if (!user && !hasPunchoutToken && !punchoutMode) {
     navigate("/login");
     return null;
   }
 
   return (
     <div className="flex min-h-screen bg-slate-100">
-      {!punchoutMode && <Sidebar activePage="infoshop-catalog" />}
+      {!punchoutMode && !hasPunchoutToken && <Sidebar activePage="infoshop-catalog" />}
 
       <main className="flex-1 overflow-auto">
         {/* PunchOut Mode Banner */}
