@@ -210,6 +210,8 @@ const ERPSelectionDialog = ({ isOpen, onClose, product, onConfirm }) => {
 
 // RFQ Success Dialog
 const RFQSuccessDialog = ({ isOpen, onClose, product }) => {
+  const [rfqRef] = useState(() => `RFQ-${Date.now().toString(36).toUpperCase()}`);
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-sm text-center">
@@ -224,7 +226,7 @@ const RFQSuccessDialog = ({ isOpen, onClose, product }) => {
         </DialogHeader>
         <div className="p-3 bg-slate-50 rounded-lg mt-4 text-sm text-slate-600">
           <p className="font-medium text-slate-900">{product?.product_name}</p>
-          <p className="text-xs mt-1">Reference: RFQ-{Date.now().toString(36).toUpperCase()}</p>
+          <p className="text-xs mt-1">Reference: {rfqRef}</p>
         </div>
         <Button onClick={onClose} className="w-full mt-4">
           Continue Shopping
