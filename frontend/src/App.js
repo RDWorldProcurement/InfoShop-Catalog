@@ -17,6 +17,8 @@ import SourcingSupportPage from "./pages/SourcingSupportPage";
 import BuyingDeskDashboardPage from "./pages/BuyingDeskDashboardPage";
 import AIProcurementAgentPage from "./pages/AIProcurementAgentPage";
 import NegotiationAgentPage from "./pages/NegotiationAgentPage";
+import AlgoliaCatalogPage from "./pages/AlgoliaCatalogPage";
+import CatalogAdminPage from "./pages/CatalogAdminPage";
 
 // Components
 import ChatBot from "./components/ChatBot";
