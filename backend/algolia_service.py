@@ -232,6 +232,9 @@ def transform_fastenal_product(row: Dict, countries: List[str], pricing_func=Non
     object_id = f"fastenal_{sku or part_number}_{hashlib.md5(product_name.encode()).hexdigest()[:8]}"
     product_group_id = generate_product_group_id(brand, part_number, oem_part_number)
     
+    # Check if product has valid image
+    has_valid_image = len(images) > 0 and any(img.startswith('http') for img in images)
+    
     return {
         "objectID": object_id,
         "product_name": product_name,
@@ -247,6 +250,7 @@ def transform_fastenal_product(row: Dict, countries: List[str], pricing_func=Non
         "list_price": list_price,
         "price": list_price,  # Will be updated with selling_price
         "has_price": 1 if list_price > 0 else 0,  # For sorting: products with price first
+        "has_image": 1 if has_valid_image else 0,  # For sorting: products with image first
         "currency": "USD",
         "availability": availability_str,
         "in_stock": in_stock,
