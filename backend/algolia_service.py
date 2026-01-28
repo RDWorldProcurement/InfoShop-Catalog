@@ -362,8 +362,10 @@ def transform_motion_product(row: Dict, countries: List[str], pricing_func=None)
     product_name = str(row.get("Item Description", "") or row.get("Product Name", "")).strip()
     brand = str(row.get("Brand Name", "") or row.get("Brand", "")).strip()
     manufacturer = str(row.get("Manufacturer", "") or brand).strip()
-    part_number = str(row.get("Manufacturer Part Number", "") or row.get("Item Number", "")).strip()
-    sku = str(row.get("Item Number", "") or row.get("Sku", "")).strip()
+    # Motion uses Product Name as the part number, also check SKU
+    raw_part_number = str(row.get("Manufacturer Part Number", "") or row.get("Item Number", "") or row.get("Product Name", "")).strip()
+    part_number = raw_part_number if raw_part_number and raw_part_number != "nan" else ""
+    sku = str(row.get("Item Number", "") or row.get("SKU", "") or row.get("Sku", "")).strip()
     
     # Parse price
     list_price = parse_price(row.get("Unit Price") or row.get("Price") or row.get("List Price"))
