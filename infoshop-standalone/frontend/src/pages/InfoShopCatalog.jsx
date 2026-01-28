@@ -384,7 +384,7 @@ const InfoShopCatalog = () => {
       if (selectedFilters.category) filters.category = selectedFilters.category;
       if (selectedFilters.supplier) filters.supplier = selectedFilters.supplier;
 
-      const response = await axios.post(`${API}/api/catalog/search`, {
+      const response = await axios.post(`${API}/api/algolia/catalog/search`, {
         query: debouncedQuery,
         page: currentPage,
         hits_per_page: 24,
