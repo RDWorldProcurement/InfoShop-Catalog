@@ -124,7 +124,7 @@ class TestPunchOutSetup:
         assert start_page is not None
         assert start_page.text is not None
         assert "punchout=" in start_page.text
-        assert "/infoshop-catalog" in start_page.text
+        assert "/algolia-catalog" in start_page.text
         
         # Extract session token from URL
         session_token = start_page.text.split("punchout=")[1]
