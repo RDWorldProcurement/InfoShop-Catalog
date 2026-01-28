@@ -243,9 +243,11 @@ def transform_fastenal_product(row: Dict, countries: List[str], pricing_func=Non
         "breadcrumb": breadcrumb,
         "list_price": list_price,
         "price": list_price,  # Will be updated with selling_price
+        "has_price": 1 if list_price > 0 else 0,  # For sorting: products with price first
         "currency": "USD",
         "availability": availability_str,
         "in_stock": in_stock,
+        "stock_quantity": 0,  # Will be parsed if available
         "availability_score": availability_score,
         "supplier": "Fastenal",
         "country": countries[0] if countries else "USA",
