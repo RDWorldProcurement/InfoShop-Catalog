@@ -223,7 +223,19 @@ const ProductCard = ({ product, onAddToCart, punchoutMode }) => {
         {/* Pricing Section */}
         <div className="mb-3 mt-auto">
           {hasPrice ? (
-            <div className="space-y-1">
+            <div className="space-y-2">
+              {/* Savings Badge - Prominent */}
+              {listPrice > 0 && listPrice > displayPrice && (
+                <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1.5 rounded-lg text-center">
+                  <span className="text-sm font-bold">
+                    SAVE {((listPrice - displayPrice) / listPrice * 100).toFixed(1)}%
+                  </span>
+                  <span className="text-xs ml-2 opacity-90">
+                    vs. Supplier List Price
+                  </span>
+                </div>
+              )}
+              
               {/* Danone Preferred Price */}
               <div className="flex items-baseline gap-1">
                 <span className="text-xs text-slate-500">$</span>
@@ -236,14 +248,14 @@ const ProductCard = ({ product, onAddToCart, punchoutMode }) => {
                 <span className="text-xs text-slate-500 ml-1">Danone Price</span>
               </div>
               
-              {/* List Price (strikethrough) */}
+              {/* List Price (strikethrough) & Dollar Savings */}
               {listPrice > 0 && listPrice > displayPrice && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 line-through">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-slate-400 line-through">
                     List: ${listPrice.toFixed(2)}
                   </span>
-                  <span className="text-xs text-green-600 font-medium">
-                    You Save: ${(listPrice - displayPrice).toFixed(2)}
+                  <span className="text-green-600 font-semibold">
+                    Save ${(listPrice - displayPrice).toFixed(2)}
                   </span>
                 </div>
               )}
