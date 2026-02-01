@@ -650,7 +650,9 @@ const InfoShopLandingPage = ({ onEnterCatalog }) => {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-white/40 text-sm">Powered by</span>
-              <img src={INFOSYS_BPM_LOGO} alt="Infosys BPM" className="h-7" />
+              <div className="bg-white rounded-lg px-2 py-1">
+                <img src={INFOSYS_BPM_LOGO} alt="Infosys BPM" className="h-5" />
+              </div>
             </div>
             <div className="text-white/40 text-sm">
               © {new Date().getFullYear()} Infosys Limited. All rights reserved.
