@@ -1,880 +1,154 @@
-# OMNISupply.io - Product Requirements Document
-
-## Original Problem Statement
-Build an enterprise-grade unified procurement platform called OMNISupply.io for Infosys Limited customers, combining:
-1. **Product & Service Catalogs** - 30M+ Industrial MRO Products and 100K+ Professional Services
-2. **AI-Powered Quotation Analysis** - Upload quotations for AI extraction, price benchmarking, and tax verification
-3. **End-to-End Sourcing Support** - Full procurement services handled by Infosys specialists
-4. **Advanced AI Procurement Agent** - Conversational AI interface for intelligent procurement routing
-5. **AI Negotiation Agent** - Autonomous price negotiation with strategy playbooks
-6. **Algolia-Powered Catalog Search** - State-of-the-art B2B catalog with multi-supplier comparison and Infosys pricing
-7. **Coupa cXML PunchOut** - Enterprise procurement system integration
-8. **Standalone InfoShop Catalog** - Extracted catalog for independent Vercel deployment (Danone branding)
-
----
-
-## Current Status: ENTERPRISE READY ✅
-
-**Deployment Health Check:** PASSED (February 1, 2026)
-- All environment variables properly configured
-- No hardcoded secrets or URLs
-- Database queries optimized
-- Frontend builds successfully
-- InfoShop Enterprise features complete
-
----
-
-## What's Been Implemented
-
-### ✅ Phase 26 - InfoShop Enterprise Features (February 1, 2026 - COMPLETED)
-
-**Major Enterprise Features:**
-
-1. **InfoShop Part Number Generation**
-   - Format: `INF` + Vendor(2) + Category(3) + Random(5)
-   - Example: `INFGRBEA70818` (INF + GR=Grainger + BEA=Bearings + 70818)
-   - AI-powered uniqueness guarantee - NO duplicates
-   - Endpoint: `GET /api/infoshop/part-number/generate`
-
-2. **Danone Preferred Pricing with Sliding Margin**
-   - Formula: List Price → Category Discount → Infosys Purchase Price → Sliding Margin → Danone Preferred Price
-   - Margin Scale (5.92% - 9.2%):
-     - $0-10: ~9.2%
-     - $10-50: ~8.5%
-     - $50-100: ~7.8%
-     - $100-500: ~7.0%
-     - $500-1000: ~6.5%
-     - $1000+: ~5.92%
-   - Endpoint: `POST /api/infoshop/pricing/calculate`
-
-3. **UNSPSC Auto-Classification**
-   - AI-powered classification using keyword matching
-   - Returns 8-digit UNSPSC codes with confidence scores
-   - Examples: Bearings→31171500, Pumps→40141600, Safety→46181500
-   - Endpoint: `GET /api/infoshop/unspsc/classify`
-
-4. **Coming Soon Partners** (26 total across 4 regions)
-   - USA: BDI, Fastenal, Donaldson, Avantor (VWR), MARKEM, VideoJet, ProPay
-   - Mexico: Fastenal, BDI, Donaldson, Avantor (VWR), MARKEM, VideoJet, ProPay
-   - Europe: Fastenal, BDI, Donaldson, Avantor (VWR), MARKEM, VideoJet, RG Group, Sonepar, Cromwell, ProPay
-   - China: NorthSky (ZKH), ProPay
-   - Endpoint: `GET /api/infoshop/partners`
-
-5. **Shipping & Delivery Validation**
-   - Minimum 2 business weeks (10 business days) lead time
-   - Validates shipping address, delivery attention, requested date
-   - Note: "Infosys will confirm promised delivery date from partners"
-   - Endpoints: `GET /api/infoshop/delivery/minimum-date`, `POST /api/infoshop/delivery/validate`
-
-6. **Partner Discount Management**
-   - Upload Excel files with Category Name + Discount %
-   - Separate files per vendor (Grainger, MOTION, etc.)
-   - Endpoint: `POST /api/infoshop/partner-discounts/upload`
-
-7. **"No Picture Available" Infosys Branding**
-   - Infosys-branded placeholder for products without images
-   - Gold-standard rendering with company identity
-
-8. **Production PunchOut Configuration**
-   - Domain: `infoshop.omnisupply.io`
-   - Identity: `OMNISUPPLY_PUNCHOUT`
-   - SharedSecret: `OmniSup!y#2026$Coupa$8472`
-   - Coupa Domain: `118817359`
-
-**New Files Created:**
-- `/app/backend/infoshop_service.py` - Enterprise business logic
-- `/app/infoshop-standalone/frontend/src/pages/InfoShopCatalog.jsx` - Complete UI rewrite
-
-**Test Results:**
-- Backend: 100% (34/34 tests passed)
-- Report: `/app/test_reports/iteration_26.json`
-
-### ✅ Phase 24 - Coupa cXML PunchOut Integration (January 28, 2026 - COMPLETED)
-
-**Coupa PunchOut Integration:**
-- Full cXML 1.2.014 protocol support
-- `PunchOutSetupRequest` handling with credential validation
-- `PunchOutOrderMessage` generation for cart transfer
-- SharedSecret authentication: `Infoshop@2026`
-- Session management (in-memory + MongoDB persistence)
-- Transaction logging for audit
-
-**PunchOut Endpoints:**
-- `POST /api/punchout/setup` - Handle cXML setup request from Coupa
-- `GET /api/punchout/session/{token}` - Verify session validity
-- `POST /api/punchout/cart/update` - Sync cart items
-- `POST /api/punchout/order` - Generate cXML order message
-- `GET /api/punchout/config` - Configuration for Coupa setup
-
-**Frontend PunchOut Mode:**
-- Blue banner showing "PunchOut Session Active"
-- Displays connected buyer identity
-- Cart management with item count and total
-- "Transfer to Coupa" button
-- No login required when accessing via PunchOut session
-- Sidebar hidden in PunchOut mode for clean catalog view
-
-**Standalone InfoShop Catalog Created:**
-- Extracted catalog into `/app/infoshop-standalone/`
-- Independent React frontend (port 3001)
-- Independent FastAPI backend (port 8002)
-- Complete PunchOut capability for Coupa integration testing
-- Detailed README with setup instructions
-
-**Files Created/Modified:**
-- `/app/backend/server.py` - Added PunchOut routes (lines 3118-3420)
-- `/app/backend/punchout_service.py` - cXML parsing, validation, generation
-- `/app/frontend/src/pages/AlgoliaCatalogPage.jsx` - PunchOut mode UI
-- `/app/infoshop-standalone/` - Complete standalone application
-
-**Test Results:**
-- Backend: 100% (13/13 tests passed)
-- Frontend: 90% (PunchOut mode functional)
-- Report: `/app/test_reports/iteration_24.json`
-
-### ✅ Phase 23 - Algolia-Powered Catalog Search & Pricing Engine (January 28, 2026 - COMPLETED)
-
-**World-Class B2B Product Search:**
-- Algolia search-as-a-service integration (App ID: ZQXK1D2XLM)
-- Sub-100ms search responses across millions of products
-- Faceted filters: Category, Brand, Supplier, Availability
-- Country selector dropdown for regional product filtering
-- Grid/List view toggle
-- Multi-supplier price comparison with "Lowest Price" badge
-
-**Infosys Pricing Engine (3-Tier Model):**
-- **List Price**: Original supplier catalog price
-- **Infosys Purchase Price**: List Price - Category Discount (what Infosys pays)
-- **Selling Price**: Customer price after 70% margin pass-through
-- Formula: `Selling Price = List Price - (70% × (List Price - Purchase Price))`
-- Example: $100 List → $60 Purchase (40% discount) → $72 Selling Price
-- Customer saves 28%, Infosys keeps 12% margin
-
-**Admin Catalog Management:**
-- Upload supplier contracts with category-level discounts
-- Upload product catalogs (Excel) with automatic pricing calculation
-- Upload history tracking
-- Contract management with discount preview
-- Pricing model visualization
-
-**Files Created/Modified:**
-- `/app/backend/pricing_engine.py` - NEW: Complete pricing calculation engine
-- `/app/backend/algolia_service.py` - MODIFIED: Full indexing, search, and pricing integration
-- `/app/backend/server.py` - MODIFIED: New endpoints for contracts, catalog upload, pricing
-- `/app/frontend/src/pages/AlgoliaCatalogPage.jsx` - MODIFIED: Full search UI with dual pricing
-- `/app/frontend/src/pages/CatalogAdminPage.jsx` - NEW: Admin page for catalog management
-- `/app/frontend/src/components/Sidebar.jsx` - MODIFIED: Added Algolia Catalog link with NEW badge
-
-**New API Endpoints:**
-- `GET /api/algolia/catalog/stats` - Catalog statistics
-- `POST /api/algolia/contracts/upload` - Upload supplier contract (admin)
-- `GET /api/algolia/contracts` - List active contracts (admin)
-- `POST /api/algolia/catalog/upload-with-pricing` - Upload catalog with pricing
-- `GET /api/algolia/countries` - Available countries
-- `POST /api/algolia/pricing/calculate` - Calculate Infosys pricing
-
-**Test Results:**
-- Backend: 100% (13/13 tests passed)
-- Frontend: 100% (all UI elements verified)
-- Report: `/app/test_reports/iteration_23.json`
-
-### ✅ Phase 22 - UNSPSC Classification & Buying Desk Context (January 25, 2026 - COMPLETED)
-
-**AI-Powered UNSPSC Classification:**
-- Automatic 8-digit UNSPSC codes for all quotation line items
-- GPT-5.2 deep semantic analysis (not just keywords)
-- Category summary showing spend by UNSPSC segment
-- Confidence scores for classification accuracy
-- Purple badges displayed in UI for each line item
-
-**Buying Desk Context Preservation:**
-- One-click engagement from any screen
-- Carries full context (quotation, search query, line items)
-- No more navigation to blank forms
-- Confirmation message with Request ID in chat
-- "Buying Desk Notified" button state change
-
-**Quotation Progress UI:**
-- Overall progress bar (0-100%)
-- Elapsed time counter (MM:SS)
-- Phase-based status messages
-- User guidance box with instructions
-
-**Files Modified:**
-- `/app/backend/document_extractor.py` - Added `classify_unspsc_with_ai()`, UNSPSC_REFERENCE
-- `/app/backend/server.py` - Integrated UNSPSC into upload, added buying desk engage endpoint
-- `/app/frontend/src/pages/UploadQuotationPage.jsx` - UNSPSC badges, progress UI
-- `/app/frontend/src/pages/AIProcurementAgentPage.jsx` - Buying desk context function
-
-### ✅ Phase 21 - Multi-Turn AI Context & Intelligent Navigation Fix (January 25, 2026 - COMPLETED)
-**Major Enhancement: True Multi-Turn Conversation Intelligence + Intelligent Routing**
-
-Fixed the AI Procurement Agent to behave like ChatGPT - maintaining deep conversation context and intelligently routing non-catalog items.
-
-**Features Implemented:**
-
-1. **Multi-Turn Context Router (P0 Fix):**
-   - New `get_conversation_context()` function retrieves last 8 messages with topics
-   - New `detect_follow_up_question()` identifies short/referential messages (fixed word-boundary bug)
-   - New `CONTEXT_CONTINUATION` intent type for follow-up handling
-   - AI classification now runs FIRST (before keyword matching)
-   - Follow-up questions like "what brands?" correctly reference prior topic (e.g., bearings)
-
-2. **Intelligent Non-Catalog Item Routing (Bug Fix):**
-   - Consumer items (bikes, pets, food, etc.) → Immediately routes to alternatives
-   - Shows "Upload Quotation" and "Request Buying Desk Support" buttons
-   - No irrelevant catalog results shown for consumer items
-   - Fixed `detect_follow_up_question()` substring matching bug ("with" was matching "it")
-
-3. **Login Page UI Refresh:**
-   - Completely redesigned login page with new branding
-   - Prominent green "Try Demo - Instant Access" button
-   - Feature highlights: AI Agent, Smart Quotations, Negotiation Agent, Buying Desk
-
-4. **Session Preservation Fix:**
-   - Logo click now navigates to `/ai-agent` instead of `/`
-   - Prevents accidental session/context loss
-
-5. **MongoDB Regex Fix:**
-   - Added `escape_regex()` function for safe queries
-   - Handles AI-generated queries with parentheses/special chars
-
-**Files Modified:**
-- `/app/backend/server.py` - Major refactor of AI conversation routing, fixed detect_follow_up_question
-- `/app/frontend/src/pages/LoginPage.jsx` - Complete UI rewrite
-- `/app/frontend/src/components/Sidebar.jsx` - Logo navigation fix
-
-**Test Results:**
-- Backend: 100% - All scenarios pass
-- Frontend: 100% - Intelligent navigation UI working
-- Report: `/app/test_reports/iteration_22.json`
-
-### ✅ Phase 20 - AI Conversation Continuity & End-to-End Flows (January 25, 2026 - COMPLETED)
-**Major Enhancement: ChatGPT-like Conversation Continuity**
-
-Fixed the AI Procurement Agent to maintain conversation context and handle all flows end-to-end.
-
-**Features Implemented:**
-
-1. **Conversation Context Awareness:**
-   - Frontend maintains `quotationAnalysisResult` state after analysis
-   - Queries like "show line items", "show savings", "add to cart" are intercepted
-   - No need to re-upload quotation - system remembers the analyzed data
-   - Renders markdown tables with line items, costs, and savings
-
-2. **Three Complete Procurement Flows:**
-
-   **Flow 1: Buy from Catalog**
-   - Search for products/services via natural language
-   - Results displayed with Add to Cart buttons
-   - Items added to cart with toast confirmation
-
-   **Flow 2: Upload Quotation (Full Flow)**
-   - Upload quotation → Real AI Analysis (GPT-5.2, Claude, Gemini)
-   - View line items and savings by typing "show details" or "line items"
-   - Select Payment Entity: Infosys | ProPay | Direct by Customer
-   - Select PunchOut System: Coupa | SAP Ariba | SAP ERP | Ivalua | Oracle
-   - Transfer cart to selected system
-
-   **Flow 3: Managed Services**
-   - Complex sourcing requests route to Buying Desk
-   - UNSPSC classification provided
-   - Category expert notification
-
-3. **Payment Entity Selection:**
-   - Infosys - Payment handled by Infosys on behalf of customer
-   - ProPay - Payment through ProPay procurement service
-   - Direct by Customer - Customer handles payment directly
-
-4. **PunchOut System Integration:**
-   - Coupa, SAP Ariba, SAP ERP, Ivalua, Oracle
-   - Visual system selection with logos
-   - Cart transfer with confirmation
-
-**Files Modified:**
-- `/app/frontend/src/pages/AIProcurementAgentPage.jsx` - Added processMessage context handling, Payment/PunchOut selection UI
-
-**Test Results:**
-- Backend: 100% (9/9 tests passed)
-- Frontend: 100% (all 3 flows working)
-- Report: `/app/test_reports/iteration_20.json`
-
-### ✅ Phase 19 - AI Negotiation Agent Phase 1 (January 25, 2026 - COMPLETED)
-**New Feature: AI-Powered Autonomous Negotiation**
-
-Built the first phase of the Negotiation Agent inspired by Aerchain's offering.
-
-**Features Implemented:**
-
-1. **Negotiation Strategies/Playbooks (5 strategies):**
-   - **Aggressive** - 20% target discount, 4 rounds, firm tone
-   - **Balanced** - 12% target discount, 3 rounds, professional tone
-   - **Relationship** - 8% target discount, 2 rounds, collaborative tone
-   - **Volume-Based** - 18% target discount, 3 rounds, opportunistic tone
-   - **Urgent** - 6% target discount, 2 rounds, direct tone
-
-2. **Target Price Recommendation:**
-   - Calculates target price based on market data and selected strategy
-   - Shows item-level targets with recommendations
-   - Displays potential savings percentage
-
-3. **AI-Generated Negotiation Emails:**
-   - Professional emails based on selected strategy
-   - Enhanced by GPT-5.2 for persuasiveness
-   - Includes market analysis and leverage points
-   - Copy to clipboard functionality
-
-4. **Counter-Offer Tracking:**
-   - Track multi-round negotiations
-   - AI calculates optimal counter-offers
-   - Shows rounds remaining and savings achieved
-   - Recommendations: COUNTER or ESCALATE
-
-**Files Created:**
-- `/app/backend/negotiation_agent.py` - Core negotiation logic, playbooks, email templates
-- `/app/frontend/src/pages/NegotiationAgentPage.jsx` - Negotiation UI
-
-**API Endpoints:**
-- `GET /api/negotiation/strategies` - List all strategies
-- `POST /api/negotiation/generate-targets` - Generate target prices
-- `POST /api/negotiation/generate-email` - Generate negotiation email
-- `POST /api/negotiation/counter-offer` - Process counter-offers
-- `POST /api/negotiation/{id}/close` - Close negotiation
-- `GET /api/negotiation/history` - User's negotiation history
-
-**UI Entry Points:**
-- "Start AI Negotiation" button on quotation analysis results
-- Available from both AI Agent and Upload Quotation pages
-- Route: `/negotiation/:quotationId`
-
-**Test Results:**
-- Backend: 100% (15/15 tests passed)
-- Frontend: 100% (all features working)
-- Report: `/app/test_reports/iteration_19.json`
-
-### ✅ Phase 18.4 - REAL Document Extraction (January 24, 2026 - COMPLETED)
-**Critical Fix: Document extraction was using mock/random data instead of actual file content**
-
-**Root Cause:**
-- `generate_ai_extraction()` function was generating random mock data
-- Uploaded file content was being read but never processed
-- AI benchmarking was running on fake data, not the actual quotation
-
-**Solution Implemented:**
-Created `/app/backend/document_extractor.py` module with:
-
-1. **Multi-Format Support:**
-   - PDF text extraction using PyPDF2
-   - Word document extraction using python-docx
-   - Excel extraction using openpyxl
-   - Image support using Pillow for base64 conversion
-
-2. **AI-Powered Extraction:**
-   - Uses GPT-5.2 to parse document content into structured JSON
-   - Extracts: supplier info, quotation details, line items, totals
-   - Handles both text-based and image-based documents
-
-3. **Robust Validation:**
-   - `validate_and_clean_extraction()` ensures proper data structure
-   - Calculates missing totals from line items
-   - Handles null/missing values gracefully
-
-**Files Created/Modified:**
-- **NEW:** `/app/backend/document_extractor.py` - Real document extraction module
-- `/app/backend/server.py` - Updated to use `extract_quotation_data()` instead of mock function
-- `/app/backend/requirements.txt` - Added PyPDF2, python-docx, lxml
-
-**Test Results:**
-- Uploaded test PDF with 4 line items
-- Correctly extracted: Supplier (ABC Industrial Supplies), Quote # (QT-2024-001234)
-- All line items extracted with correct quantities and prices
-- AI benchmarking ran on REAL data and identified $1,074 potential savings
-- Processing time: ~1.5 minutes
-
-**Test Results:**
-- Backend: 100% (extraction working)
-- Report: `/app/test_reports/iteration_18.json`
-
-### ✅ Phase 18 - Advanced AI-Driven Procurement Handling (January 24, 2026 - COMPLETED)
-**Major Feature: AI Procurement Agent - Conversational Entry Point**
-
-**New AI Procurement Agent Page (/ai-agent):**
-- Conversational chat interface with natural language understanding
-- Powered by 3 LLMs working in concert: GPT-5.2, Claude Sonnet 4.5, Gemini 3 Flash
-- Intelligent routing to one of three workflows:
-  1. **CATALOG_SEARCH**: When user wants to find products/services → Shows matching products with Add to Cart
-  2. **QUOTATION_ANALYSIS**: When user has a supplier quote → Guides to Upload Quotation page
-  3. **MANAGED_SERVICES**: For strategic/complex sourcing → Routes to Buying Desk with UNSPSC suggestion
-- Quick action buttons: Find a Product, Find a Service, I have a Quotation, Complex/Strategic Sourcing
-- Real-time LLM indicator badges (GPT-5.2, Claude, Gemini)
-- Currency display at bottom (USD/EUR/MXN based on user's country)
-
-**Landing Page Update - 4 Options Layout:**
-- Featured AI Procurement Agent card at top with gradient styling
-- "NEW" badge and "GPT-5.2 + Claude + Gemini" badge
-- Three regular option cards below:
-  1. Browse Catalog (PunchOut Enabled)
-  2. AI Enabled Intelligent Buying (Upload Quotation)
-  3. Managed Services (Buying Desk)
-
-**Sidebar Navigation Update:**
-- Added "AI Procurement Agent" with "NEW" badge (purple gradient)
-- Positioned at top of Procurement section
-
-**Backend Endpoint Added:**
-- `POST /api/ai-agent/conversation` - Main conversational endpoint
-  - Accepts: message, session_id, context, language, currency
-  - Returns: message, engines_used, action, products, services, context, unspsc_suggestion
-  - Intent classification using LLM with keyword-based fallback
-  - Product/service search integration
-  - Conversation storage in MongoDB for analytics
-
-**Files Created/Modified:**
-- `/app/frontend/src/pages/AIProcurementAgentPage.jsx` - Full conversational UI
-- `/app/frontend/src/pages/LandingPage.jsx` - Updated to 4-option layout with featured AI card
-- `/app/frontend/src/components/Sidebar.jsx` - Added AI Procurement Agent nav item
-- `/app/frontend/src/App.js` - Added /ai-agent route
-- `/app/backend/server.py` - Added AI agent conversation endpoint (lines 4515-4800)
-
-**Test Results:**
-- Backend: 100% (12/12 tests passed)
-- Frontend: All features working correctly
-- Test file: `/app/backend/tests/test_ai_agent.py`
-- Report: `/app/test_reports/iteration_14.json`
-
-**Catalog Search Enhancements (January 24, 2026):**
-- Enhanced `search_catalog_for_agent()` to search BOTH in-memory catalogs AND MongoDB `vendor_products` collection
-- Implemented match scoring algorithm for relevance ranking:
-  - Exact phrase match in name: +100 points
-  - SKU/Part number match: +90 points
-  - Brand match: +80 points
-  - Individual term matches: +10-35 points per term
-- Added MongoDB text indexes at startup for fast search on large catalogs:
-  - `vendor_products`: name, brand, category, description, sku (text index)
-  - `vendor_services`: name, category, description (text index)
-- Search results now include `match_score` and `source` fields (catalog vs vendor_catalog)
-- Verified admin catalog upload (`POST /api/admin/upload-catalog`) works with CSV/Excel files
-- Fixed vendor product scoring to match in-memory product scoring (SKU, brand, category matching)
-
-**⚠️ IMPORTANT: Catalog Scale Readiness**
-- User will be adding large number of products next week
-- MongoDB indexes are in place for performance
-- Search accuracy is critical - uses multi-field matching with scoring
-- SKU/Part number searches have highest priority (90 points)
-- All catalog search tests passed (15/15)
-
-### ✅ Phase 18.1 - Dynamic Currency Mapping (January 24, 2026 - COMPLETED)
-**Multi-Currency Support Based on Language Selection:**
-- Added 7 language options with associated currencies:
-  - English (en) → USD ($)
-  - Français (fr) → EUR (€)
-  - Deutsch (de) → EUR (€)
-  - Italiano (it) → EUR (€)
-  - Nederlands (nl) → EUR (€)
-  - Español (España) (es-ES) → EUR (€)
-  - Español (México) (es-MX) → MXN (MX$)
-- Currency automatically updates when language is changed
-- Added full Spanish translations for Spain and Mexico variants
-- Sidebar shows "Language & Currency" section with currency display
-- Catalog header shows current currency
-- Currency persists in localStorage across navigation and page refresh
-
-**Files Modified:**
-- `/app/frontend/src/i18n/LanguageContext.js` - Added LANGUAGE_CURRENCY_MAP, useMemo for currency derivation, formatPrice helper
-- `/app/frontend/src/i18n/translations.js` - Added es-ES and es-MX translations with all UI strings
-- `/app/frontend/src/components/Sidebar.jsx` - Updated language selector to show currency codes and display
-- `/app/frontend/src/pages/CatalogPage.jsx` - Uses dynamic currency from LanguageContext
-
-**Test Results:**
-- Frontend: 100% (16/16 tests passed)
-- Report: `/app/test_reports/iteration_16.json`
-
-### ✅ Phase 18.2 - Intelligent AI Agent Business Logic (January 24, 2026 - COMPLETED)
-**Smart Detection and User Guidance:**
-
-**Problem Solved:**
-- Previously, searching for "blue bike with red dots" would return random products
-- Now the AI intelligently recognizes this is NOT in the catalog and guides users appropriately
-
-**New Intelligent Features:**
-1. **is_likely_not_in_catalog()** function detects:
-   - Consumer items (bike, bicycle, furniture, clothing, food, etc.)
-   - Color + unusual pattern combinations (blue with red dots)
-   - Items outside standard industrial/IT procurement
-
-2. **assess_requirement_complexity()** function detects:
-   - Complex requirements (multiple, specialized, custom)
-   - Installation/integration needs
-   - Bulk/volume requirements
-   - Long-term/contract needs
-
-3. **Smart Response Flow:**
-   - If NOT_IN_CATALOG → Shows intelligent message + two action buttons
-   - If COMPLEX → Suggests Managed Services with UNSPSC classification
-   - If FOUND → Shows products with match scores
-   - If LOW_RELEVANCE → Shows products + offers alternatives
-
-4. **"Recommended Next Steps" UI Box:**
-   - Purple button: "Upload Quotation for Analysis" → `/upload-quotation`
-   - Orange button: "Request Buying Desk Support" → `/sourcing-support`
-   - Shows intelligent_guidance reason
-
-**API Response Enhancements:**
-- `show_quotation_upload`: boolean
-- `show_managed_services`: boolean  
-- `intelligent_guidance`: {reason, recommended_paths, confidence}
-
-**Test Results:**
-- Backend: 100% (16/16 tests passed)
-- Frontend: 100% (10/10 tests passed)
-- Report: `/app/test_reports/iteration_17.json`
-
-### ✅ Phase 17 - Advanced AI Price Benchmarking with 3 LLMs (January 2026 - COMPLETED)
-**Major Feature: AI Enabled Intelligent Buying with 3 AI Engines**
-
-**Naming Updates:**
-- Renamed "One-Off Purchases" to "AI Enabled Intelligent Buying" across all pages
-- Added AI-themed tags to all 3 landing page cards:
-  - Browse Catalog: "PunchOut Enabled Catalog" tag (blue, cart icon)
-  - AI Enabled Intelligent Buying: "Infosys AI Enabled Intelligent Buying" tag (purple, brain icon)
-  - Managed Services: "Infosys Buying Desk" tag (orange, handshake icon)
-
-**Real AI Price Benchmarking Implementation:**
-- Integrated 3 LLMs working in parallel:
-  - 🤖 **OpenAI GPT-5.2** - Product price analysis and market research
-  - 🧠 **Claude Sonnet 4.5** - Professional services rate analysis (Robert Half, PayScale)
-  - ⚡ **Gemini 3 Flash** - Cross-validation and synthesis
-- Created `/app/backend/ai_price_benchmark.py` module with async LLM integration
-- Added `POST /api/procurement/quotation/upload-with-ai` endpoint for real AI analysis
-
-**"Use Already Available Quotations" Feature (Demo Mode):**
-- Added prominent orange button for instant demo without file upload
-- Pre-loaded quotation from "TechPro Solutions Inc." with 6 line items:
-  - Professional Services: Senior Cloud Architect ($29,600), DevOps Engineer ($13,200)
-  - MRO Maintenance: HVAC Maintenance ($11,400), Electrical Inspection ($5,100)
-  - MRO Products: Safety Equipment ($7,225), Hydraulic Parts ($5,625)
-- Total value: ~$72K (under $75K limit as requested)
-- Shows impressive AI analysis animation with progress bars for all 3 engines
-- Displays potential savings of $4,535
-
-**Upload Quotation Page Updates:**
-- New header: "Infosys AI Enabled Intelligent Buying"
-- AI Capabilities card showing all 3 engines with specialties
-- "Use Real AI Analysis" toggle checkbox
-- AI Analysis Progress modal with animated progress bars
-- Expanded results showing individual AI engine analyses per line item
-
-**Backend Endpoints Added:**
-- `GET /api/procurement/quotation/demo-analysis` - Pre-loaded impressive demo analysis
-- `POST /api/procurement/quotation/upload-with-ai` - Real AI-powered analysis
-
-**Files Created/Modified:**
-- `/app/backend/ai_price_benchmark.py` - New AI price benchmarking module
-- `/app/frontend/src/pages/UploadQuotationPage.jsx` - Complete rewrite
-- `/app/frontend/src/pages/LandingPage.jsx` - Added AI tags to all cards
-- `/app/frontend/src/components/Sidebar.jsx` - Updated label and Brain icon
-
-### ✅ Phase 16 - Admin Buying Desk Management System (January 15, 2026 - COMPLETED)
-**Admin Portal - Buying Desk Management:**
-- **Tactical Buying Tab** (formerly "Upload Catalog" was the default):
-  - Stats cards: Total Requests, Pending Action, RFQ Sent, Negotiating, PO Ready
-  - Request list showing: Request ID, Customer, Supplier, Amount, Potential Savings, Progress bar
-  - Expandable panel with:
-    - Update Status buttons (Submitted → Supplier ID → RFQ Sent → Quotes Received → Negotiating → PO Ready)
-    - Assign Specialist dropdown (Rajesh Kumar, Priya Sharma, Amit Patel, Sneha Reddy, Vikram Singh)
-    - Add Note functionality with notes history
-  - Filter by status dropdown
-  - Refresh button to reload data
-
-- **Managed Services Tab** (for Sourcing Requests):
-  - Stats cards: Total Requests, Urgent/Critical, In Progress, RFQ Sent, Completed
-  - Request list showing: Sourcing ID, Title, Description, Category, Budget, Delivery Location, Urgency badge
-  - Expandable panel with:
-    - Update Status buttons (Submitted → In Progress → RFQ Sent → Quotes Received → Completed/Cancelled)
-    - Assign Specialist dropdown
-    - Full Request Details view
-    - Add Note functionality
-
-**Backend Endpoints Added:**
-- GET /api/admin/buying-desk/requests - Get all tactical buying requests with stats
-- GET /api/admin/buying-desk/request/{id} - Get single tactical request
-- PUT /api/admin/buying-desk/request/{id}/status - Update status
-- PUT /api/admin/buying-desk/request/{id}/assign - Assign specialist
-- POST /api/admin/buying-desk/request/{id}/note - Add note
-- GET /api/admin/buying-desk/specialists - Get specialist roster
-- GET /api/admin/buying-desk/dashboard-stats - Get combined stats
-- GET /api/admin/sourcing/requests - Get all sourcing requests with stats
-- GET /api/admin/sourcing/request/{id} - Get single sourcing request
-- PUT /api/admin/sourcing/request/{id}/status - Update status
-- PUT /api/admin/sourcing/request/{id}/assign - Assign specialist
-- POST /api/admin/sourcing/request/{id}/note - Add note
-
-**Footer Links Updated:**
-- Privacy Policy → https://www.infosys.com/privacy-statement.html
-- Terms of Service → https://www.infosys.com/terms-of-use.html
-- Contact Us → https://www.infosysbpm.com/contact.html
-
-### ✅ Phase 16.1 - Stability Improvements (January 15, 2026 - COMPLETED)
-**Health Check Endpoints Added:**
-- `GET /api/health` - Comprehensive health check with database, collections, and data counts
-- `GET /api/ready` - Kubernetes readiness probe
-- `GET /api/live` - Kubernetes liveness probe
-
-**Error Handling Improvements:**
-- Added try-except blocks to admin buying desk endpoints
-- Added logging for errors in admin endpoints
-- Added Error Boundary component for React frontend
-- Added axios interceptors for global error handling
-- Set axios timeout to 30 seconds
-- Auto-clear auth on 401 responses
-
-**Files Added/Modified:**
-- `/app/frontend/src/components/ErrorBoundary.jsx` - New error boundary component
-- `/app/frontend/src/App.js` - Added ErrorBoundary wrapper and axios interceptors
-- `/app/backend/server.py` - Added health endpoints and error handling
-
-### ✅ Phase 15 - Multi-Language Translation Fix & Logo Enhancement (December 2025 - COMPLETED)
-**Landing Page Translation - Complete i18n Implementation:**
-- Fixed comprehensive multi-language support for all 5 languages: English, French, German, Italian, Dutch
-- Converted static data arrays to use translation keys:
-  - PLATFORM_STATS (labelKey): annualSpend, enterpriseClients, averageSavings, languagesSupported
-  - AI_FEATURES (titleKey, descKey): aiDocumentAnalysis, priceBenchmarkingTitle, taxIntelligence, tacticalSourcing
-  - PROCESS_STEPS (titleKey, descKey): step1-4 titles and descriptions
-  - PAYMENT_MODELS (nameKey, subtitleKey, descKey): paymentModels translations added
-- All sections now translate correctly:
-  - Hero section with title and subtitle
-  - Navigation links (Features, How It Works, Payment Options)
-  - Stats section with dynamic labels
-  - AI Features section with titles and descriptions
-  - Multi-Language Document Support section
-  - How It Works process steps
-  - Payment Options with model names and descriptions
-  - CTA section with buttons (Get Started, Contact Sales)
-  - Footer links (Privacy Policy, Terms of Service, Contact Us, All rights reserved)
-
-**German Translation Fix:**
-- "Managed Services" correctly translated to "Verwaltete Dienste"
-
-**Infosys BPM Logo Enhancement on Login Page:**
-- Replaced semi-transparent background with solid white background
-- Removed brightness-200 filter that was making logo unclear
-- Added proper shadow and border styling for better visibility
-- Logo dimensions: 114x56 pixels with clear branding
-
-### ✅ Phase 14 - ProPay.ai Logo & Buying Desk Tracker (January 15, 2026 - COMPLETED)
-**ProPay.ai Logo Integration:**
-- Updated ProPay.ai logo across all screens using official logo asset
-- Landing Page: Payment Options section shows ProPay.ai with logo
-- One-Off Purchases: PO and Invoice Handling Entity section displays logo
-- Managed Services: PO and Invoice Handling Entity section displays logo
-- Renamed "ProPay World Wide Inc" → "ProPay.ai"
-
-**AI Capability Text Updates:**
-- Price benchmarking now mentions "products and services" explicitly
-- Updated in Landing Page, One-Off Purchases page descriptions
-
-**Buying Desk Dashboard (NEW PAGE):**
-- Route: `/buying-desk`
-- Visual progress tracker with 6 stages:
-  1. Submitted
-  2. Supplier Identification
-  3. RFQ Sent
-  4. Quotes Received
-  5. Negotiating
-  6. PO Ready
-- Stats cards: Total Requests, In Progress, Completed, Potential Savings
-- Request cards with:
-  - Request ID and status badge
-  - Supplier name and total amount
-  - Potential savings indicator
-  - Visual progress bar showing stage completion
-  - Expandable details with timestamps
-- Sidebar link: "Buying Desk Tracker" with "Track" badge
-
-**Backend Enhancements:**
-- New endpoint: GET /api/procurement/buying-desk/requests
-- New endpoint: GET /api/procurement/buying-desk/request/{id}
-- Updated buying_desk_requests schema with stages array and current_stage
-
-### ✅ Phase 13 - UI Labeling & PO/Invoice Entity Options (January 15, 2026 - COMPLETED)
-**Landing Page Option Labels:**
-- "Upload Quotation" renamed to "**One-Off Purchases**" - Clearer description: "Upload your quotation for AI-powered analysis & processing"
-- "Sourcing Support" renamed to "**Managed Services**" - Description: "Let our Buying Desk handle end-to-end sourcing for you"
-- Button updated to "Request Buying Desk"
-
-**Sidebar Navigation Updates:**
-- "Upload Quotation" → "**One-Off Purchases**" with "AI" badge
-- "Sourcing Support" → "**Managed Services**" with "Buying Desk" badge
-
-**Page Title Updates:**
-- Upload Quotation page header: "**One-Off Purchases**"
-- Sourcing Support page header: "**Managed Services / Buying Desk**"
-
-**PO and Invoice Handling Entity Feature:**
-- Renamed "Payment Model" to "**PO and Invoice Handling Entity**" on Managed Services page
-- Added description: "Select which entity will handle purchase orders and invoices"
-- **NEW:** Added same section to One-Off Purchases page (after quotation analysis)
-- Three options:
-  - Infosys Limited - "Consolidated invoicing through Infosys entity"
-  - ProPay World Wide Inc - "Third-party payment processing partner"
-  - Customer Direct - "Direct invoicing from supplier to customer"
-
-### ✅ Phase 12 - Engage Tactical Buyers & Cart Navigation Fix (January 15, 2026 - COMPLETED)
-**Engage Infosys Tactical Buyers Button:**
-- New prominent CTA on Upload Quotation page after analysis completes
-- Positioned before Potential Savings section
-- Blue button "Engage Tactical Buyers" with Handshake icon
-- On click: Shows "Infosys Notified!" with green checkmark
-- Success message: "Your request has been submitted to the Infosys Buying Desk Dashboard. Expected response within 24 hours."
-- "Request Submitted" badge replaces button after submission
-- Toast notification confirms team notification
-
-**Backend - New Endpoint:**
-- POST /api/procurement/quotation/{id}/engage-tactical-buyers
-- Creates buying_desk_request record with: request_id, quotation_id, user info, amounts, potential_savings, timestamps
-- Updates quotation with tactical_buyers_engaged flag
-
-**Add to Cart Navigation Fix:**
-- Clicking "Add to Cart" on Catalog page now opens PunchOut modal directly
-- Shows "Transfer Cart via PunchOut" with 5 system options: Coupa, SAP Ariba, SAP ERP, Ivalua, Oracle
-- Add to Cart from Upload Quotation page navigates to Catalog with openCart=true param
-- Seamless cart transfer flow implemented
-
-### ✅ Phase 11 - Unified Platform Merge (January 15, 2026 - COMPLETED)
-**Landing Page Redesign:**
-- New hero section with 3 procurement options (Browse Catalog, Upload Quotation, Sourcing Support)
-- Stats bar: $2B+ Annual Spend, 500+ Clients, 35% Savings, 8 Languages
-- AI-Powered Procurement Intelligence section (4 feature cards)
-- Multi-Language Document Support banner (8 languages)
-- How It Works process (4 steps)
-- Flexible Payment Options (Infosys Limited, ProPay, Customer Direct)
-- ERP Integrations section (Coupa, SAP Ariba, SAP ERP, Ivalua, Oracle)
-
-**Upload Quotation Feature (NEW):**
-- Drag & drop file upload (PDF, Images, Excel, Word)
-- Supplier info capture (name, email)
-- 8 language support for document processing
-- AI-powered analysis results:
-  - Data extraction with confidence score
-  - Line item parsing with UNSPSC codes
-  - Price benchmarking vs market average
-  - Tax verification with Avalara status
-  - Flags for above-market pricing
-  - Recommendations for negotiation
-- Actions: Add to Cart, Request Negotiation Support
-
-**End-to-End Sourcing Support (NEW):**
-- Request form: Title, Category, Description, Tech Specs
-- Budget & Quantity fields with currency selection
-- Delivery location and required-by date
-- Preferred suppliers input
-- Payment model selection (3 options)
-- Urgency levels: Standard (5-7 days), Urgent (2-3 days), Critical (24-48 hrs)
-- Request history with status tracking
-- Assigned specialist display
-
-**Backend APIs (NEW):**
-- POST /api/procurement/quotation/upload - File upload with AI analysis
-- GET /api/procurement/quotation/history - User's quotation history
-- GET /api/procurement/quotation/{id} - Quotation details
-- POST /api/procurement/quotation/{id}/escalate - Request negotiation
-- POST /api/procurement/quotation/{id}/add-to-cart - Add items to cart
-- POST /api/procurement/sourcing/request - Submit sourcing request
-- GET /api/procurement/sourcing/history - User's sourcing history
-- GET /api/procurement/sourcing/{id} - Sourcing request details
-- POST /api/procurement/sourcing/{id}/cancel - Cancel request
-- GET /api/user/profile - User profile with activity summary
-- GET /api/procurement/dashboard - Procurement dashboard stats
-
-**MongoDB Collections (NEW):**
-- quotation_uploads - Stores uploaded quotations and AI analysis
-- sourcing_requests - Stores E2E sourcing requests
-- activity_logs - User activity tracking
-
-**Updated Sidebar:**
-- Organized sections: Catalog, Procurement, Orders, Rewards
-- "Upload Quotation" with AI badge
-- "Sourcing Support" with E2E badge
-
-### Previous Phases (Completed)
-- Phase 10: Category Icons & Product Comparison
-- Phase 9: Watch Demo Feature
-- Phase 8: UI Polish & New Vendor Products (Donaldson, Avantor, Markem-Imaje)
-- Phase 7: Deep Language Translation (Emergent LLM)
-- Phase 6: Admin Portal & Updated Stats
-- Phase 5: Extended Catalog & 5-Stage Order Tracking
-
-## Technology Stack
-- **Backend**: FastAPI, MongoDB (motor), JWT, Emergent LLM
-- **Frontend**: React, Tailwind CSS, Shadcn UI
-- **Images**: Emergent CDN
-- **Branding**: Infosys BPM (#007CC3, #FF6B00, #FF9900)
-- **File Processing**: Simulated AI extraction (production-ready structure)
-- **i18n**: Real-time LLM translation + 8-language document support
-
-## Test Credentials
-- **Demo User**: demo@infosys.com / demo123
-- **Admin User**: admin@omnisupply.io / admin123
-
-## Key API Endpoints
-### Authentication
-- POST /api/auth/login - User authentication
-
-### Catalog
-- GET /api/products/search - Product search with translation
-- GET /api/services/search - Service search with translation
-- GET /api/products/categories - 32 categories
-- GET /api/products/brands - 33 brands
-
-### Procurement (NEW)
-- POST /api/procurement/quotation/upload - Upload & analyze quotation
-- GET /api/procurement/quotation/history - Quotation history
-- POST /api/procurement/quotation/{id}/engage-tactical-buyers - Notify Infosys Buying Desk (NEW)
-- POST /api/procurement/sourcing/request - Submit sourcing request
-- GET /api/procurement/sourcing/history - Sourcing history
-- GET /api/procurement/dashboard - Dashboard stats
-
-### Orders & Cart
-- POST /api/cart/add - Add to cart
-- GET /api/orders - Order history
-- POST /api/rfq/submit - Submit RFQ
-
-### Admin
-- POST /api/admin/login - Admin authentication
-- POST /api/admin/upload-catalog - Vendor catalog upload
-
-## Prioritized Backlog
-
-### P0 (Immediate - Next Tasks)
-- [x] ~~Dynamic Currency Mapping: EUR for French & Spanish (Spain), MXN for Spanish (Mexico), USD for English~~ **COMPLETED**
-- [x] ~~Mixed Catalog Display: Industrial products, spare parts, and IT equipment interleaved~~ **COMPLETED**
-- [x] ~~Intelligent AI Agent: Detect items NOT in catalog, guide users to quotation upload or Managed Services~~ **COMPLETED**
-
-### P1 (High Priority)
-- [ ] Real-time notifications for Buying Desk status changes
-- [ ] Real AI/ML document extraction integration
-- [ ] Schedule Repeat Orders backend logic
-- [ ] Bulk Submission via Excel upload
-
-### P2 (Medium Priority)
-- [ ] DB query optimization (replace `.to_list(10000)` with aggregation pipelines)
-- [ ] Enhance InfoConnect chatbot with LLM
-- [ ] Real vendor API integration (Grainger)
-- [ ] Email notifications for sourcing updates
-
-### P3 (Low Priority)
-- [ ] Advanced analytics dashboard
-- [ ] Supplier rating system
-- [ ] Audit trail export
-
-## MOCKED Features
-- **AI Document Extraction**: Generates realistic but simulated extraction results
-- **Price Benchmarking**: Simulated market price comparison
-- **Tax Verification**: Simulated Avalara integration
-- **Sourcing Specialist Assignment**: Auto-assigned for demo
-- **PunchOut Transfer**: Simulates ERP transfer
-
-## 3rd Party Integrations
-- **Emergent LLM** - Deep language translation
-- **Avalara** (Mocked) - Tax verification
-- **ERP Systems** (Mocked) - PunchOut support for Coupa, SAP Ariba, etc.
+# InfoShop Digital Catalog - Product Requirements Document
+
+## Project Overview
+InfoShop is a B2B digital catalog application for Danone, powered by Infosys BPM. It consolidates supplier catalogs from multiple partners into a single unified platform with transparent Danone Preferred Pricing.
+
+## Primary Goals
+1. **Catalog Consolidation**: Aggregate products from Grainger, MOTION, and future partners
+2. **Transparent Pricing**: Show Danone Preferred Pricing with clear savings vs. supplier list prices
+3. **Enterprise Integration**: Coupa PunchOut enabled for seamless procurement workflows
+4. **AI-Powered Features**: UNSPSC classification, InfoShop Part Number generation
+
+## What's Been Implemented (Feb 2026)
+
+### ✅ Core Features - COMPLETE
+
+#### Landing Page (InfoShopLandingPage.jsx)
+- Hero section with tagline: "You Deal with One, We Deal with Many"
+- Interactive animation: 12 supplier file documents dropping into InfoShop folder
+- Stats section: 26+ partners, 3M+ products, 4 global regions
+- Trust badges: Enterprise Security, Coupa PunchOut, 15-25% Savings
+- Infosys BPM and OMNISupply branding
+
+#### Product Catalog (InfoShopCatalog.jsx)
+- **2,000 products indexed** (1,000 Grainger + 1,000 MOTION)
+- Product cards display:
+  - Brand and product name
+  - InfoShop Part Number (copyable)
+  - Manufacturer Part Number
+  - Partner SKU
+  - UNSPSC code
+  - Category badge
+  - UOM and MoQ
+  - Stock availability
+  - **Danone Preferred Price** (prominent)
+  - List Price (strikethrough)
+  - **Savings badge** (green, e.g., "SAVE 18.7% vs. Supplier List Price")
+- Search functionality (real-time)
+- Filter by partner (Grainger/MOTION)
+- Sort by relevance, price
+
+#### Pricing Engine (infoshop_service.py)
+- **Category-based discounts**:
+  - Grainger: 18-25% by category (machining, safety, electrical, etc.)
+  - MOTION: Per-product discounts from supplier data, or 20-25% default
+- **Sliding gross margin**: 5.92% - 9.2% based on item price
+- Formula: `Danone Price = List Price × (1 - Discount%) × (1 + Margin%)`
+- Average customer savings: ~17% vs supplier list price
+
+#### InfoShop Part Number Generation
+- Format: `INF` + Vendor(2) + Category(3) + Random(5)
+- Example: `INFGRBEA12345` (Grainger, Bearings)
+- Unique, non-duplicating across all products
+
+#### Cart & Checkout Flow
+- Add to cart functionality
+- Cart sidebar with quantity adjustment
+- Checkout flow with shipping info collection:
+  - Shipping address
+  - Delivery attention
+  - Required delivery date (2-week minimum lead time)
+
+### ✅ Backend APIs - COMPLETE
+
+| Endpoint | Description |
+|----------|-------------|
+| POST /api/algolia/catalog/search | Product search with filters |
+| GET /api/algolia/catalog/public-stats | Catalog statistics |
+| GET /api/infoshop/partners | Active and coming-soon partners |
+| POST /api/infoshop/pricing/calculate | Calculate Danone price |
+| GET /api/infoshop/delivery/minimum-date | Minimum delivery date |
+| POST /api/infoshop/cart/prepare-transfer | Prepare cart for Coupa |
+
+### ✅ Third-Party Integrations
+
+| Service | Status |
+|---------|--------|
+| Algolia | ✅ LIVE - 2000 products indexed |
+| Coupa PunchOut | ✅ Backend ready |
+| Framer Motion | ✅ Animation library |
+
+## Data Architecture
+
+### Algolia Index: omnisupply_products
+```json
+{
+  "objectID": "infoshop_grainger_SKU_hash",
+  "product_name": "...",
+  "brand": "...",
+  "infoshop_part_number": "INFGRBEA12345",
+  "mfg_part_number": "...",
+  "partner_part_number": "SKU",
+  "vendor": "Grainger",
+  "category": "Indexable Cutting Tools",
+  "unspsc_code": "23171618",
+  "list_price": 19.99,
+  "category_discount_percent": 24.0,
+  "danone_preferred_price": 16.55,
+  "customer_savings_percent": 17.2,
+  "primary_image": "https://...",
+  "has_image": 1,
+  "in_stock": true
+}
+```
+
+### Pricing Example
+- **List Price**: $19.99
+- **Category Discount**: 24%
+- **Infosys Purchase Price**: $15.19
+- **Gross Margin**: 9.0%
+- **Danone Preferred Price**: $16.55
+- **Customer Savings**: 17.2%
+
+## File Structure
+```
+/app/
+├── backend/
+│   ├── server.py              # FastAPI main app
+│   ├── infoshop_service.py    # Pricing & transformation logic
+│   ├── algolia_service.py     # Algolia search service
+│   ├── punchout_service.py    # Coupa cXML integration
+│   └── reindex_infoshop.py    # Product indexing script
+├── frontend/
+│   └── src/
+│       ├── App.js
+│       └── pages/
+│           ├── InfoShopLandingPage.jsx
+│           └── InfoShopCatalog.jsx
+```
+
+## Outstanding Tasks
+
+### P0 - Critical
+- [ ] Scale to 2-3 million products (chunked processing, background tasks)
+
+### P1 - High Priority
+- [ ] Deploy to Vercel/production (infoshop.omnisupply.io)
+- [ ] Complete checkout flow with Coupa PunchOut transfer
+- [ ] "Coming Soon" partners dropdown UI
+
+### P2 - Future
+- [ ] Vendor Onboarding Agent
+- [ ] Negotiation Agent (Phase 2)
+- [ ] Contract Agent
+- [ ] Spend Analytics Dashboard
+- [ ] Approval Workflows
+
+## Testing Status
+- **Backend**: 15/15 tests passed (100%)
+- **Frontend**: All UI elements verified
+- **Pricing**: Savings range 14.8% - 26.2%
+- **Test Report**: /app/test_reports/iteration_27.json
+
+## Last Updated
+February 1, 2026
