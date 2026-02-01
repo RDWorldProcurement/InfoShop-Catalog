@@ -18,6 +18,7 @@ import logging
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timezone, timedelta
 import asyncio
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
