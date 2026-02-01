@@ -101,6 +101,21 @@ from infoshop_service import (
     get_all_partner_discounts
 )
 
+# Import Scalable Ingestion Service
+from scalable_ingestion import (
+    JobStatus,
+    IndexingJobConfig,
+    IndexingJob,
+    DEFAULT_CONFIG,
+    create_ingestion_job,
+    process_ingestion_job,
+    cancel_job,
+    get_job_status,
+    get_all_jobs,
+    get_job,
+    count_file_rows,
+)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
