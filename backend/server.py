@@ -7240,6 +7240,205 @@ async def upload_infoshop_catalog(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ============================================
+# SCALABLE INGESTION API - For 2-3 Million Products
+# ============================================
+
+@api_router.post("/infoshop/catalog/upload-large")
+async def upload_large_catalog(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+    vendor: str = Form(...),
+    chunk_size: int = Form(5000),
+    algolia_batch_size: int = Form(1000)
+):
+    """
+    Upload large catalog file for background processing
+    
+    Designed for 2-3 million products with:
+    - Chunked file processing (memory efficient)
+    - Background job processing
+    - Progress tracking
+    - Resume capability
+    
+    Returns job_id for tracking progress via /api/infoshop/jobs/{job_id}
+    """
+    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
+        raise HTTPException(status_code=400, detail="File must be Excel (.xlsx, .xls) or CSV (.csv)")
+    
+    if vendor.lower() not in [p.lower() for p in ACTIVE_PARTNERS]:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Vendor '{vendor}' not in active partners: {ACTIVE_PARTNERS}"
+        )
+    
+    try:
+        # Save file to disk (don't load into memory)
+        upload_dir = Path("/app/backend/uploads/catalogs")
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Generate unique filename
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        safe_filename = f"{vendor}_{timestamp}_{file.filename}"
+        file_path = upload_dir / safe_filename
+        
+        # Stream file to disk
+        with open(file_path, "wb") as f:
+            while chunk := await file.read(1024 * 1024):  # 1MB chunks
+                f.write(chunk)
+        
+        logger.info(f"Saved large file: {file_path}")
+        
+        # Create job configuration
+        config = IndexingJobConfig(
+            chunk_size=min(chunk_size, 10000),  # Cap at 10k for safety
+            algolia_batch_size=min(algolia_batch_size, 1000)  # Algolia limit
+        )
+        
+        # Create ingestion job
+        job = await create_ingestion_job(
+            file_path=str(file_path),
+            vendor=vendor,
+            filename=file.filename,
+            db=db,
+            config=config
+        )
+        
+        # Start background processing
+        background_tasks.add_task(
+            process_ingestion_job,
+            job,
+            db
+        )
+        
+        return {
+            "success": True,
+            "message": "Large catalog upload started",
+            "job_id": job.job_id,
+            "vendor": vendor,
+            "filename": file.filename,
+            "total_rows": job.total_rows,
+            "estimated_chunks": job.total_chunks,
+            "status": job.status.value,
+            "track_progress_url": f"/api/infoshop/jobs/{job.job_id}"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Large catalog upload error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/infoshop/jobs")
+async def list_ingestion_jobs(limit: int = 50):
+    """
+    List recent ingestion jobs
+    """
+    jobs = await get_all_jobs(db, limit=limit)
+    
+    # Convert ObjectId to string
+    for job in jobs:
+        if "_id" in job:
+            job["_id"] = str(job["_id"])
+    
+    return {
+        "jobs": jobs,
+        "count": len(jobs)
+    }
+
+
+@api_router.get("/infoshop/jobs/{job_id}")
+async def get_ingestion_job_status(job_id: str):
+    """
+    Get status of an ingestion job
+    
+    Returns progress, indexed count, errors, etc.
+    """
+    status = await get_job_status(job_id, db)
+    
+    if not status:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    return status
+
+
+@api_router.post("/infoshop/jobs/{job_id}/cancel")
+async def cancel_ingestion_job(job_id: str):
+    """
+    Cancel a running ingestion job
+    """
+    success = await cancel_job(job_id, db)
+    
+    if not success:
+        raise HTTPException(status_code=400, detail="Job not found or already completed")
+    
+    return {
+        "success": True,
+        "message": f"Job {job_id} cancelled"
+    }
+
+
+@api_router.get("/infoshop/catalog/stats")
+async def get_catalog_stats():
+    """
+    Get current catalog statistics
+    """
+    try:
+        from algolia_service import algolia_client, PRODUCTS_INDEX
+        
+        # Get Algolia stats
+        response = algolia_client.search_single_index(
+            PRODUCTS_INDEX,
+            {"query": "", "hitsPerPage": 0, "analytics": False}
+        )
+        
+        algolia_count = response.nb_hits if hasattr(response, 'nb_hits') else 0
+        
+        # Get vendor breakdown
+        response_facets = algolia_client.search_single_index(
+            PRODUCTS_INDEX,
+            {"query": "", "hitsPerPage": 0, "facets": ["supplier", "vendor"]}
+        )
+        
+        vendor_counts = {}
+        if hasattr(response_facets, 'facets') and response_facets.facets:
+            facets = response_facets.facets
+            if hasattr(facets, 'model_dump'):
+                facets = facets.model_dump()
+            vendor_counts = facets.get("supplier", facets.get("vendor", {}))
+        
+        # Get MongoDB stats
+        mongo_count = await db.infoshop_products.count_documents({})
+        
+        # Get recent jobs
+        recent_jobs = await get_all_jobs(db, limit=5)
+        
+        return {
+            "algolia_product_count": algolia_count,
+            "mongodb_product_count": mongo_count,
+            "vendor_breakdown": vendor_counts,
+            "active_partners": ACTIVE_PARTNERS,
+            "recent_jobs": [
+                {
+                    "job_id": j.get("job_id"),
+                    "vendor": j.get("vendor"),
+                    "status": j.get("status"),
+                    "indexed_count": j.get("indexed_count", 0),
+                    "progress": j.get("progress_percent", 0)
+                }
+                for j in recent_jobs
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"Catalog stats error: {e}")
+        return {
+            "algolia_product_count": 0,
+            "error": str(e)
+        }
+
+
 @api_router.post("/infoshop/pricing/calculate")
 async def calculate_infoshop_pricing(
     list_price: float = Form(...),
