@@ -717,6 +717,17 @@ def transform_product_for_infoshop(
     # Generate unique object ID
     object_id = f"infoshop_{vendor.lower()}_{partner_part_number or mfg_part_number}_{hashlib.md5(product_name.encode()).hexdigest()[:8]}"
     
+    # Description - vendor specific
+    if vendor_lower == "grainger":
+        description = str(row.get("Product Details", "") or row.get("Description", ""))[:500]
+    elif vendor_lower == "motion":
+        description = str(row.get("Short Description", "") or row.get("Overview", "") or row.get("Description", ""))[:500]
+    else:
+        description = str(row.get("Description", "") or row.get("Short Description", ""))[:500]
+    
+    if description == "nan":
+        description = ""
+    
     return {
         "objectID": object_id,
         "infoshop_part_number": infoshop_part_number,
@@ -725,6 +736,7 @@ def transform_product_for_infoshop(
         "mfg_part_number": mfg_part_number,
         "partner_part_number": partner_part_number,
         "vendor": vendor,
+        "supplier": vendor,  # Alias for Algolia compatibility
         "category": category,
         "unspsc_code": unspsc_result["unspsc_code"],
         "unspsc_confidence": unspsc_result["confidence"],
@@ -735,15 +747,19 @@ def transform_product_for_infoshop(
         "gross_margin_percent": pricing["gross_margin_percent"],
         "danone_preferred_price": pricing["danone_preferred_price"],
         "customer_savings_percent": pricing["customer_savings_percent"],
+        "price": pricing["danone_preferred_price"],  # For Algolia search/sort
+        "selling_price": pricing["danone_preferred_price"],  # For Algolia compatibility
+        "has_price": 1 if pricing["danone_preferred_price"] > 0 else 0,
         "uom": uom,
         "moq": moq,
         "stock_available": stock,
-        "in_stock": stock is not None and (isinstance(stock, int) and stock > 0 or "in stock" in str(stock).lower()),
+        "in_stock": is_in_stock,
+        "availability": stock_status if stock_status and stock_status != "nan" else "",
         "images": images[:5],
         "primary_image": image_validation["url"] if image_validation["valid"] else None,
         "has_image": 1 if image_validation["valid"] else 0,
         "use_placeholder": image_validation["use_placeholder"],
-        "description": str(row.get("Description", "") or row.get("Short Description", "") or row.get("Overview", ""))[:500],
+        "description": description,
         "indexed_at": datetime.now(timezone.utc).isoformat()
     }
 
