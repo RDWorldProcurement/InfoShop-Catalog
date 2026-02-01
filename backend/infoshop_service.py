@@ -660,32 +660,53 @@ def transform_product_for_infoshop(
     
     moq = 1
     for moq_field in ["MoQ", "MOQ", "Minimum Purchase Quantity", "Min Order Qty", "MinOrderQty"]:
-        if row.get(moq_field):
+        if row.get(moq_field) is not None:
             try:
-                moq = int(float(str(row.get(moq_field))))
+                moq_val = row.get(moq_field)
+                if isinstance(moq_val, (int, float)) and not pd.isna(moq_val):
+                    moq = int(moq_val)
+                else:
+                    moq = int(float(str(moq_val)))
                 if moq > 0:
                     break
             except (ValueError, TypeError):
                 continue
     
-    # Stock availability
+    # Stock availability - vendor-specific
     stock = None
-    stock_status = str(row.get("Stock", "") or row.get("Stock Available", "") or row.get("Availability", "") or row.get("Stock_Status", "")).strip()
+    if vendor_lower == "grainger":
+        stock_status = str(row.get("Stock_Status", "") or row.get("Availability", "")).strip()
+    elif vendor_lower == "motion":
+        stock_status = str(row.get("Availability", "") or row.get("Stock Status", "")).strip()
+    else:
+        stock_status = str(row.get("Availability", "") or row.get("Stock", "")).strip()
+    
     if stock_status and stock_status != "nan":
         stock = stock_status
-        # Try to extract numeric stock
-        stock_match = re.search(r'\d+', stock_status)
-        if stock_match:
-            stock = int(stock_match.group())
+        # Check for in-stock indicators
+        in_stock_keywords = ["in stock", "instock", "available", "in-stock", "ships"]
+        is_in_stock = any(kw in stock_status.lower() for kw in in_stock_keywords)
+    else:
+        is_in_stock = False
     
-    # Images
-    images_raw = row.get("Images", "") or row.get("Product_image", "") or row.get("Image URL", "")
+    # Images - vendor-specific column names
+    if vendor_lower == "grainger":
+        images_raw = row.get("Product_image", "") or row.get("Images", "")
+    elif vendor_lower == "motion":
+        images_raw = row.get("Images", "") or row.get("Image URL", "")
+    else:
+        images_raw = row.get("Images", "") or row.get("Image URL", "")
+    
     images = []
-    if images_raw:
+    if images_raw and not pd.isna(images_raw):
         if isinstance(images_raw, str):
-            images = [img.strip() for img in images_raw.split("|") if img.strip()]
+            # Handle pipe-separated or comma-separated
+            if "|" in images_raw:
+                images = [img.strip() for img in images_raw.split("|") if img.strip() and img.strip().startswith("http")]
+            else:
+                images = [images_raw.strip()] if images_raw.strip().startswith("http") else []
         elif isinstance(images_raw, list):
-            images = images_raw
+            images = [img for img in images_raw if img and str(img).startswith("http")]
     
     primary_image = images[0] if images else None
     image_validation = validate_image_url(primary_image)
