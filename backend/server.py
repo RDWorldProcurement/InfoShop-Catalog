@@ -3292,8 +3292,9 @@ async def punchout_setup(request: Request):
         )
         
         # Generate StartPage URL - points to catalog with punchout session
-        frontend_url = os.environ.get("FRONTEND_URL", "https://omnishop-catalog.preview.emergentagent.com")
-        start_page_url = f"{frontend_url}/algolia-catalog?punchout={session_token}"
+        # In production, FRONTEND_URL should be set to https://infoshop.omnisupply.io
+        frontend_url = os.environ.get("FRONTEND_URL", "https://infoshop.omnisupply.io")
+        start_page_url = f"{frontend_url}?catalog=true&punchout_session={session_token}"
         
         logger.info(f"PunchOut session created: {session_token[:16]}... -> {start_page_url}")
         
