@@ -939,6 +939,23 @@ const InfoShopCatalog = ({ punchoutSessionData, onBackToLanding }) => {
                 </Badge>
               )}
             </Button>
+            
+            {/* Logout Button - Only for non-PunchOut users */}
+            {!punchoutMode && onBackToLanding && (
+              <Button 
+                variant="ghost"
+                onClick={() => {
+                  // Clear session and return to landing page
+                  setCartItems([]);
+                  onBackToLanding();
+                }}
+                className="text-slate-600 hover:text-slate-800"
+                data-testid="logout-button"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Exit
+              </Button>
+            )}
           </div>
 
           {/* Filters Row */}
