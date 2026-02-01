@@ -338,11 +338,13 @@ const InfoShopLandingPage = ({ onEnterCatalog }) => {
               <div className="hidden md:block text-right">
                 <p className="text-white/50 text-xs">Powered by</p>
               </div>
-              <img 
-                src={INFOSYS_BPM_LOGO} 
-                alt="Infosys BPM" 
-                className="h-8 md:h-10"
-              />
+              <div className="bg-white rounded-lg px-3 py-1.5 shadow-md">
+                <img 
+                  src={INFOSYS_BPM_LOGO} 
+                  alt="Infosys BPM" 
+                  className="h-6 md:h-8"
+                />
+              </div>
             </div>
           </div>
         </header>
