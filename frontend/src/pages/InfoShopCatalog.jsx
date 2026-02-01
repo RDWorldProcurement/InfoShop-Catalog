@@ -29,6 +29,7 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  LogOut,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 
