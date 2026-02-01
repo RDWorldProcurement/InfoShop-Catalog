@@ -880,8 +880,17 @@ const InfoShopCatalog = ({ punchoutSessionData, onBackToLanding }) => {
         {/* Main Header */}
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
-            {/* Logo */}
+            {/* Logo with Back button for non-PunchOut */}
             <div className="flex items-center gap-3">
+              {!punchoutMode && onBackToLanding && (
+                <button 
+                  onClick={onBackToLanding}
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                  title="Back to Home"
+                >
+                  <ChevronLeft className="w-5 h-5 text-slate-600" />
+                </button>
+              )}
               <div className="bg-[#007abf] text-white px-4 py-2 rounded-lg font-bold text-xl">
                 InfoShop
               </div>
@@ -889,6 +898,11 @@ const InfoShopCatalog = ({ punchoutSessionData, onBackToLanding }) => {
                 <p className="text-xs text-slate-500">Powered by</p>
                 <p className="text-sm font-bold text-[#007abf]">Infosys BPM</p>
               </div>
+              {punchoutMode && (
+                <Badge className="bg-green-100 text-green-700 border-green-200">
+                  Coupa PunchOut
+                </Badge>
+              )}
             </div>
 
             {/* Search */}
