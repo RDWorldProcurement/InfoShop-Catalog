@@ -470,6 +470,52 @@ def validate_delivery_date(requested_date: str) -> Dict[str, Any]:
 
 
 # =============================================================================
+# DEFAULT CATEGORY DISCOUNTS BY VENDOR
+# =============================================================================
+
+# Default discounts for Grainger by category (based on typical MRO industry rates)
+GRAINGER_CATEGORY_DISCOUNTS = {
+    "machining": 22.0,
+    "indexable cutting tools": 24.0,
+    "safety": 18.0,
+    "electrical": 20.0,
+    "plumbing": 19.0,
+    "hvac": 21.0,
+    "material handling": 17.0,
+    "lighting": 20.0,
+    "cleaning": 15.0,
+    "fasteners": 25.0,
+    "bearings": 23.0,
+    "motors": 18.0,
+    "pumps": 19.0,
+    "valves": 20.0,
+    "tools": 22.0,
+    "abrasives": 21.0,
+    "adhesives": 18.0,
+    "power transmission": 22.0,
+    "default": 20.0,  # Default discount for unmatched categories
+}
+
+# Default discounts for MOTION - will be overridden by per-product discount from data
+MOTION_CATEGORY_DISCOUNTS = {
+    "bearings": 25.0,
+    "mechanical-power-transmission": 22.0,
+    "power transmission": 22.0,
+    "motors": 20.0,
+    "default": 20.0,
+}
+
+# Fastenal discounts
+FASTENAL_CATEGORY_DISCOUNTS = {
+    "cutting tools": 22.0,
+    "threading": 24.0,
+    "fasteners": 26.0,
+    "safety": 18.0,
+    "default": 20.0,
+}
+
+
+# =============================================================================
 # PRODUCT TRANSFORMATION FOR INFOSHOP
 # =============================================================================
 
@@ -486,48 +532,125 @@ def transform_product_for_infoshop(
     - Danone Preferred Price calculation
     - UNSPSC classification
     - Image validation
+    
+    IMPORTANT: For MOTION, the discount is embedded in the row's "Discount" column
+    For Grainger/Fastenal, we use category-based discounts
     """
-    # Extract basic fields
-    product_name = str(row.get("Product Name", "") or row.get("Title", "") or row.get("Item Description", "")).strip()
-    brand = str(row.get("Brand", "") or row.get("Manufacturer Brand", "") or row.get("Brand Name", "")).strip()
-    mfg_part_number = str(row.get("Manufacturer Part No", "") or row.get("ManufacturerPartNumber", "") or row.get("Part Number", "") or row.get("Product Name", "")).strip()
-    partner_part_number = str(row.get("SKU", "") or row.get("Sku", "") or row.get("Item Number", "")).strip()
+    vendor_lower = vendor.lower()
+    
+    # Extract basic fields based on vendor format
+    if vendor_lower == "grainger":
+        product_name = str(row.get("Product title", "") or row.get("Product Name", "")).strip()
+        brand = str(row.get("Brand", "")).strip()
+        mfg_part_number = str(row.get("ManufacturerPartNumber", "") or row.get("Sku", "")).strip()
+        partner_part_number = str(row.get("Sku", "")).strip()
+    elif vendor_lower == "motion":
+        product_name = str(row.get("Product Name", "") or row.get("Item Description", "")).strip()
+        brand = str(row.get("Brand", "")).strip()
+        mfg_part_number = str(row.get("Product Name", "") or row.get("SKU", "")).strip()
+        partner_part_number = str(row.get("SKU", "") or row.get("Sku", "")).strip()
+    else:  # Fastenal or generic
+        product_name = str(row.get("Title", "") or row.get("Product Name", "")).strip()
+        brand = str(row.get("Brand", "") or row.get("Manufacturer", "")).strip()
+        mfg_part_number = str(row.get("Manufacturer Part No", "") or row.get("Part Number", "")).strip()
+        partner_part_number = str(row.get("SKU", "") or row.get("Sku", "")).strip()
     
     # Category and UNSPSC
     category = str(row.get("Category", "") or row.get("Breadcrumb", "")).strip()
     if " > " in category:
-        category = category.split(" > ")[1] if len(category.split(" > ")) > 1 else category.split(" > ")[0]
+        # Extract the second-level category from breadcrumb
+        parts = category.split(" > ")
+        category = parts[1] if len(parts) > 1 else parts[0]
     
     existing_unspsc = str(row.get("UNSPSC", "")).strip()
-    unspsc_result = classify_unspsc(product_name, category, str(row.get("Description", "")), existing_unspsc if existing_unspsc and existing_unspsc != "nan" else None)
+    unspsc_result = classify_unspsc(product_name, category, str(row.get("Description", "") or row.get("Short Description", "") or row.get("Overview", "")), existing_unspsc if existing_unspsc and existing_unspsc != "nan" else None)
     
-    # Pricing
+    # Pricing - Get LIST PRICE based on vendor format
     list_price = 0
-    for price_field in ["List Price", "Original Price", "Price", "Unit Price", "Original_Price", "List_Price"]:
-        if row.get(price_field):
+    
+    if vendor_lower == "grainger":
+        # Grainger uses Original_Price as list price (List_Price is mostly NaN)
+        price_fields = ["Original_Price", "List_Price", "Price"]
+    elif vendor_lower == "motion":
+        # MOTION: List Price is the supplier list price, Original Price is Infosys purchase price
+        # We use List Price as our list_price for calculation
+        price_fields = ["List Price", "Original Price", "Price"]
+    else:
+        price_fields = ["Original Price", "List Price", "Price", "Unit Price"]
+    
+    for price_field in price_fields:
+        if row.get(price_field) is not None:
             try:
-                price_str = str(row.get(price_field)).replace("$", "").replace(",", "").strip()
-                if price_str and price_str != "nan":
-                    list_price = float(price_str)
+                price_val = row.get(price_field)
+                if isinstance(price_val, (int, float)) and not pd.isna(price_val):
+                    list_price = float(price_val)
                     if list_price > 0:
                         break
+                else:
+                    price_str = str(price_val).replace("$", "").replace(",", "").strip()
+                    if price_str and price_str != "nan":
+                        list_price = float(price_str)
+                        if list_price > 0:
+                            break
             except (ValueError, TypeError):
                 continue
     
-    # Get category discount
+    # Get category discount - DIFFERENT LOGIC PER VENDOR
     category_discount = 0
-    if category_discounts and category:
-        # Try exact match first
-        category_discount = category_discounts.get(category, 0)
-        # Try partial match
+    
+    if vendor_lower == "motion":
+        # MOTION: Use the per-product discount from the "Discount" column
+        product_discount = row.get("Discount")
+        if product_discount is not None and not pd.isna(product_discount):
+            try:
+                category_discount = float(product_discount)
+                # Handle negative discounts (markup) - set to 0
+                if category_discount < 0:
+                    category_discount = 0
+            except (ValueError, TypeError):
+                category_discount = MOTION_CATEGORY_DISCOUNTS.get(category.lower(), MOTION_CATEGORY_DISCOUNTS.get("default", 20.0))
+        else:
+            category_discount = MOTION_CATEGORY_DISCOUNTS.get(category.lower(), MOTION_CATEGORY_DISCOUNTS.get("default", 20.0))
+    
+    elif vendor_lower == "grainger":
+        # Grainger: Use category-based discounts
+        default_discounts = GRAINGER_CATEGORY_DISCOUNTS
+        
+        # First check provided discounts
+        if category_discounts and category:
+            category_discount = category_discounts.get(category, 0)
+            if category_discount == 0:
+                # Try partial match
+                category_lower = category.lower()
+                for cat_name, discount in category_discounts.items():
+                    if cat_name.lower() in category_lower or category_lower in cat_name.lower():
+                        category_discount = discount
+                        break
+        
+        # If still no discount, use default category discounts
         if category_discount == 0:
             category_lower = category.lower()
-            for cat_name, discount in category_discounts.items():
-                if cat_name.lower() in category_lower or category_lower in cat_name.lower():
+            for cat_keyword, discount in default_discounts.items():
+                if cat_keyword in category_lower:
                     category_discount = discount
                     break
+            if category_discount == 0:
+                category_discount = default_discounts.get("default", 20.0)
     
-    # Calculate pricing
+    else:  # Fastenal or generic
+        default_discounts = FASTENAL_CATEGORY_DISCOUNTS
+        if category_discounts and category:
+            category_discount = category_discounts.get(category, 0)
+        if category_discount == 0:
+            category_lower = category.lower()
+            for cat_keyword, discount in default_discounts.items():
+                if cat_keyword in category_lower:
+                    category_discount = discount
+                    break
+            if category_discount == 0:
+                category_discount = default_discounts.get("default", 20.0)
+    
+    # Calculate pricing with Danone Preferred Price formula
     pricing = calculate_danone_preferred_price(list_price, category_discount, vendor)
     
     # UOM and MoQ
