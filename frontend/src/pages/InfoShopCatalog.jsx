@@ -118,18 +118,22 @@ const ProductCard = ({ product, onAddToCart, punchoutMode }) => {
       className="group hover:shadow-xl transition-all duration-300 border border-slate-200 hover:border-[#007abf]/30 bg-white overflow-hidden h-full flex flex-col"
       data-testid={`product-card-${product.infoshop_part_number}`}
     >
-      {/* Image Section */}
-      <div className="relative aspect-square bg-white p-3 border-b border-slate-100">
-        {hasValidImage ? (
-          <img
-            src={product.primary_image}
-            alt={product.product_name}
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <NoPictureAvailable />
-        )}
+      {/* Image Section - Fixed 2x2 inch (51x51mm ≈ 192px) */}
+      <div className="relative bg-white p-2 border-b border-slate-100 flex items-center justify-center" style={{ height: '200px' }}>
+        <div className="w-[192px] h-[192px] flex items-center justify-center">
+          {hasValidImage ? (
+            <img
+              src={product.primary_image}
+              alt={product.product_name}
+              className="max-w-[192px] max-h-[192px] w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-300"
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className="w-[192px] h-[192px]">
+              <NoPictureAvailable />
+            </div>
+          )}
+        </div>
         
         {savings > 0 && (
           <Badge className="absolute top-2 left-2 bg-green-600 text-white text-xs font-bold px-2 py-1">
