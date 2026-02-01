@@ -243,8 +243,9 @@ class TestInfoShopPartNumbers:
         assert response.status_code == 200
         data = response.json()
         
-        assert "part_number" in data
-        part_num = data["part_number"]
+        # API returns infoshop_part_number field
+        assert "infoshop_part_number" in data
+        part_num = data["infoshop_part_number"]
         assert part_num.startswith("INF")
         assert "GR" in part_num  # Grainger code
         print(f"Generated part number: {part_num}")
@@ -259,46 +260,51 @@ class TestDeliveryDateAPI:
         assert response.status_code == 200
         data = response.json()
         
-        assert "minimum_date" in data
-        min_date = datetime.strptime(data["minimum_date"], "%Y-%m-%d")
+        # API returns minimum_delivery_date field
+        assert "minimum_delivery_date" in data
+        min_date = datetime.strptime(data["minimum_delivery_date"], "%Y-%m-%d")
         today = datetime.now()
         
         # Should be at least 10 days from now (accounting for weekends)
         days_diff = (min_date - today).days
         assert days_diff >= 10, f"Minimum date should be at least 10 days away, got {days_diff}"
-        print(f"Minimum delivery date: {data['minimum_date']} ({days_diff} days from now)")
+        print(f"Minimum delivery date: {data['minimum_delivery_date']} ({days_diff} days from now)")
 
 
 class TestPricingCalculation:
     """Test pricing calculation API"""
     
     def test_pricing_calculation(self):
-        """Test /api/infoshop/pricing/calculate endpoint"""
+        """Test /api/infoshop/pricing/calculate endpoint (uses Form data)"""
         response = requests.post(
             f"{BASE_URL}/api/infoshop/pricing/calculate",
-            json={
+            data={
                 "list_price": 100.0,
-                "category": "Bearings",
-                "vendor": "Grainger"
+                "category_discount": 20.0  # 20% category discount
             }
         )
         assert response.status_code == 200
         data = response.json()
         
-        # Check required fields
-        assert "list_price" in data
-        assert "danone_preferred_price" in data
-        assert "customer_savings_percent" in data
+        # Check required fields - API returns nested pricing object
+        assert "success" in data
+        assert data["success"] == True
+        assert "pricing" in data
+        
+        pricing = data["pricing"]
+        assert "list_price" in pricing
+        assert "danone_preferred_price" in pricing
+        assert "customer_savings_percent" in pricing
         
         # Verify pricing logic
-        assert data["list_price"] == 100.0
-        assert data["danone_preferred_price"] < 100.0  # Should have discount
-        assert data["customer_savings_percent"] > 0  # Should show savings
+        assert pricing["list_price"] == 100.0
+        assert pricing["danone_preferred_price"] < 100.0  # Should have discount
+        assert pricing["customer_savings_percent"] > 0  # Should show savings
         
         print(f"Pricing calculation:")
-        print(f"  List price: ${data['list_price']:.2f}")
-        print(f"  Danone price: ${data['danone_preferred_price']:.2f}")
-        print(f"  Savings: {data['customer_savings_percent']:.1f}%")
+        print(f"  List price: ${pricing['list_price']:.2f}")
+        print(f"  Danone price: ${pricing['danone_preferred_price']:.2f}")
+        print(f"  Savings: {pricing['customer_savings_percent']:.1f}%")
 
 
 class TestUNSPSCClassification:
@@ -313,12 +319,18 @@ class TestUNSPSCClassification:
         assert response.status_code == 200
         data = response.json()
         
-        assert "unspsc_code" in data
-        assert "confidence" in data
+        # API returns nested classification object
+        assert "success" in data
+        assert data["success"] == True
+        assert "classification" in data
+        
+        classification = data["classification"]
+        assert "unspsc_code" in classification
+        assert "confidence" in classification
         
         # UNSPSC code should be 8 digits
-        assert len(data["unspsc_code"]) == 8
-        print(f"UNSPSC classification: {data['unspsc_code']} (confidence: {data['confidence']})")
+        assert len(classification["unspsc_code"]) == 8
+        print(f"UNSPSC classification: {classification['unspsc_code']} (confidence: {classification['confidence']})")
 
 
 # Run tests
