@@ -683,8 +683,26 @@ const InfoShopCatalog = ({ punchoutSessionData, onBackToLanding }) => {
     fetchMinDate();
   }, []);
 
-  // Check for PunchOut session
+  // Check for PunchOut session - from props or URL
   useEffect(() => {
+    // Check if coming from App.js with punchout session data
+    if (punchoutSessionData?.token) {
+      setPunchoutMode(true);
+      setPunchoutSession(punchoutSessionData);
+      
+      // Verify session with backend
+      axios.get(`${API}/api/punchout/session/${punchoutSessionData.token}`)
+        .then((res) => {
+          setPunchoutSession({ ...punchoutSessionData, ...res.data });
+        })
+        .catch((err) => {
+          console.error("PunchOut session verification:", err);
+          // Still keep punchout mode active - session might be new
+        });
+      return;
+    }
+    
+    // Fallback: Check URL params directly
     const params = new URLSearchParams(window.location.search);
     const sessionToken = params.get("punchout_session") || params.get("session");
     
@@ -701,7 +719,7 @@ const InfoShopCatalog = ({ punchoutSessionData, onBackToLanding }) => {
           console.error("PunchOut session invalid:", err);
         });
     }
-  }, []);
+  }, [punchoutSessionData]);
 
   // Search products
   const searchProducts = useCallback(async () => {
