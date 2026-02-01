@@ -681,11 +681,6 @@ def search_products(
         # Build filter string
         filter_parts = []
         
-        # For default view (no query, first 3 pages), prioritize products with images
-        # This makes the catalog look richer
-        if not query and page < 3 and not (filters and any(filters.values())):
-            filter_parts.append("has_image:1")
-        
         if filters:
             if filters.get("category"):
                 filter_parts.append(f'category:"{filters["category"]}"')
