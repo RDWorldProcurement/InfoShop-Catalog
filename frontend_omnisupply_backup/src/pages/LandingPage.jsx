@@ -1,0 +1,853 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { Card, CardContent } from "../components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../components/ui/dialog";
+import { useLanguage } from "../i18n/LanguageContext";
+import axios from "axios";
+import { API } from "../App";
+import {
+  Package, Settings, ShieldCheck, Truck, Zap, Globe, ChevronRight,
+  Building2, BarChart3, Users, CheckCircle, ArrowRight, Layers,
+  Wrench, Cpu, Cog, Droplet, Lightbulb, Shield, Briefcase,
+  Palette, Monitor, Box, Factory, Languages, Play, Search, ShoppingCart, ExternalLink,
+  X, ChevronLeft, LogIn, Award, RefreshCw, Upload, FileText, Coins,
+  FileUp, Handshake, Brain, DollarSign, Calculator, Scale, Receipt,
+  TrendingUp, Phone, Mail, Clock, Flag, Star
+} from "lucide-react";
+
+// Demo Walkthrough Slides
+const DEMO_SLIDES = [
+  {
+    id: 1,
+    title: "Welcome to OMNISupply.io",
+    subtitle: "Your Complete Procurement Solution",
+    description: "Access catalogs, upload quotations for AI analysis, or request end-to-end sourcing support. All in one unified platform powered by Infosys BPM.",
+    icon: Package,
+    color: "bg-[#007CC3]",
+    features: [
+      "30M+ MRO Products & 100K+ Services",
+      "AI-Powered Quotation Analysis",
+      "End-to-End Sourcing Support",
+      "Multi-Language Support (8 Languages)"
+    ]
+  },
+  {
+    id: 2,
+    title: "Three Ways to Procure",
+    subtitle: "Choose Your Path",
+    description: "Whether you need to browse catalogs, analyze existing quotations, or get full sourcing support - we've got you covered.",
+    icon: Layers,
+    color: "bg-green-600",
+    steps: [
+      { step: 1, title: "Browse Catalog", desc: "Search 30M+ products & services with preferred pricing" },
+      { step: 2, title: "Upload Quotation", desc: "AI extracts data, benchmarks prices, verifies tax" },
+      { step: 3, title: "Request Sourcing", desc: "Let Infosys handle end-to-end procurement" }
+    ]
+  },
+  {
+    id: 3,
+    title: "AI-Powered Analysis",
+    subtitle: "Intelligent Document Processing",
+    description: "Our AI extracts data from quotations in 8 languages, automatically benchmarks prices for products and services against market data, and verifies tax compliance.",
+    icon: Brain,
+    color: "bg-purple-600",
+    features: [
+      "Automatic data extraction from any format",
+      "Price benchmarking against market data",
+      "Tax verification with Avalara integration",
+      "Flag high-price items for negotiation"
+    ]
+  },
+  {
+    id: 4,
+    title: "Flexible Payment Models",
+    subtitle: "Choose How to Pay",
+    description: "Select the payment model that works best for your organization.",
+    icon: DollarSign,
+    color: "bg-amber-600",
+    options: [
+      { icon: Building2, title: "Infosys Limited", desc: "One vendor model - simplified invoicing" },
+      { icon: Globe, title: "ProPay World Wide Inc.", desc: "Global payment processing partner" },
+      { icon: Receipt, title: "Direct Payment", desc: "You pay supplier directly after approval" }
+    ]
+  },
+  {
+    id: 5,
+    title: "Enterprise Integration",
+    subtitle: "Seamless ERP Connectivity",
+    description: "Transfer approved purchases directly to your ERP system with one click.",
+    icon: Zap,
+    color: "bg-indigo-600",
+    integrations: ["Coupa", "SAP Ariba", "SAP ERP", "Ivalua", "Oracle"],
+    benefits: [
+      "PunchOut Catalog Support",
+      "Automated PO Generation",
+      "Invoice Reconciliation",
+      "Spend Analytics"
+    ]
+  }
+];
+
+// Stats data - labels will be translated dynamically
+const PLATFORM_STATS = [
+  { value: "$2B+", labelKey: "annualSpend", icon: TrendingUp },
+  { value: "500+", labelKey: "enterpriseClients", icon: Building2 },
+  { value: "35%", labelKey: "averageSavings", icon: DollarSign },
+  { value: "8", labelKey: "languagesSupported", icon: Languages }
+];
+
+// AI Features - titles and descriptions will be translated dynamically
+const AI_FEATURES = [
+  {
+    titleKey: "aiDocumentAnalysis",
+    descKey: "aiDocumentAnalysisDesc",
+    icon: Brain,
+    image: "https://static.prod-images.emergentagent.com/jobs/79f5bbcd-e8f5-438b-a126-c907b5b0d5c1/images/346c9a436d1d66f5e8563a435f94959de02b5c5bf41115e3286cdcecccd3c5f3.png"
+  },
+  {
+    titleKey: "priceBenchmarkingTitle",
+    descKey: "priceBenchmarkingDesc",
+    icon: Scale,
+    image: "https://static.prod-images.emergentagent.com/jobs/79f5bbcd-e8f5-438b-a126-c907b5b0d5c1/images/306c05101cbe4df4c393745673f3a071a7c5f341ca6318db849abe2d96aa3f93.png"
+  },
+  {
+    titleKey: "taxIntelligence",
+    descKey: "taxIntelligenceDesc",
+    icon: Calculator,
+    image: "https://static.prod-images.emergentagent.com/jobs/79f5bbcd-e8f5-438b-a126-c907b5b0d5c1/images/5db023814a718c6cca4ec68ea7e3bf6cd7ecd290fe6f51ccacd05a17d5766afa.png"
+  },
+  {
+    titleKey: "tacticalSourcing",
+    descKey: "tacticalSourcingDesc",
+    icon: Handshake,
+    image: "https://static.prod-images.emergentagent.com/jobs/79f5bbcd-e8f5-438b-a126-c907b5b0d5c1/images/7286e691789ed3cbf5871823fda4bb78123907ed075f04cb2d047cedad39f046.png"
+  }
+];
+
+// How it works steps - titles and descriptions will be translated dynamically
+const PROCESS_STEPS = [
+  { step: "1", titleKey: "step1Title", descKey: "step1Desc", icon: Upload },
+  { step: "2", titleKey: "step2Title", descKey: "step2Desc", icon: Brain },
+  { step: "3", titleKey: "step3Title", descKey: "step3Desc", icon: Flag },
+  { step: "4", titleKey: "step4Title", descKey: "step4Desc", icon: ShoppingCart }
+];
+
+// Payment models - will be translated dynamically using keys
+const PAYMENT_MODELS = [
+  {
+    nameKey: "infosysLimited",
+    subtitleKey: "oneVendorModel",
+    descKey: "infosysLimitedDesc",
+    logo: "https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png",
+    color: "#007CC3"
+  },
+  {
+    nameKey: "propayWorldwide",
+    subtitleKey: "paymentProcessingPartner",
+    descKey: "propayDesc",
+    logo: "https://customer-assets.emergentagent.com/job_procure-ai-fusion/artifacts/tst2i955_ProPay.ai%20Logo%202.svg",
+    color: "#10B981"
+  },
+  {
+    nameKey: "customerDirectPayment",
+    subtitleKey: "directPayment",
+    descKey: "customerDirectDesc",
+    logo: null,
+    color: "#F59E0B"
+  }
+];
+
+// Supported languages
+const SUPPORTED_LANGUAGES = [
+  { code: "en", name: "English", flag: "🇺🇸" },
+  { code: "fr", name: "French", flag: "🇫🇷" },
+  { code: "de", name: "German", flag: "🇩🇪" },
+  { code: "es", name: "Spanish", flag: "🇪🇸" },
+  { code: "it", name: "Italian", flag: "🇮🇹" },
+  { code: "nl", name: "Dutch", flag: "🇳🇱" },
+  { code: "zh", name: "Chinese", flag: "🇨🇳" },
+  { code: "pt", name: "Portuguese", flag: "🇵🇹" }
+];
+
+const INTEGRATIONS = [
+  { name: "Coupa", color: "#0070C0", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/203af02878e8462b8b478e5a388300e13644b9c66a580240853a8c1b1b16421b.png" },
+  { name: "SAP Ariba", color: "#F0AB00", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/242c396695ed95e8c682ce4b9ab4fd164cefc30b4931d7acd112693b2b4be0bc.png" },
+  { name: "SAP ERP", color: "#0077B5", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/193fe369db8e5863b7e8cf1eef92e1169fc8cffa6c81ec14dc0438ca36ac2a22.png" },
+  { name: "Ivalua", color: "#00B2A9", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/16910d5da96ec608f2ab781af7b863dc269065f5f64d1996288d24be5423b5f1.png" },
+  { name: "Oracle", color: "#F80000", logo: "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/68bc01c43c6ce5e440fa07f6f3139ab989a0401f81edca69eb86dafb4a1b0870.png" },
+];
+
+// OMNISupply.io Logo (Icon Only - No Text)
+const OMNISUPPLY_LOGO = "https://static.prod-images.emergentagent.com/jobs/d1a8d9bf-4869-463a-9b82-69772febaffb/images/5544120fa58b5db3f9b4ad8c6dafa2c32057f9ac5ad4be02779d98746bd4131d.png";
+
+const LandingPage = () => {
+  const navigate = useNavigate();
+  const { t, language, changeLanguage, languageOptions, currency } = useLanguage();
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img 
+                src="https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png" 
+                alt="Infosys BPM"
+                className="h-8"
+              />
+              <div className="h-6 w-px bg-slate-300"></div>
+              <div className="flex items-center gap-3">
+                <img 
+                  src={OMNISUPPLY_LOGO}
+                  alt="OMNISupply.io"
+                  className="h-12 w-12 object-contain"
+                />
+                <span className="font-bold text-xl text-slate-900" style={{ fontFamily: 'Manrope' }}>
+                  OMNI<span className="text-[#007CC3]">Supply</span>.io
+                </span>
+              </div>
+            </div>
+            
+            <div className="hidden md:flex items-center gap-6">
+              <a href="#features" className="text-slate-600 hover:text-[#007CC3] font-medium">{t.landing.navFeatures}</a>
+              <a href="#how-it-works" className="text-slate-600 hover:text-[#007CC3] font-medium">{t.landing.navHowItWorks}</a>
+              <a href="#payment" className="text-slate-600 hover:text-[#007CC3] font-medium">{t.landing.navPaymentOptions}</a>
+              
+              {/* Language Selector */}
+              <Select value={language} onValueChange={changeLanguage}>
+                <SelectTrigger className="w-[130px] border-slate-200">
+                  <Globe className="w-4 h-4 mr-2 text-slate-500" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {languageOptions.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      <span className="flex items-center gap-2">
+                        <span>{lang.flag}</span>
+                        <span>{lang.name}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Button 
+                variant="outline" 
+                className="border-[#007CC3] text-[#007CC3] hover:bg-[#007CC3] hover:text-white"
+                onClick={() => navigate("/login")}
+              >
+                {t.landing.signIn}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section - 4 Options with AI Agent Featured */}
+      <section className="relative py-16 lg:py-24 overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#007CC3]/5 via-white to-purple-50"></div>
+        
+        <div className="relative max-w-7xl mx-auto px-6">
+          {/* Hero Header */}
+          <div className="text-center mb-12">
+            <Badge className="mb-4 bg-[#007CC3]/10 text-[#007CC3] border-[#007CC3]/20 px-4 py-1">
+              {t.landing.poweredBy}
+            </Badge>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6" style={{ fontFamily: 'Manrope' }}>
+              {t.landing.heroTitle}<br />
+              <span className="text-[#007CC3]">{t.landing.heroTitleHighlight}</span>
+            </h1>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+              {t.landing.heroSubtitle}
+            </p>
+            <div className="flex justify-center gap-4 mb-8">
+              <Button 
+                variant="outline"
+                className="gap-2"
+                onClick={() => { setCurrentSlide(0); setDemoModalOpen(true); }}
+                data-testid="watch-demo-btn"
+              >
+                <Play className="w-4 h-4" /> {t.landing.watchDemo}
+              </Button>
+              <Button 
+                className="bg-[#007CC3] hover:bg-[#00629B] gap-2"
+                onClick={() => navigate("/login")}
+              >
+                {t.landing.getStarted} <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Featured: AI Procurement Agent Card */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-purple-500 bg-gradient-to-br from-slate-900 via-purple-900 to-blue-900">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-cyan-500 to-blue-500"></div>
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
+              <CardContent className="relative p-8">
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                  {/* AI Visual */}
+                  <div className="flex-shrink-0">
+                    <div className="relative">
+                      <div className="w-24 h-24 bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-110 transition-transform">
+                        <Brain className="w-12 h-12 text-white" />
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center animate-pulse">
+                        <Zap className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="flex items-center gap-2 justify-center md:justify-start mb-2">
+                      <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 px-3">
+                        NEW
+                      </Badge>
+                      <Badge variant="outline" className="border-purple-400 text-purple-300">
+                        GPT-5.2 + Claude + Gemini
+                      </Badge>
+                    </div>
+                    <h3 className="text-2xl md:text-3xl font-bold text-white mb-3" style={{ fontFamily: 'Manrope' }}>
+                      Advanced AI-Driven Procurement
+                    </h3>
+                    <p className="text-slate-300 mb-4 text-base">
+                      Tell us what you need in your own words. Our intelligent AI agent, powered by three leading LLMs, 
+                      will understand your requirements and guide you to the right solution — whether it's finding products, 
+                      analyzing quotations, or connecting you with sourcing experts.
+                    </p>
+                    <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-6">
+                      <div className="flex items-center gap-2 text-sm text-slate-300 bg-white/10 px-3 py-1.5 rounded-full">
+                        <CheckCircle className="w-4 h-4 text-green-400" /> Natural Language Understanding
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-slate-300 bg-white/10 px-3 py-1.5 rounded-full">
+                        <CheckCircle className="w-4 h-4 text-green-400" /> Intelligent Routing
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-slate-300 bg-white/10 px-3 py-1.5 rounded-full">
+                        <CheckCircle className="w-4 h-4 text-green-400" /> Instant Results
+                      </div>
+                    </div>
+                    <Button 
+                      size="lg"
+                      className="bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 hover:from-purple-600 hover:via-blue-600 hover:to-cyan-600 text-white shadow-lg shadow-purple-500/25"
+                      onClick={() => navigate("/login?redirect=ai-agent")}
+                      data-testid="ai-agent-btn"
+                    >
+                      <Brain className="w-5 h-5 mr-2" /> Start AI Conversation
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Three Option Cards */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {/* Option 1: Browse Catalog */}
+            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-[#007CC3]">
+              <div className="absolute top-0 left-0 right-0 h-2 bg-[#007CC3]"></div>
+              <CardContent className="p-6">
+                <div className="w-14 h-14 bg-[#007CC3]/10 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Search className="w-7 h-7 text-[#007CC3]" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
+                  {t.landing.browseCatalog}
+                </h3>
+                <p className="text-[#007CC3] font-semibold text-sm mb-2 flex items-center gap-1">
+                  <ShoppingCart className="w-4 h-4" /> {t.landing.punchoutEnabledCatalog || "PunchOut Enabled Catalog"}
+                </p>
+                <p className="text-slate-600 mb-4 text-sm">
+                  {t.landing.browseCatalogDesc}
+                </p>
+                <ul className="space-y-2 mb-6 text-sm">
+                  <li className="flex items-center gap-2 text-slate-600">
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.multiBrandComparison}
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-600">
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.realTimeInventory}
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-600">
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.punchOutToERP}
+                  </li>
+                </ul>
+                <Button 
+                  className="w-full bg-[#007CC3] hover:bg-[#00629B]"
+                  onClick={() => navigate("/login")}
+                  data-testid="browse-catalog-btn"
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" /> {t.landing.startBrowsing}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Option 2: AI Enabled Intelligent Buying */}
+            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-purple-500">
+              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500"></div>
+              <CardContent className="p-6">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-blue-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FileUp className="w-7 h-7 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
+                  {t.landing.aiEnabledIntelligentBuying || "AI Enabled Intelligent Buying"}
+                </h3>
+                <p className="text-purple-600 font-semibold text-sm mb-2 flex items-center gap-1">
+                  <Brain className="w-4 h-4" /> {t.landing.aiIntelligentBuying}
+                </p>
+                <p className="text-slate-600 mb-4 text-sm">
+                  {t.landing.oneOffPurchasesDesc}
+                </p>
+                <ul className="space-y-2 mb-6 text-sm">
+                  <li className="flex items-center gap-2 text-slate-600">
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.aiDataExtraction}
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-600">
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.priceBenchmarking}
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-600">
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.taxVerification}
+                  </li>
+                </ul>
+                <Button 
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  onClick={() => navigate("/login?redirect=upload-quotation")}
+                  data-testid="upload-quotation-btn"
+                >
+                  <Upload className="w-4 h-4 mr-2" /> {t.landing.uploadQuotation}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Option 3: Managed Services / Buying Desk */}
+            <Card className="relative overflow-hidden group hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-[#FF6B00]">
+              <div className="absolute top-0 left-0 right-0 h-2 bg-[#FF6B00]"></div>
+              <CardContent className="p-6">
+                <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <Handshake className="w-7 h-7 text-[#FF6B00]" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
+                  {t.landing.managedServices}
+                </h3>
+                <p className="text-[#FF6B00] font-semibold text-sm mb-2 flex items-center gap-1">
+                  <Handshake className="w-4 h-4" /> {t.landing.infosysBuyingDesk || "Infosys Buying Desk"}
+                </p>
+                <p className="text-slate-600 mb-4 text-sm">
+                  {t.landing.managedServicesDesc}
+                </p>
+                <ul className="space-y-2 mb-6 text-sm">
+                  <li className="flex items-center gap-2 text-slate-600">
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.supplierIdentification}
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-600">
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.rfqManagement}
+                  </li>
+                  <li className="flex items-center gap-2 text-slate-600">
+                    <CheckCircle className="w-4 h-4 text-green-500" /> {t.landing.expertNegotiation}
+                  </li>
+                </ul>
+                <Button 
+                  className="w-full bg-[#FF6B00] hover:bg-[#E65000]"
+                  onClick={() => navigate("/login?redirect=sourcing-support")}
+                  data-testid="sourcing-support-btn"
+                >
+                  <Handshake className="w-4 h-4 mr-2" /> {t.landing.requestBuyingDesk}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-12 bg-[#007CC3]">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {PLATFORM_STATS.map((stat, idx) => (
+              <div key={idx} className="text-center">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <stat.icon className="w-6 h-6 text-white" />
+                </div>
+                <p className="text-3xl md:text-4xl font-bold text-white mb-1" style={{ fontFamily: 'Manrope' }}>{stat.value}</p>
+                <p className="text-white/80 text-sm">{t.landing.platformStats[stat.labelKey]}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI Features Section */}
+      <section id="features" className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-purple-100 text-purple-700 border-purple-200">{t.landing.aiPowered}</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4" style={{ fontFamily: 'Manrope' }}>
+              {t.landing.aiProcurementIntelligence}
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              {t.landing.aiProcurementDesc}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {AI_FEATURES.map((feature, idx) => (
+              <Card key={idx} className="overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="h-40 overflow-hidden">
+                  <img 
+                    src={feature.image} 
+                    alt={t.landing[feature.titleKey]}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-[#007CC3]/10 rounded-lg flex items-center justify-center">
+                      <feature.icon className="w-5 h-5 text-[#007CC3]" />
+                    </div>
+                    <h3 className="font-bold text-slate-900">{t.landing[feature.titleKey]}</h3>
+                  </div>
+                  <p className="text-sm text-slate-600">{t.landing[feature.descKey]}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Multi-Language Support */}
+      <section className="py-12 bg-white border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-8">
+            <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
+              {t.landing.multiLanguageSupport}
+            </h3>
+            <p className="text-slate-600">
+              {t.landing.multiLanguageSupportDesc}
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <div 
+                key={lang.code}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full hover:bg-[#007CC3]/10 transition-colors"
+              >
+                <span className="text-xl">{lang.flag}</span>
+                <span className="font-medium text-slate-700">{lang.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how-it-works" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-green-100 text-green-700 border-green-200">{t.landing.howItWorks}</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4" style={{ fontFamily: 'Manrope' }}>
+              {t.landing.howItWorks}
+            </h2>
+            <p className="text-lg text-slate-600">
+              {t.landing.howItWorksDesc}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8">
+            {PROCESS_STEPS.map((step, idx) => (
+              <div key={idx} className="relative text-center">
+                {idx < PROCESS_STEPS.length - 1 && (
+                  <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-slate-200"></div>
+                )}
+                <div className="w-16 h-16 bg-[#007CC3] rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold relative z-10">
+                  {step.step}
+                </div>
+                <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <step.icon className="w-6 h-6 text-[#007CC3]" />
+                </div>
+                <h3 className="font-bold text-slate-900 mb-2">{t.landing[step.titleKey]}</h3>
+                <p className="text-sm text-slate-600">{t.landing[step.descKey]}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Payment Options */}
+      <section id="payment" className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-amber-100 text-amber-700 border-amber-200">{t.landing.flexiblePaymentOptions}</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4" style={{ fontFamily: 'Manrope' }}>
+              {t.landing.flexiblePaymentOptions}
+            </h2>
+            <p className="text-lg text-slate-600">
+              {t.landing.flexiblePaymentOptionsDesc}
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {PAYMENT_MODELS.map((model, idx) => (
+              <Card key={idx} className="overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="h-2" style={{ backgroundColor: model.color }}></div>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    {model.logo ? (
+                      <img src={model.logo} alt={t.landing.paymentModels?.[model.nameKey] || model.nameKey} className="h-8" />
+                    ) : (
+                      <div 
+                        className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
+                        style={{ backgroundColor: model.color }}
+                      >
+                        {(t.landing.paymentModels?.[model.nameKey] || "C").charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-bold text-slate-900">{t.landing.paymentModels?.[model.nameKey] || model.nameKey}</h3>
+                      <p className="text-sm text-slate-500">{t.landing[model.subtitleKey]}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600">{t.landing.paymentModels?.[model.descKey] || model.descKey}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ERP Integrations */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h3 className="text-xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'Manrope' }}>
+            {t.landing.erpIntegration}
+          </h3>
+          <p className="text-slate-600 mb-8">{t.landing.erpIntegrationDesc}</p>
+          <div className="flex flex-wrap justify-center gap-6">
+            {INTEGRATIONS.map((integration, idx) => (
+              <div 
+                key={idx} 
+                className="flex flex-col items-center gap-3 px-6 py-5 bg-white border-2 rounded-xl hover:shadow-lg transition-all min-w-[140px]"
+                style={{ borderColor: integration.color }}
+              >
+                <img 
+                  src={integration.logo}
+                  alt={integration.name}
+                  className="w-16 h-16 object-contain"
+                />
+                <span className="font-semibold text-slate-700 text-sm">{integration.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-br from-[#007CC3] to-[#00629B]">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6" style={{ fontFamily: 'Manrope' }}>
+            {t.landing.readyToTransform}
+          </h2>
+          <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
+            {t.landing.readyToTransformDesc}
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button 
+              size="lg"
+              className="bg-white text-[#007CC3] hover:bg-slate-100 px-8"
+              onClick={() => navigate("/login")}
+            >
+              {t.landing.getStarted} <ArrowRight className="ml-2 w-5 h-5" />
+            </Button>
+            <Button 
+              size="lg"
+              variant="outline"
+              className="border-white text-white hover:bg-white/10 px-8"
+            >
+              <Phone className="mr-2 w-5 h-5" /> {t.landing.contactSales}
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 bg-slate-900">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-4">
+              <div className="bg-white px-3 py-2 rounded-lg">
+                <img 
+                  src="https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png" 
+                  alt="Infosys BPM"
+                  className="h-8"
+                />
+              </div>
+              <div className="h-6 w-px bg-slate-700"></div>
+              <div className="flex items-center gap-3">
+                <img 
+                  src={OMNISUPPLY_LOGO}
+                  alt="OMNISupply.io"
+                  className="h-12 w-12 object-contain"
+                />
+                <span className="font-bold text-white text-lg" style={{ fontFamily: 'Manrope' }}>OMNISupply.io</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-6 text-slate-400 text-sm">
+              <a href="https://www.infosys.com/privacy-statement.html" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t.landing.privacyPolicy}</a>
+              <a href="https://www.infosys.com/terms-of-use.html" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t.landing.termsOfService}</a>
+              <a href="https://www.infosysbpm.com/contact.html" target="_blank" rel="noopener noreferrer" className="hover:text-white">{t.landing.contactUs}</a>
+            </div>
+            <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Infosys BPM Limited. {t.landing.allRightsReserved}</p>
+          </div>
+        </div>
+      </footer>
+
+      {/* Demo Walkthrough Modal */}
+      <Dialog open={demoModalOpen} onOpenChange={setDemoModalOpen}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white">
+          <div className="relative">
+            <button 
+              onClick={() => setDemoModalOpen(false)}
+              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="min-h-[500px]">
+              {DEMO_SLIDES.map((slide, idx) => (
+                <div key={slide.id} className={`${currentSlide === idx ? 'block' : 'hidden'}`}>
+                  <div className={`${slide.color} p-8 text-white`}>
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+                        <slide.icon className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <p className="text-white/80 text-sm font-medium">{slide.subtitle}</p>
+                        <h3 className="text-2xl font-bold" style={{ fontFamily: 'Manrope' }}>{slide.title}</h3>
+                      </div>
+                    </div>
+                    <p className="text-white/90">{slide.description}</p>
+                  </div>
+
+                  <div className="p-8">
+                    {slide.features && (
+                      <div className="space-y-3">
+                        {slide.features.map((feature, fIdx) => (
+                          <div key={fIdx} className="flex items-center gap-3">
+                            <div className={`w-6 h-6 rounded-full ${slide.color} flex items-center justify-center`}>
+                              <CheckCircle className="w-4 h-4 text-white" />
+                            </div>
+                            <span className="text-slate-700">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {slide.steps && (
+                      <div className="space-y-4">
+                        {slide.steps.map((step) => (
+                          <div key={step.step} className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl">
+                            <div className={`w-10 h-10 ${slide.color} rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}>
+                              {step.step}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-slate-900">{step.title}</h4>
+                              <p className="text-slate-500 text-sm">{step.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {slide.options && (
+                      <div className="grid grid-cols-3 gap-4">
+                        {slide.options.map((option, oIdx) => (
+                          <div key={oIdx} className="p-4 border border-slate-200 rounded-xl text-center">
+                            <div className={`w-10 h-10 ${slide.color} rounded-lg flex items-center justify-center text-white mx-auto mb-3`}>
+                              <option.icon className="w-5 h-5" />
+                            </div>
+                            <h4 className="font-semibold text-slate-900 mb-1 text-sm">{option.title}</h4>
+                            <p className="text-slate-500 text-xs">{option.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {slide.integrations && (
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {slide.integrations.map((int, iIdx) => (
+                            <Badge key={iIdx} variant="secondary" className="bg-indigo-100 text-indigo-700 px-3 py-1">
+                              {int}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          {slide.benefits.map((benefit, bIdx) => (
+                            <div key={bIdx} className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-indigo-500" />
+                              <span className="text-slate-700 text-sm">{benefit}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-slate-200 p-4 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-2">
+                {DEMO_SLIDES.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`w-2.5 h-2.5 rounded-full transition-all ${
+                      currentSlide === idx ? 'bg-[#007CC3] w-6' : 'bg-slate-300 hover:bg-slate-400'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
+                  disabled={currentSlide === 0}
+                  className="gap-1"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Previous
+                </Button>
+                
+                {currentSlide < DEMO_SLIDES.length - 1 ? (
+                  <Button
+                    size="sm"
+                    onClick={() => setCurrentSlide(currentSlide + 1)}
+                    className="bg-[#007CC3] hover:bg-[#00629B] gap-1"
+                  >
+                    Next <ChevronRight className="w-4 h-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => { setDemoModalOpen(false); navigate('/login'); }}
+                    className="bg-[#FF9900] hover:bg-[#FF6B00] gap-1"
+                  >
+                    Get Started <ArrowRight className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default LandingPage;
