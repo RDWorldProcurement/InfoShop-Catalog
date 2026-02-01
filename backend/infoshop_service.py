@@ -605,13 +605,27 @@ def transform_product_for_infoshop(
         if product_discount is not None and not pd.isna(product_discount):
             try:
                 category_discount = float(product_discount)
-                # Handle negative discounts (markup) - set to 0
-                if category_discount < 0:
-                    category_discount = 0
+                # Handle negative or zero discounts - apply category default
+                if category_discount <= 0:
+                    # Apply category-based default discount to ensure customer savings
+                    category_lower = category.lower()
+                    for cat_keyword, discount in MOTION_CATEGORY_DISCOUNTS.items():
+                        if cat_keyword != "default" and cat_keyword in category_lower:
+                            category_discount = discount
+                            break
+                    if category_discount <= 0:
+                        category_discount = MOTION_CATEGORY_DISCOUNTS.get("default", 20.0)
             except (ValueError, TypeError):
                 category_discount = MOTION_CATEGORY_DISCOUNTS.get(category.lower(), MOTION_CATEGORY_DISCOUNTS.get("default", 20.0))
         else:
-            category_discount = MOTION_CATEGORY_DISCOUNTS.get(category.lower(), MOTION_CATEGORY_DISCOUNTS.get("default", 20.0))
+            # No discount in data - apply category default
+            category_lower = category.lower()
+            for cat_keyword, discount in MOTION_CATEGORY_DISCOUNTS.items():
+                if cat_keyword != "default" and cat_keyword in category_lower:
+                    category_discount = discount
+                    break
+            if category_discount <= 0:
+                category_discount = MOTION_CATEGORY_DISCOUNTS.get("default", 20.0)
     
     elif vendor_lower == "grainger":
         # Grainger: Use category-based discounts
