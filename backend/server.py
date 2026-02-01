@@ -6943,6 +6943,486 @@ async def ai_agent_conversation(
             "intelligent_guidance": None
         }
 
+# ============================================
+# INFOSHOP CATALOG ENTERPRISE ENDPOINTS
+# ============================================
+
+class InfoShopProductRequest(BaseModel):
+    """Request model for InfoShop product transformation"""
+    products: List[Dict[str, Any]]
+    vendor: str
+    category_discounts: Optional[Dict[str, float]] = None
+
+class PartnerDiscountUpload(BaseModel):
+    """Request model for partner discount upload"""
+    vendor: str
+    discounts: Dict[str, float]  # Category Name -> Discount %
+
+class ShippingInfo(BaseModel):
+    """Shipping information for cart transfer"""
+    shipping_address: str
+    delivery_attention: str
+    requested_delivery_date: str
+    special_instructions: Optional[str] = None
+
+class InfoShopCartTransfer(BaseModel):
+    """Cart transfer request with shipping info"""
+    session_token: str
+    items: List[Dict[str, Any]]
+    shipping_info: ShippingInfo
+
+
+@api_router.get("/infoshop/partners")
+async def get_infoshop_partners():
+    """Get active and coming soon partners for InfoShop"""
+    return {
+        "active_partners": ACTIVE_PARTNERS,
+        "coming_soon_partners": COMING_SOON_PARTNERS,
+        "total_coming_soon": sum(len(partners) for partners in COMING_SOON_PARTNERS.values())
+    }
+
+
+@api_router.post("/infoshop/partner-discounts/upload")
+async def upload_partner_discounts(file: UploadFile = File(...), vendor: str = Form(...)):
+    """
+    Upload category discounts for a vendor
+    Excel format: Category Name, Discount %
+    """
+    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
+        raise HTTPException(status_code=400, detail="File must be Excel (.xlsx, .xls) or CSV (.csv)")
+    
+    try:
+        content = await file.read()
+        
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(content))
+        else:
+            df = pd.read_excel(io.BytesIO(content))
+        
+        # Find category and discount columns
+        category_col = None
+        discount_col = None
+        
+        for col in df.columns:
+            col_lower = col.lower()
+            if 'category' in col_lower:
+                category_col = col
+            if 'discount' in col_lower or '%' in col_lower:
+                discount_col = col
+        
+        if not category_col or not discount_col:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Could not find Category and Discount columns. Found: {list(df.columns)}"
+            )
+        
+        # Build discount dictionary
+        discounts = {}
+        for _, row in df.iterrows():
+            category = str(row[category_col]).strip()
+            if category and category != "nan":
+                try:
+                    discount = float(str(row[discount_col]).replace('%', '').strip())
+                    discounts[category] = discount
+                except (ValueError, TypeError):
+                    continue
+        
+        # Load into memory
+        load_partner_discounts(vendor, discounts)
+        
+        # Save to database for persistence
+        await db.partner_discounts.update_one(
+            {"vendor": vendor.lower()},
+            {
+                "$set": {
+                    "vendor": vendor.lower(),
+                    "vendor_display": vendor,
+                    "discounts": discounts,
+                    "category_count": len(discounts),
+                    "uploaded_at": datetime.now(timezone.utc).isoformat(),
+                    "filename": file.filename
+                }
+            },
+            upsert=True
+        )
+        
+        return {
+            "success": True,
+            "vendor": vendor,
+            "categories_loaded": len(discounts),
+            "sample_discounts": dict(list(discounts.items())[:5]),
+            "message": f"Loaded {len(discounts)} category discounts for {vendor}"
+        }
+        
+    except Exception as e:
+        logger.error(f"Partner discount upload error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.get("/infoshop/partner-discounts/{vendor}")
+async def get_vendor_discounts(vendor: str):
+    """Get category discounts for a vendor"""
+    # Try memory first
+    discounts = get_partner_discounts(vendor)
+    
+    # Try database if not in memory
+    if not discounts:
+        doc = await db.partner_discounts.find_one({"vendor": vendor.lower()})
+        if doc:
+            discounts = doc.get("discounts", {})
+            load_partner_discounts(vendor, discounts)
+    
+    return {
+        "vendor": vendor,
+        "discounts": discounts,
+        "category_count": len(discounts)
+    }
+
+
+@api_router.get("/infoshop/partner-discounts")
+async def get_all_vendor_discounts():
+    """Get all loaded partner discounts"""
+    # Load from database
+    cursor = db.partner_discounts.find({})
+    all_discounts = {}
+    
+    async for doc in cursor:
+        vendor = doc.get("vendor_display", doc.get("vendor"))
+        all_discounts[vendor] = {
+            "discounts": doc.get("discounts", {}),
+            "category_count": len(doc.get("discounts", {})),
+            "uploaded_at": doc.get("uploaded_at")
+        }
+        # Load into memory
+        load_partner_discounts(vendor, doc.get("discounts", {}))
+    
+    return {
+        "vendors": list(all_discounts.keys()),
+        "data": all_discounts
+    }
+
+
+@api_router.post("/infoshop/catalog/upload")
+async def upload_infoshop_catalog(
+    file: UploadFile = File(...),
+    vendor: str = Form(...)
+):
+    """
+    Upload product catalog for InfoShop with enterprise transformations
+    
+    - Generates unique InfoShop Part Numbers
+    - Calculates Danone Preferred Pricing
+    - Auto-classifies UNSPSC codes
+    - Validates images
+    """
+    if not file.filename.endswith(('.xlsx', '.xls', '.csv')):
+        raise HTTPException(status_code=400, detail="File must be Excel (.xlsx, .xls) or CSV (.csv)")
+    
+    if vendor.lower() not in [p.lower() for p in ACTIVE_PARTNERS]:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Vendor '{vendor}' not in active partners: {ACTIVE_PARTNERS}"
+        )
+    
+    try:
+        content = await file.read()
+        
+        if file.filename.endswith('.csv'):
+            df = pd.read_csv(io.BytesIO(content))
+        else:
+            df = pd.read_excel(io.BytesIO(content))
+        
+        logger.info(f"Processing {len(df)} products from {vendor}")
+        
+        # Get vendor discounts
+        discounts = get_partner_discounts(vendor)
+        if not discounts:
+            # Try to load from database
+            doc = await db.partner_discounts.find_one({"vendor": vendor.lower()})
+            if doc:
+                discounts = doc.get("discounts", {})
+                load_partner_discounts(vendor, discounts)
+        
+        # Transform products
+        products = []
+        errors = []
+        
+        for idx, row in df.iterrows():
+            try:
+                product = transform_product_for_infoshop(row.to_dict(), vendor, discounts)
+                if product.get("product_name"):
+                    products.append(product)
+            except Exception as e:
+                errors.append({"row": idx, "error": str(e)})
+                continue
+        
+        if not products:
+            raise HTTPException(status_code=400, detail="No valid products found in file")
+        
+        # Index to Algolia if available
+        indexed_count = 0
+        if ALGOLIA_AVAILABLE:
+            try:
+                from algolia_service import algolia_client, PRODUCTS_INDEX
+                
+                # Batch save (500 at a time)
+                batch_size = 500
+                for i in range(0, len(products), batch_size):
+                    batch = products[i:i + batch_size]
+                    algolia_client.save_objects(PRODUCTS_INDEX, batch)
+                    indexed_count += len(batch)
+                    logger.info(f"Indexed batch {i//batch_size + 1}: {len(batch)} products")
+                
+            except Exception as e:
+                logger.error(f"Algolia indexing error: {e}")
+        
+        # Save to MongoDB as backup
+        if products:
+            await db.infoshop_products.insert_many(products)
+        
+        # Log upload
+        await db.infoshop_uploads.insert_one({
+            "vendor": vendor,
+            "filename": file.filename,
+            "total_rows": len(df),
+            "products_created": len(products),
+            "indexed_count": indexed_count,
+            "errors": len(errors),
+            "uploaded_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        # Sample products for response
+        sample = products[:3] if products else []
+        
+        return {
+            "success": True,
+            "vendor": vendor,
+            "total_rows": len(df),
+            "products_created": len(products),
+            "indexed_to_algolia": indexed_count,
+            "errors": len(errors),
+            "error_details": errors[:10] if errors else [],
+            "discounts_applied": len(discounts) > 0,
+            "sample_products": [
+                {
+                    "infoshop_part_number": p["infoshop_part_number"],
+                    "product_name": p["product_name"][:50] + "..." if len(p["product_name"]) > 50 else p["product_name"],
+                    "brand": p["brand"],
+                    "list_price": p["list_price"],
+                    "danone_preferred_price": p["danone_preferred_price"],
+                    "customer_savings_percent": p["customer_savings_percent"],
+                    "unspsc_code": p["unspsc_code"],
+                    "has_image": p["has_image"]
+                }
+                for p in sample
+            ]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"InfoShop catalog upload error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@api_router.post("/infoshop/pricing/calculate")
+async def calculate_infoshop_pricing(
+    list_price: float = Form(...),
+    category_discount: float = Form(...)
+):
+    """
+    Calculate Danone Preferred Price with sliding margin
+    
+    Demonstrates the pricing formula:
+    - Infosys Purchase Price = List Price × (1 - Discount%)
+    - Gross Margin = 5.92% to 9.2% (sliding based on price)
+    - Danone Preferred Price = Purchase Price × (1 + Margin%)
+    """
+    result = calculate_danone_preferred_price(list_price, category_discount)
+    
+    return {
+        "success": True,
+        "pricing": result,
+        "formula_explanation": {
+            "step1": f"List Price: ${result['list_price']}",
+            "step2": f"Category Discount: {result['category_discount_percent']}%",
+            "step3": f"Infosys Purchase Price: ${result['infosys_purchase_price']} (List × {100 - result['category_discount_percent']}%)",
+            "step4": f"Gross Margin: {result['gross_margin_percent']}% (sliding scale 5.92-9.2%)",
+            "step5": f"Danone Preferred Price: ${result['danone_preferred_price']}",
+            "customer_benefit": f"Customer saves {result['customer_savings_percent']}% vs List Price"
+        }
+    }
+
+
+@api_router.get("/infoshop/delivery/minimum-date")
+async def get_minimum_delivery_date():
+    """Get minimum delivery date (2 business weeks from today)"""
+    min_date = calculate_minimum_delivery_date()
+    return {
+        "minimum_delivery_date": min_date,
+        "business_days": 10,
+        "note": "Infosys will confirm promised delivery date once secured from partners"
+    }
+
+
+@api_router.post("/infoshop/delivery/validate")
+async def validate_requested_delivery(requested_date: str = Form(...)):
+    """Validate that requested delivery date is at least 2 business weeks out"""
+    result = validate_delivery_date(requested_date)
+    return result
+
+
+@api_router.post("/infoshop/cart/prepare-transfer")
+async def prepare_cart_transfer(request: InfoShopCartTransfer):
+    """
+    Prepare cart for transfer to Coupa with shipping information
+    
+    Validates:
+    - Shipping address is provided
+    - Delivery attention is provided
+    - Delivery date is at least 2 business weeks out
+    """
+    # Validate delivery date
+    date_validation = validate_delivery_date(request.shipping_info.requested_delivery_date)
+    if not date_validation["valid"]:
+        raise HTTPException(
+            status_code=400,
+            detail=date_validation["message"]
+        )
+    
+    # Validate shipping info
+    if not request.shipping_info.shipping_address or len(request.shipping_info.shipping_address) < 10:
+        raise HTTPException(
+            status_code=400,
+            detail="Please provide a complete shipping address"
+        )
+    
+    if not request.shipping_info.delivery_attention:
+        raise HTTPException(
+            status_code=400,
+            detail="Delivery attention (recipient name) is required"
+        )
+    
+    # Verify PunchOut session
+    session = get_punchout_session(request.session_token)
+    if not session:
+        session = await get_punchout_session_from_db(db, request.session_token)
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="PunchOut session not found or expired")
+    
+    # Calculate totals
+    total_items = len(request.items)
+    total_amount = sum(
+        item.get("danone_preferred_price", item.get("unit_price", 0)) * item.get("quantity", 1) 
+        for item in request.items
+    )
+    
+    # Update session with cart and shipping
+    session["cart_items"] = request.items
+    session["shipping_info"] = {
+        "address": request.shipping_info.shipping_address,
+        "attention": request.shipping_info.delivery_attention,
+        "requested_date": request.shipping_info.requested_delivery_date,
+        "special_instructions": request.shipping_info.special_instructions
+    }
+    session["cart_total"] = total_amount
+    session["ready_for_transfer"] = True
+    
+    # Save to database
+    await save_punchout_session_to_db(db, session)
+    
+    return {
+        "success": True,
+        "session_token": request.session_token,
+        "total_items": total_items,
+        "total_amount": round(total_amount, 2),
+        "shipping_info": {
+            "address": request.shipping_info.shipping_address,
+            "attention": request.shipping_info.delivery_attention,
+            "requested_date": request.shipping_info.requested_delivery_date,
+            "minimum_date": date_validation["minimum_date"]
+        },
+        "delivery_note": "Infosys will confirm promised delivery date once secured from partners",
+        "ready_for_transfer": True
+    }
+
+
+@api_router.get("/infoshop/unspsc/classify")
+async def classify_product_unspsc(
+    product_name: str,
+    category: str = None,
+    description: str = None
+):
+    """
+    AI-powered UNSPSC classification for a product
+    """
+    result = classify_unspsc(product_name, category, description)
+    return {
+        "success": True,
+        "classification": result
+    }
+
+
+@api_router.get("/infoshop/part-number/generate")
+async def generate_part_number(
+    vendor: str,
+    category: str,
+    product_name: str = ""
+):
+    """
+    Generate unique InfoShop Part Number
+    Format: INF + Vendor(2) + Category(3) + Random(5)
+    """
+    part_number = generate_infoshop_part_number(vendor, category, product_name)
+    return {
+        "success": True,
+        "infoshop_part_number": part_number,
+        "format": "INF + Vendor(2) + Category(3) + Random(5)"
+    }
+
+
+@api_router.get("/infoshop/stats")
+async def get_infoshop_stats():
+    """Get InfoShop catalog statistics"""
+    # Get counts from database
+    total_products = await db.infoshop_products.count_documents({})
+    
+    # Get vendor breakdown
+    pipeline = [
+        {"$group": {"_id": "$vendor", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}
+    ]
+    vendor_counts = await db.infoshop_products.aggregate(pipeline).to_list(100)
+    
+    # Get recent uploads
+    recent_uploads = await db.infoshop_uploads.find({}).sort("uploaded_at", -1).limit(5).to_list(5)
+    
+    # Get Algolia stats if available
+    algolia_stats = {}
+    if ALGOLIA_AVAILABLE:
+        try:
+            algolia_stats = get_index_stats()
+        except Exception as e:
+            logger.error(f"Algolia stats error: {e}")
+    
+    return {
+        "total_products": total_products,
+        "algolia_indexed": algolia_stats.get("total_products", 0),
+        "vendors": {item["_id"]: item["count"] for item in vendor_counts},
+        "active_partners": ACTIVE_PARTNERS,
+        "coming_soon_count": sum(len(p) for p in COMING_SOON_PARTNERS.values()),
+        "recent_uploads": [
+            {
+                "vendor": u.get("vendor"),
+                "filename": u.get("filename"),
+                "products": u.get("products_created"),
+                "date": u.get("uploaded_at")
+            }
+            for u in recent_uploads
+        ]
+    }
+
 app.include_router(api_router)
 
 app.add_middleware(
