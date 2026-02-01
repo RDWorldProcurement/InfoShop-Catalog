@@ -240,7 +240,7 @@ const ProductCard = ({ product, onAddToCart, punchoutMode }) => {
                 </div>
               )}
               
-              {/* Danone Preferred Price */}
+              {/* Danone Special Price */}
               <div className="flex items-baseline gap-1">
                 <span className="text-xs text-slate-500">$</span>
                 <span className="text-2xl font-bold text-[#007abf]">
@@ -249,7 +249,7 @@ const ProductCard = ({ product, onAddToCart, punchoutMode }) => {
                 <span className="text-sm font-bold text-[#007abf]">
                   .{displayPrice.toFixed(2).split(".")[1]}
                 </span>
-                <span className="text-xs text-slate-500 ml-1">Danone Price</span>
+                <span className="text-xs font-bold text-[#E97300] ml-1">Danone Special Price</span>
               </div>
               
               {/* List Price (strikethrough) & Dollar Savings */}
