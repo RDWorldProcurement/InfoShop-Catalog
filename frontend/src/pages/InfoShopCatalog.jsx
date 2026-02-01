@@ -614,7 +614,7 @@ const CartSidebar = ({
 // ============================================
 // MAIN INFOSHOP CATALOG COMPONENT
 // ============================================
-const InfoShopCatalog = () => {
+const InfoShopCatalog = ({ punchoutSessionData, onBackToLanding }) => {
   // State
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
