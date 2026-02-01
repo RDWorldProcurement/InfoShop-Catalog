@@ -20,7 +20,8 @@ import { Button } from "../components/ui/button";
 // ============================================
 
 const OMNISUPPLY_LOGO = "https://customer-assets.emergentagent.com/job_3d3497d4-96ce-45f6-9a33-f8d277c4c70e/artifacts/tt4qnc6b_OMNISupply.png";
-const INFOSYS_BPM_LOGO = "https://customer-assets.emergentagent.com/job_infosys-mro/artifacts/5v2g4s4l_Infosys%20BPM%20Logo.png";
+// Use transparent/dark-friendly version of Infosys BPM logo or create a styled container
+const INFOSYS_BPM_LOGO = "https://customer-assets.emergentagent.com/job_3d3497d4-96ce-45f6-9a33-f8d277c4c70e/artifacts/i0gp8i5o_InfosysBPM.png";
 
 // Supplier Data with AI-generated logos
 const SUPPLIERS = [
