@@ -85,6 +85,22 @@ from punchout_service import (
     PUNCHOUT_CONFIG
 )
 
+# Import InfoShop Catalog Service for enterprise features
+from infoshop_service import (
+    ACTIVE_PARTNERS,
+    COMING_SOON_PARTNERS,
+    generate_infoshop_part_number,
+    calculate_danone_preferred_price,
+    classify_unspsc,
+    validate_image_url,
+    calculate_minimum_delivery_date,
+    validate_delivery_date,
+    transform_product_for_infoshop,
+    load_partner_discounts,
+    get_partner_discounts,
+    get_all_partner_discounts
+)
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
