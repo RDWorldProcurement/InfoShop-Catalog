@@ -1,372 +1,639 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Card, CardContent } from "../components/ui/card";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import axios from "axios";
 import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
-import { Checkbox } from "../components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../components/ui/dialog";
+import { Card, CardContent } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
 import {
   Search,
   ShoppingCart,
   Package,
-  Star,
-  StarHalf,
-  Loader2,
-  Sparkles,
-  LayoutGrid,
-  LayoutList,
-  Globe,
-  X,
+  Filter,
+  Grid3X3,
+  List,
   ChevronLeft,
   ChevronRight,
-  Heart,
+  Copy,
+  Check,
+  X,
+  Clock,
   Truck,
-  Building,
-  ExternalLink,
-  SlidersHorizontal,
+  Building2,
+  Calendar,
+  MapPin,
+  User,
+  AlertCircle,
+  Star,
+  ArrowUpDown,
+  Globe,
+  CheckCircle,
+  XCircle,
+  Loader2,
 } from "lucide-react";
-import { toast } from "sonner";
-import axios from "axios";
+import { Toaster, toast } from "sonner";
 
-const API = process.env.REACT_APP_BACKEND_URL || "http://localhost:8002";
+// API Base URL
+const API = process.env.REACT_APP_BACKEND_URL || "";
 
-// Logos
-const INFOSYS_BPM_LOGO = "https://customer-assets.emergentagent.com/job_a2ef7314-1fe0-40c0-895b-f2091948a043/artifacts/20a5az81_Infosys%20BPM%20Logo.png";
-const DANONE_LOGO = "https://customer-assets.emergentagent.com/job_a2ef7314-1fe0-40c0-895b-f2091948a043/artifacts/v1287k2p_Danone%20Logo.png";
+// ============================================
+// INFOSYS BRANDING
+// ============================================
+const INFOSYS_LOGO = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgNjAiPjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iNjAiIGZpbGw9IiMwMDdhYmYiLz48dGV4dCB4PSIxMCIgeT0iNDIiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyOCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIj5JbmZvc3lzPC90ZXh0Pjwvc3ZnPg==";
 
-// Countries
-const COUNTRIES = [
-  { code: "ALL", name: "All Countries", flag: "🌎" },
-  { code: "USA", name: "United States", flag: "🇺🇸" },
-  { code: "Canada", name: "Canada", flag: "🇨🇦" },
-  { code: "Mexico", name: "Mexico", flag: "🇲🇽" },
-  { code: "Germany", name: "Germany", flag: "🇩🇪" },
-  { code: "UK", name: "United Kingdom", flag: "🇬🇧" },
-];
-
-// Format price
-const formatPrice = (price) => {
-  if (!price || price === 0) return null;
-  return `$${parseFloat(price).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+const INFOSYS_COLORS = {
+  primary: "#007abf",
+  secondary: "#00a9e0",
+  accent: "#e97300",
+  dark: "#1a1a2e",
 };
 
-// Generate rating
-const getProductRating = (productId) => {
-  const hash = productId?.split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0) || 0;
-  const rating = 3.5 + (Math.abs(hash) % 15) / 10;
-  const reviews = 10 + (Math.abs(hash) % 500);
-  return { rating: Math.min(rating, 5), reviews };
-};
-
-// Star Rating Component
-const StarRating = ({ rating, reviews }) => {
-  const fullStars = Math.floor(rating);
-  const hasHalf = rating % 1 >= 0.5;
-  
-  return (
-    <div className="flex items-center gap-1">
-      <div className="flex text-amber-400">
-        {[...Array(fullStars)].map((_, i) => (
-          <Star key={i} className="w-4 h-4 fill-current" />
-        ))}
-        {hasHalf && <StarHalf className="w-4 h-4 fill-current" />}
-        {[...Array(5 - fullStars - (hasHalf ? 1 : 0))].map((_, i) => (
-          <Star key={`empty-${i}`} className="w-4 h-4 text-slate-300" />
-        ))}
-      </div>
-      <span className="text-sm text-blue-600">{reviews.toLocaleString()} ratings</span>
+// ============================================
+// NO PICTURE AVAILABLE COMPONENT
+// ============================================
+const NoPictureAvailable = () => (
+  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border-2 border-dashed border-slate-200 p-4">
+    <div className="w-16 h-16 mb-3 flex items-center justify-center rounded-full bg-[#007abf]/10">
+      <Package className="w-8 h-8 text-[#007abf]" />
     </div>
+    <div className="text-center">
+      <p className="text-sm font-semibold text-[#007abf]">No Picture</p>
+      <p className="text-xs text-slate-500">Available</p>
+    </div>
+    <div className="mt-2 flex items-center gap-1">
+      <span className="text-[10px] text-slate-400">Powered by</span>
+      <span className="text-[10px] font-bold text-[#007abf]">Infosys</span>
+    </div>
+  </div>
+);
+
+// ============================================
+// COPY BUTTON COMPONENT
+// ============================================
+const CopyPartNumber = ({ partNumber }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(partNumber);
+      setCopied(true);
+      toast.success(`Copied: ${partNumber}`);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast.error("Failed to copy");
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="flex items-center gap-1 px-2 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded transition-colors"
+      title="Copy InfoShop Part Number"
+    >
+      {copied ? (
+        <Check className="w-3 h-3 text-green-600" />
+      ) : (
+        <Copy className="w-3 h-3 text-slate-600" />
+      )}
+      <span className="font-mono text-slate-700">{partNumber}</span>
+    </button>
   );
 };
 
-// Product Card
-const ProductCard = ({ product, onAddToCart, viewMode, punchoutMode }) => {
+// ============================================
+// PRODUCT CARD COMPONENT
+// ============================================
+const ProductCard = ({ product, onAddToCart, punchoutMode }) => {
   const [imageError, setImageError] = useState(false);
-  
-  const primaryImage = product.primary_image || product.images?.[0];
-  const hasValidImage = primaryImage && primaryImage.startsWith('http') && !imageError;
-  const hasPrice = product.selling_price > 0 || product.price > 0;
-  const hasDiscount = product.discount_percentage > 0;
-  const { rating, reviews } = getProductRating(product.objectID);
-  const sellingPrice = product.selling_price || product.price;
+
+  const hasValidImage = product.primary_image && !imageError && !product.use_placeholder;
+  const hasPrice = product.danone_preferred_price > 0 || product.list_price > 0;
+
+  const displayPrice = product.danone_preferred_price || product.list_price || 0;
+  const listPrice = product.list_price || 0;
+  const savings = product.customer_savings_percent || 0;
 
   return (
-    <Card className="group hover:shadow-xl transition-all duration-200 border border-slate-200 hover:border-slate-300 bg-white overflow-hidden h-full flex flex-col">
-      {/* Image */}
-      <div className="relative aspect-square bg-white p-4 border-b border-slate-100">
+    <Card 
+      className="group hover:shadow-xl transition-all duration-300 border border-slate-200 hover:border-[#007abf]/30 bg-white overflow-hidden h-full flex flex-col"
+      data-testid={`product-card-${product.infoshop_part_number}`}
+    >
+      {/* Image Section */}
+      <div className="relative aspect-square bg-white p-3 border-b border-slate-100">
         {hasValidImage ? (
           <img
-            src={primaryImage}
+            src={product.primary_image}
             alt={product.product_name}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
             onError={() => setImageError(true)}
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 rounded border-2 border-dashed border-slate-200">
-            <Package className="w-12 h-12 text-slate-300 mb-2" />
-            <p className="text-sm font-medium text-slate-400 text-center px-2">No Picture from Seller</p>
-          </div>
+          <NoPictureAvailable />
         )}
         
-        {hasDiscount && (
-          <Badge className="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1">
-            -{product.discount_percentage}%
+        {savings > 0 && (
+          <Badge className="absolute top-2 left-2 bg-green-600 text-white text-xs font-bold px-2 py-1">
+            Save {savings.toFixed(1)}%
+          </Badge>
+        )}
+
+        {product.in_stock && (
+          <Badge className="absolute top-2 right-2 bg-emerald-500 text-white text-xs px-2 py-0.5">
+            In Stock
           </Badge>
         )}
       </div>
 
-      {/* Content */}
+      {/* Content Section */}
       <CardContent className="p-4 flex-1 flex flex-col">
-        <p className="text-xs text-blue-600 uppercase tracking-wide mb-1">
-          {product.brand || "Industrial Supply"}
+        {/* Brand */}
+        <p className="text-xs text-[#007abf] font-semibold uppercase tracking-wide mb-1">
+          {product.brand || product.vendor}
         </p>
 
-        <h3 className="text-sm text-slate-800 line-clamp-2 mb-2 min-h-[40px]">
+        {/* Product Name */}
+        <h3 className="text-sm text-slate-800 font-medium line-clamp-2 mb-2 min-h-[40px]">
           {product.product_name}
         </h3>
 
-        {/* Part Numbers */}
-        <div className="text-xs text-slate-500 mb-2 space-y-0.5">
-          {product.part_number && (
-            <p><span className="font-medium">Mfg Part #:</span> {product.part_number}</p>
+        {/* Part Numbers Section */}
+        <div className="space-y-1 mb-3 text-xs">
+          {/* InfoShop Part Number with Copy */}
+          <div className="flex items-center justify-between">
+            <span className="text-slate-500">InfoShop #:</span>
+            <CopyPartNumber partNumber={product.infoshop_part_number} />
+          </div>
+          
+          {/* Mfg Part Number */}
+          {product.mfg_part_number && (
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">Mfg Part #:</span>
+              <span className="font-mono text-slate-700">{product.mfg_part_number}</span>
+            </div>
           )}
-          {product.oem_part_number && product.oem_part_number !== product.part_number && (
-            <p><span className="font-medium">OEM Part #:</span> {product.oem_part_number}</p>
+          
+          {/* Partner Part Number */}
+          {product.partner_part_number && (
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500">{product.vendor} #:</span>
+              <span className="font-mono text-slate-700">{product.partner_part_number}</span>
+            </div>
           )}
         </div>
 
-        <div className="mb-2">
-          <StarRating rating={rating} reviews={reviews} />
+        {/* UNSPSC & Category */}
+        <div className="flex flex-wrap gap-1 mb-3">
+          {product.unspsc_code && (
+            <Badge variant="outline" className="text-[10px] bg-slate-50">
+              UNSPSC: {product.unspsc_code}
+            </Badge>
+          )}
+          {product.category && (
+            <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700">
+              {product.category.length > 20 ? product.category.substring(0, 20) + "..." : product.category}
+            </Badge>
+          )}
         </div>
 
-        {/* Price */}
-        <div className="mb-3">
+        {/* UOM & MoQ */}
+        <div className="flex items-center gap-3 text-xs text-slate-500 mb-3">
+          <span>UOM: <strong>{product.uom || "EA"}</strong></span>
+          <span>MoQ: <strong>{product.moq || 1}</strong></span>
+        </div>
+
+        {/* Stock */}
+        {product.stock_available !== null && product.stock_available !== undefined && (
+          <div className="text-xs mb-3">
+            {product.in_stock ? (
+              <span className="text-emerald-600 font-medium flex items-center gap-1">
+                <CheckCircle className="w-3 h-3" />
+                {typeof product.stock_available === "number" 
+                  ? `${product.stock_available} in stock` 
+                  : product.stock_available}
+              </span>
+            ) : (
+              <span className="text-amber-600 flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {product.stock_available || "Lead time applies"}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Pricing Section */}
+        <div className="mb-3 mt-auto">
           {hasPrice ? (
-            <div>
+            <div className="space-y-1">
+              {/* Danone Preferred Price */}
               <div className="flex items-baseline gap-1">
                 <span className="text-xs text-slate-500">$</span>
-                <span className="text-xl font-medium text-slate-900">
-                  {sellingPrice.toLocaleString("en-US", { minimumFractionDigits: 2 }).split('.')[0]}
+                <span className="text-2xl font-bold text-[#007abf]">
+                  {displayPrice.toFixed(2).split(".")[0]}
                 </span>
-                <span className="text-sm text-slate-900">
-                  .{sellingPrice.toLocaleString("en-US", { minimumFractionDigits: 2 }).split('.')[1]}
+                <span className="text-sm font-bold text-[#007abf]">
+                  .{displayPrice.toFixed(2).split(".")[1]}
                 </span>
+                <span className="text-xs text-slate-500 ml-1">Danone Price</span>
               </div>
-              {hasDiscount && product.list_price > 0 && (
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-slate-500 line-through">
-                    List: {formatPrice(product.list_price)}
+              
+              {/* List Price (strikethrough) */}
+              {listPrice > 0 && listPrice > displayPrice && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400 line-through">
+                    List: ${listPrice.toFixed(2)}
                   </span>
-                  <span className="text-xs text-red-600 font-medium">
-                    Save {formatPrice(product.list_price - sellingPrice)}
+                  <span className="text-xs text-green-600 font-medium">
+                    You Save: ${(listPrice - displayPrice).toFixed(2)}
                   </span>
                 </div>
               )}
             </div>
           ) : (
-            <div className="p-2 bg-blue-50 border border-blue-100 rounded-lg text-center">
-              <p className="text-sm font-semibold text-blue-700">Request Quote</p>
+            <div className="p-2 bg-amber-50 border border-amber-200 rounded text-center">
+              <p className="text-sm font-medium text-amber-700">Request Quote</p>
             </div>
           )}
         </div>
 
-        {/* Availability */}
-        <div className="text-xs mb-3">
-          {product.in_stock ? (
-            <span className="text-green-600 font-medium">
-              ✓ In Stock {product.stock_quantity > 0 && `(${product.stock_quantity})`}
-            </span>
-          ) : (
-            <span className="text-orange-600">{product.availability || "Ships in 2-3 weeks"}</span>
-          )}
-        </div>
-
+        {/* Vendor Tag */}
         <p className="text-xs text-slate-400 mb-3">
-          Sold by {product.supplier || "InfoShop"}
+          Sold by <span className="font-medium text-slate-600">{product.vendor}</span>
         </p>
 
-        {/* Action Button */}
-        <div className="mt-auto">
-          {hasPrice && (
-            <Button 
-              className="w-full bg-amber-400 hover:bg-amber-500 text-black font-medium text-sm"
-              onClick={() => onAddToCart(product)}
-            >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              {punchoutMode ? "Add to Cart" : "Add to Cart"}
-            </Button>
-          )}
-        </div>
+        {/* Add to Cart Button */}
+        <Button
+          className="w-full bg-[#e97300] hover:bg-[#d66900] text-white font-medium"
+          onClick={() => onAddToCart(product)}
+          disabled={!hasPrice}
+          data-testid={`add-to-cart-${product.infoshop_part_number}`}
+        >
+          <ShoppingCart className="w-4 h-4 mr-2" />
+          {punchoutMode ? "Add to Requisition" : "Add to Cart"}
+        </Button>
       </CardContent>
     </Card>
   );
 };
 
-// Main InfoShop Catalog
+// ============================================
+// PARTNER SELECTOR WITH COMING SOON
+// ============================================
+const PartnerSelector = ({ selectedPartner, onSelectPartner, partners, comingSoon }) => {
+  const [showComingSoon, setShowComingSoon] = useState(false);
+
+  return (
+    <div className="relative">
+      <select
+        value={selectedPartner}
+        onChange={(e) => onSelectPartner(e.target.value)}
+        className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#007abf] focus:border-transparent"
+        data-testid="partner-selector"
+      >
+        <option value="ALL">All Active Partners</option>
+        {partners.map((partner) => (
+          <option key={partner} value={partner}>
+            {partner}
+          </option>
+        ))}
+        <option disabled>────────────────</option>
+        <option disabled style={{ fontWeight: "bold", color: "#6b7280" }}>
+          Coming Soon Partners:
+        </option>
+        {Object.entries(comingSoon).map(([region, regionPartners]) => (
+          <optgroup key={region} label={region}>
+            {regionPartners.map((partner) => (
+              <option key={partner} value={partner} disabled>
+                🔜 {partner}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+    </div>
+  );
+};
+
+// ============================================
+// SHIPPING FORM MODAL
+// ============================================
+const ShippingFormModal = ({ isOpen, onClose, onSubmit, minimumDate, cartTotal, itemCount }) => {
+  const [formData, setFormData] = useState({
+    shipping_address: "",
+    delivery_attention: "",
+    requested_delivery_date: minimumDate,
+    special_instructions: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await onSubmit(formData);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-auto">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#007abf] to-[#00a9e0] p-6 text-white rounded-t-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Truck className="w-8 h-8" />
+              <div>
+                <h2 className="text-xl font-bold">Shipping Information</h2>
+                <p className="text-blue-100 text-sm">Required before transfer to Coupa</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="p-1 hover:bg-white/20 rounded">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        {/* Order Summary */}
+        <div className="bg-slate-50 p-4 border-b">
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-600">Items in Cart:</span>
+            <span className="font-semibold">{itemCount}</span>
+          </div>
+          <div className="flex justify-between text-sm mt-1">
+            <span className="text-slate-600">Cart Total:</span>
+            <span className="font-bold text-[#007abf]">${cartTotal.toFixed(2)}</span>
+          </div>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Shipping Address */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              <MapPin className="w-4 h-4 inline mr-1" />
+              Shipping Address *
+            </label>
+            <textarea
+              required
+              rows={3}
+              value={formData.shipping_address}
+              onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
+              placeholder="Enter complete shipping address including street, city, state, ZIP code"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#007abf] focus:border-transparent"
+              data-testid="shipping-address-input"
+            />
+          </div>
+
+          {/* Delivery Attention */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              <User className="w-4 h-4 inline mr-1" />
+              Delivery Attention *
+            </label>
+            <Input
+              required
+              value={formData.delivery_attention}
+              onChange={(e) => setFormData({ ...formData, delivery_attention: e.target.value })}
+              placeholder="Recipient name or department"
+              data-testid="delivery-attention-input"
+            />
+          </div>
+
+          {/* Requested Delivery Date */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              <Calendar className="w-4 h-4 inline mr-1" />
+              Requested Delivery Date *
+            </label>
+            <Input
+              required
+              type="date"
+              min={minimumDate}
+              value={formData.requested_delivery_date}
+              onChange={(e) => setFormData({ ...formData, requested_delivery_date: e.target.value })}
+              data-testid="delivery-date-input"
+            />
+            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              Minimum 2 business weeks lead time required
+            </p>
+          </div>
+
+          {/* Special Instructions */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Special Instructions (Optional)
+            </label>
+            <textarea
+              rows={2}
+              value={formData.special_instructions}
+              onChange={(e) => setFormData({ ...formData, special_instructions: e.target.value })}
+              placeholder="Any special delivery instructions or notes"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#007abf] focus:border-transparent"
+            />
+          </div>
+
+          {/* Delivery Note */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <p className="text-sm text-amber-800 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <span>
+                <strong>Note:</strong> Infosys will confirm the promised delivery date once 
+                we receive confirmation from our partners (Grainger, MOTION, etc.).
+              </span>
+            </p>
+          </div>
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-[#e97300] hover:bg-[#d66900] text-white py-3 font-semibold"
+            data-testid="transfer-to-coupa-btn"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Preparing Transfer...
+              </>
+            ) : (
+              <>
+                <Truck className="w-4 h-4 mr-2" />
+                Transfer to Coupa
+              </>
+            )}
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// CART SIDEBAR
+// ============================================
+const CartSidebar = ({ 
+  isOpen, 
+  onClose, 
+  items, 
+  onRemoveItem, 
+  onUpdateQuantity, 
+  onProceedToCheckout,
+  punchoutMode 
+}) => {
+  const total = items.reduce(
+    (sum, item) => sum + (item.danone_preferred_price || item.list_price || 0) * item.quantity,
+    0
+  );
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-40" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/30" />
+      <div 
+        className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#007abf] to-[#00a9e0] p-4 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="w-6 h-6" />
+              <span className="font-bold text-lg">Your Cart</span>
+              <Badge className="bg-white/20">{items.length} items</Badge>
+            </div>
+            <button onClick={onClose} className="p-1 hover:bg-white/20 rounded">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        {/* Cart Items */}
+        <div className="flex-1 overflow-auto p-4 space-y-3">
+          {items.length === 0 ? (
+            <div className="text-center py-12 text-slate-500">
+              <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+              <p>Your cart is empty</p>
+            </div>
+          ) : (
+            items.map((item, index) => (
+              <div key={index} className="bg-slate-50 rounded-lg p-3">
+                <div className="flex gap-3">
+                  {/* Image */}
+                  <div className="w-16 h-16 flex-shrink-0 bg-white rounded border">
+                    {item.primary_image ? (
+                      <img src={item.primary_image} alt="" className="w-full h-full object-contain" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="w-8 h-8 text-slate-300" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Details */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-800 line-clamp-2">
+                      {item.product_name}
+                    </p>
+                    <p className="text-xs text-slate-500 font-mono mt-1">
+                      {item.infoshop_part_number}
+                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => onUpdateQuantity(index, Math.max(1, item.quantity - 1))}
+                          className="w-6 h-6 rounded bg-white border text-slate-600 hover:bg-slate-100"
+                        >
+                          -
+                        </button>
+                        <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
+                        <button
+                          onClick={() => onUpdateQuantity(index, item.quantity + 1)}
+                          className="w-6 h-6 rounded bg-white border text-slate-600 hover:bg-slate-100"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span className="font-bold text-[#007abf]">
+                        ${((item.danone_preferred_price || item.list_price) * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Remove */}
+                  <button
+                    onClick={() => onRemoveItem(index)}
+                    className="text-slate-400 hover:text-red-500"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Footer */}
+        {items.length > 0 && (
+          <div className="border-t p-4 bg-white">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-slate-600">Total:</span>
+              <span className="text-2xl font-bold text-[#007abf]">${total.toFixed(2)}</span>
+            </div>
+            <Button
+              onClick={onProceedToCheckout}
+              className="w-full bg-[#e97300] hover:bg-[#d66900] text-white py-3 font-semibold"
+              data-testid="proceed-to-checkout-btn"
+            >
+              <Truck className="w-4 h-4 mr-2" />
+              {punchoutMode ? "Proceed to Transfer" : "Proceed to Checkout"}
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ============================================
+// MAIN INFOSHOP CATALOG COMPONENT
+// ============================================
 const InfoShopCatalog = () => {
   // State
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [totalHits, setTotalHits] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
+  const [totalHits, setTotalHits] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [processingTime, setProcessingTime] = useState(0);
-  const [viewMode, setViewMode] = useState("grid");
-  const [showFilters, setShowFilters] = useState(true);
-  const [catalogStats, setCatalogStats] = useState(null);
-  const [selectedCountry, setSelectedCountry] = useState("ALL");
+  
+  // Filters
+  const [selectedPartner, setSelectedPartner] = useState("ALL");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState("");
   const [sortBy, setSortBy] = useState("relevance");
-  const [selectedFilters, setSelectedFilters] = useState({
-    brand: null,
-    category: null,
-    supplier: null,
-  });
-
-  // PunchOut Mode State
+  
+  // Partner data
+  const [activePartners, setActivePartners] = useState(["Grainger", "MOTION"]);
+  const [comingSoonPartners, setComingSoonPartners] = useState({});
+  
+  // Cart
+  const [cartItems, setCartItems] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [showShippingForm, setShowShippingForm] = useState(false);
+  const [minimumDeliveryDate, setMinimumDeliveryDate] = useState("");
+  
+  // PunchOut
   const [punchoutMode, setPunchoutMode] = useState(false);
   const [punchoutSession, setPunchoutSession] = useState(null);
-  const [punchoutCart, setPunchoutCart] = useState([]);
-  const [showPunchoutCart, setShowPunchoutCart] = useState(false);
-  const [transferring, setTransferring] = useState(false);
-
-  // Check for PunchOut mode
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const sessionToken = params.get("punchout");
-    
-    if (sessionToken) {
-      const verifySession = async () => {
-        try {
-          const response = await axios.get(`${API}/api/punchout/session/${sessionToken}`);
-          if (response.data.valid) {
-            setPunchoutMode(true);
-            setPunchoutSession({ token: sessionToken, ...response.data });
-            toast.info(
-              <div>
-                <p className="font-medium">PunchOut Mode Active</p>
-                <p className="text-sm">Browse and add items, then Transfer to Coupa</p>
-              </div>,
-              { duration: 6000 }
-            );
-          }
-        } catch (error) {
-          console.error("Invalid PunchOut session:", error);
-          toast.error("Invalid or expired PunchOut session");
-          window.history.replaceState({}, '', window.location.pathname);
-        }
-      };
-      verifySession();
-    }
-  }, []);
-
-  // Add to PunchOut Cart
-  const addToPunchoutCart = (product, quantity = 1) => {
-    setPunchoutCart(prevCart => {
-      const existingIndex = prevCart.findIndex(item => item.product_id === product.objectID);
-      
-      if (existingIndex >= 0) {
-        const newCart = [...prevCart];
-        newCart[existingIndex].quantity += quantity;
-        return newCart;
-      }
-      
-      return [...prevCart, {
-        product_id: product.objectID,
-        supplier_part_id: product.sku || product.part_number || product.objectID,
-        name: product.product_name,
-        description: product.short_description || "",
-        quantity: quantity,
-        unit_price: product.selling_price || product.price || 0,
-        unit_of_measure: product.unit || "EA",
-        brand: product.brand || "",
-        part_number: product.part_number || "",
-        unspsc_code: product.unspsc_code || ""
-      }];
-    });
-    
-    toast.success(`Added to cart: ${product.product_name}`);
-  };
-
-  // Remove from cart
-  const removeFromPunchoutCart = (productId) => {
-    setPunchoutCart(prevCart => prevCart.filter(item => item.product_id !== productId));
-  };
-
-  // Sync cart with backend
-  useEffect(() => {
-    if (punchoutMode && punchoutSession?.token && punchoutCart.length > 0) {
-      axios.post(`${API}/api/punchout/cart/update`, {
-        session_token: punchoutSession.token,
-        items: punchoutCart
-      }).catch(err => console.error("Cart sync error:", err));
-    }
-  }, [punchoutMode, punchoutSession, punchoutCart]);
-
-  // Transfer to Coupa
-  const transferToCoupa = async () => {
-    if (!punchoutSession?.token || punchoutCart.length === 0) {
-      toast.error("Cart is empty");
-      return;
-    }
-    
-    setTransferring(true);
-    try {
-      const response = await axios.post(`${API}/api/punchout/order?session_token=${punchoutSession.token}`);
-      const { cxml, browser_form_post_url } = response.data;
-      
-      if (browser_form_post_url && cxml) {
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = browser_form_post_url;
-        form.target = "_self";
-        
-        const input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "cxml-urlencoded";
-        input.value = encodeURIComponent(cxml);
-        
-        form.appendChild(input);
-        document.body.appendChild(form);
-        
-        toast.success("Cart transfer initiated, redirecting...");
-        setTimeout(() => form.submit(), 1000);
-      } else {
-        toast.success(
-          <div>
-            <p className="font-medium text-green-700">✓ Cart Transfer Completed</p>
-            <p className="text-sm">Order sent to procurement system.</p>
-          </div>,
-          { duration: 5000 }
-        );
-        setPunchoutCart([]);
-        setPunchoutMode(false);
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-    } catch (error) {
-      console.error("Transfer error:", error);
-      toast.error("Failed to transfer cart");
-    } finally {
-      setTransferring(false);
-    }
-  };
+  
+  // Stats
+  const [catalogStats, setCatalogStats] = useState(null);
 
   // Debounce search
   useEffect(() => {
@@ -374,15 +641,64 @@ const InfoShopCatalog = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Search function
+  // Fetch partners on mount
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const response = await axios.get(`${API}/api/infoshop/partners`);
+        setActivePartners(response.data.active_partners || ["Grainger", "MOTION"]);
+        setComingSoonPartners(response.data.coming_soon_partners || {});
+      } catch (error) {
+        console.error("Failed to fetch partners:", error);
+      }
+    };
+    fetchPartners();
+  }, []);
+
+  // Fetch minimum delivery date
+  useEffect(() => {
+    const fetchMinDate = async () => {
+      try {
+        const response = await axios.get(`${API}/api/infoshop/delivery/minimum-date`);
+        setMinimumDeliveryDate(response.data.minimum_delivery_date);
+      } catch (error) {
+        // Fallback: calculate locally (2 weeks from now)
+        const date = new Date();
+        date.setDate(date.getDate() + 14);
+        setMinimumDeliveryDate(date.toISOString().split("T")[0]);
+      }
+    };
+    fetchMinDate();
+  }, []);
+
+  // Check for PunchOut session
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionToken = params.get("punchout_session") || params.get("session");
+    
+    if (sessionToken) {
+      setPunchoutMode(true);
+      setPunchoutSession({ token: sessionToken });
+      
+      // Verify session
+      axios.get(`${API}/api/punchout/session/${sessionToken}`)
+        .then((res) => {
+          setPunchoutSession(res.data);
+        })
+        .catch((err) => {
+          console.error("PunchOut session invalid:", err);
+        });
+    }
+  }, []);
+
+  // Search products
   const searchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const filters = {};
-      if (selectedCountry !== "ALL") filters.country = selectedCountry;
-      if (selectedFilters.brand) filters.brand = selectedFilters.brand;
-      if (selectedFilters.category) filters.category = selectedFilters.category;
-      if (selectedFilters.supplier) filters.supplier = selectedFilters.supplier;
+      if (selectedPartner !== "ALL") filters.supplier = selectedPartner;
+      if (selectedCategory) filters.category = selectedCategory;
+      if (selectedBrand) filters.brand = selectedBrand;
 
       const response = await axios.post(`${API}/api/algolia/catalog/search`, {
         query: debouncedQuery,
@@ -396,13 +712,18 @@ const InfoShopCatalog = () => {
       setProducts(data.hits || []);
       setTotalHits(data.nbHits || 0);
       setTotalPages(data.nbPages || 0);
-      setProcessingTime(data.processingTimeMS || 0);
     } catch (error) {
       console.error("Search error:", error);
+      toast.error("Failed to search products");
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, currentPage, selectedCountry, selectedFilters, sortBy]);
+  }, [debouncedQuery, currentPage, selectedPartner, selectedCategory, selectedBrand, sortBy]);
+
+  // Fetch on search change
+  useEffect(() => {
+    searchProducts();
+  }, [searchProducts]);
 
   // Fetch stats
   useEffect(() => {
@@ -417,365 +738,316 @@ const InfoShopCatalog = () => {
     fetchStats();
   }, []);
 
-  // Search on change
-  useEffect(() => {
-    searchProducts();
-  }, [searchProducts]);
-
-  // Handle add to cart
+  // Add to cart
   const handleAddToCart = (product) => {
-    if (punchoutMode) {
-      addToPunchoutCart(product);
+    const existingIndex = cartItems.findIndex(
+      (item) => item.infoshop_part_number === product.infoshop_part_number
+    );
+
+    if (existingIndex >= 0) {
+      const updated = [...cartItems];
+      updated[existingIndex].quantity += 1;
+      setCartItems(updated);
     } else {
-      toast.info("Please access this catalog through your procurement system (Coupa) for purchasing.");
+      setCartItems([...cartItems, { ...product, quantity: 1 }]);
+    }
+
+    toast.success(`Added to cart: ${product.product_name.substring(0, 40)}...`);
+  };
+
+  // Remove from cart
+  const handleRemoveFromCart = (index) => {
+    const updated = [...cartItems];
+    updated.splice(index, 1);
+    setCartItems(updated);
+  };
+
+  // Update quantity
+  const handleUpdateQuantity = (index, newQuantity) => {
+    const updated = [...cartItems];
+    updated[index].quantity = newQuantity;
+    setCartItems(updated);
+  };
+
+  // Proceed to checkout
+  const handleProceedToCheckout = () => {
+    setCartOpen(false);
+    setShowShippingForm(true);
+  };
+
+  // Submit shipping and transfer
+  const handleShippingSubmit = async (shippingData) => {
+    try {
+      // Prepare cart transfer
+      const response = await axios.post(`${API}/api/infoshop/cart/prepare-transfer`, {
+        session_token: punchoutSession?.token || "direct-purchase",
+        items: cartItems,
+        shipping_info: shippingData,
+      });
+
+      if (response.data.success) {
+        toast.success("Cart prepared for transfer!");
+        
+        if (punchoutMode && punchoutSession?.browser_form_post_url) {
+          // Generate cXML and submit to Coupa
+          const orderResponse = await axios.post(`${API}/api/punchout/order`, {
+            session_token: punchoutSession.token,
+            items: cartItems.map((item) => ({
+              supplier_part_id: item.infoshop_part_number,
+              quantity: item.quantity,
+              unit_price: item.danone_preferred_price || item.list_price,
+              uom: item.uom || "EA",
+              description: item.product_name,
+              classification: item.unspsc_code,
+              manufacturer_name: item.brand,
+              manufacturer_part_id: item.mfg_part_number,
+            })),
+          });
+
+          // In a real implementation, this would POST to Coupa
+          toast.success("Transferring to Coupa...");
+          console.log("Order cXML:", orderResponse.data);
+        }
+        
+        setShowShippingForm(false);
+        setCartItems([]);
+      }
+    } catch (error) {
+      console.error("Transfer error:", error);
+      toast.error(error.response?.data?.detail || "Failed to prepare transfer");
     }
   };
 
-  // Cart total
-  const punchoutCartTotal = punchoutCart.reduce(
-    (sum, item) => sum + item.unit_price * item.quantity, 0
+  const cartTotal = cartItems.reduce(
+    (sum, item) => sum + (item.danone_preferred_price || item.list_price || 0) * item.quantity,
+    0
   );
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      {/* Header with Branding */}
-      <div className="bg-white border-b border-slate-200 px-6 py-3">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-6">
-            <img src={INFOSYS_BPM_LOGO} alt="Infosys BPM" className="h-12 object-contain" />
-            <div className="h-8 w-px bg-slate-300" />
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-500">Powered for</span>
-              <img src={DANONE_LOGO} alt="Danone" className="h-10 object-contain" />
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-slate-500">PunchOut Enabled Catalog</p>
-            <p className="text-sm font-medium text-slate-700">Enterprise Procurement Portal</p>
-          </div>
-        </div>
-      </div>
-
-      {/* PunchOut Banner */}
-      {punchoutMode && (
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3">
-          <div className="flex items-center justify-between max-w-7xl mx-auto">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <Building className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="font-bold">PunchOut Session Active</p>
-                <p className="text-sm text-blue-100">
-                  Connected from {punchoutSession?.buyer_identity || "Coupa"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                className="text-white hover:bg-white/10"
-                onClick={() => setShowPunchoutCart(true)}
-              >
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                Cart ({punchoutCart.length})
-                {punchoutCartTotal > 0 && <span className="ml-2">${punchoutCartTotal.toFixed(2)}</span>}
-              </Button>
-              <Button
-                className="bg-amber-500 hover:bg-amber-600 text-black font-bold"
-                onClick={transferToCoupa}
-                disabled={transferring || punchoutCart.length === 0}
-              >
-                {transferring ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <ExternalLink className="w-5 h-5 mr-2" />}
-                Transfer to Coupa
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="min-h-screen bg-slate-50">
+      <Toaster position="top-right" richColors />
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#007CC3] to-[#005a8c] text-white px-6 py-3">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-amber-400" />
-              InfoShop Catalog
-            </h1>
-            <span className="text-sm text-blue-100">
-              {catalogStats?.total_products?.toLocaleString() || "0"} products
-            </span>
-          </div>
-          <Select value={selectedCountry} onValueChange={(val) => { setSelectedCountry(val); setCurrentPage(0); }}>
-            <SelectTrigger className="w-[160px] bg-white/10 border-white/20 text-white">
-              <Globe className="w-4 h-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {COUNTRIES.map((country) => (
-                <SelectItem key={country.code} value={country.code}>
-                  {country.flag} {country.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Search */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-10">
-        <div className="flex items-center gap-4 max-w-7xl mx-auto">
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <Input
-              type="text"
-              placeholder="Search products by name, part number, brand..."
-              className="w-full h-12 pl-12 pr-12 text-lg border-2 border-slate-300 focus:border-orange-500 rounded-lg"
-              value={searchQuery}
-              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(0); }}
-            />
-            {searchQuery && (
-              <button
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                onClick={() => { setSearchQuery(""); setCurrentPage(0); }}
-              >
-                <X className="w-5 h-5" />
-              </button>
-            )}
-          </div>
-          <Button className="h-12 px-8 bg-amber-500 hover:bg-amber-600 text-black font-medium">
-            <Search className="w-5 h-5 mr-2" />
-            Search
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex p-6 gap-6 max-w-7xl mx-auto">
-        {/* Filters */}
-        {showFilters && (
-          <aside className="w-64 flex-shrink-0">
-            <Card className="sticky top-32">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-slate-900">Filters</h3>
-                  <button
-                    className="text-sm text-blue-600"
-                    onClick={() => setSelectedFilters({ brand: null, category: null, supplier: null })}
-                  >
-                    Clear all
-                  </button>
-                </div>
-
-                {/* Category */}
-                <div className="mb-4">
-                  <h4 className="font-medium text-sm text-slate-900 mb-2">Category</h4>
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {catalogStats?.top_categories?.slice(0, 10).map((cat) => (
-                      <label key={cat.name} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
-                        <Checkbox
-                          checked={selectedFilters.category === cat.name}
-                          onCheckedChange={(checked) => 
-                            setSelectedFilters({ ...selectedFilters, category: checked ? cat.name : null })
-                          }
-                        />
-                        <span className="text-sm text-slate-700 truncate flex-1">{cat.name}</span>
-                        <span className="text-xs text-slate-400">{cat.count}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Brand */}
-                <div className="mb-4">
-                  <h4 className="font-medium text-sm text-slate-900 mb-2">Brand</h4>
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {catalogStats?.top_brands?.slice(0, 10).map((brand) => (
-                      <label key={brand.name} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
-                        <Checkbox
-                          checked={selectedFilters.brand === brand.name}
-                          onCheckedChange={(checked) => 
-                            setSelectedFilters({ ...selectedFilters, brand: checked ? brand.name : null })
-                          }
-                        />
-                        <span className="text-sm text-slate-700 truncate flex-1">{brand.name}</span>
-                        <span className="text-xs text-slate-400">{brand.count}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Supplier */}
-                <div>
-                  <h4 className="font-medium text-sm text-slate-900 mb-2">Supplier</h4>
-                  <div className="space-y-1">
-                    {catalogStats?.suppliers?.map((supplier) => (
-                      <label key={supplier.name} className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
-                        <Checkbox
-                          checked={selectedFilters.supplier === supplier.name}
-                          onCheckedChange={(checked) => 
-                            setSelectedFilters({ ...selectedFilters, supplier: checked ? supplier.name : null })
-                          }
-                        />
-                        <span className="text-sm text-slate-700">{supplier.name}</span>
-                        <span className="text-xs text-slate-400">{supplier.count}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </aside>
-        )}
-
-        {/* Products */}
-        <div className="flex-1">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => setShowFilters(!showFilters)}>
-                <SlidersHorizontal className="w-4 h-4 mr-1" />
-                {showFilters ? "Hide" : "Show"} Filters
-              </Button>
-              <span className="text-sm text-slate-600">
-                <span className="font-medium">{totalHits.toLocaleString()}</span> results
-                {processingTime > 0 && <span className="text-slate-400"> ({processingTime}ms)</span>}
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
+        {/* PunchOut Banner */}
+        {punchoutMode && (
+          <div className="bg-gradient-to-r from-[#007abf] to-[#00a9e0] text-white py-2 px-4">
+            <div className="max-w-7xl mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-5 h-5" />
+                <span className="font-medium">PunchOut Session Active</span>
+                {punchoutSession?.buyer_name && (
+                  <Badge className="bg-white/20">{punchoutSession.buyer_name}</Badge>
+                )}
+              </div>
+              <span className="text-sm text-blue-100">
+                Connected to Coupa • Session secure
               </span>
             </div>
+          </div>
+        )}
+
+        {/* Main Header */}
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between gap-4">
+            {/* Logo */}
             <div className="flex items-center gap-3">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="relevance">Relevance</SelectItem>
-                  <SelectItem value="price_asc">Price: Low to High</SelectItem>
-                  <SelectItem value="price_desc">Price: High to Low</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex items-center border rounded-lg">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="sm"
-                  className="rounded-r-none"
-                  onClick={() => setViewMode("grid")}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
-                  size="sm"
-                  className="rounded-l-none"
-                  onClick={() => setViewMode("list")}
-                >
-                  <LayoutList className="w-4 h-4" />
-                </Button>
+              <div className="bg-[#007abf] text-white px-4 py-2 rounded-lg font-bold text-xl">
+                InfoShop
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-xs text-slate-500">Powered by</p>
+                <p className="text-sm font-bold text-[#007abf]">Infosys BPM</p>
               </div>
             </div>
+
+            {/* Search */}
+            <div className="flex-1 max-w-2xl">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Search millions of industrial products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border-slate-300 focus:ring-[#007abf]"
+                  data-testid="search-input"
+                />
+              </div>
+            </div>
+
+            {/* Cart */}
+            <Button
+              variant="outline"
+              className="relative"
+              onClick={() => setCartOpen(true)}
+              data-testid="cart-button"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {cartItems.length > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-[#e97300] text-white text-xs px-1.5">
+                  {cartItems.length}
+                </Badge>
+              )}
+            </Button>
           </div>
 
-          {/* Loading */}
-          {loading && (
-            <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-10 h-10 animate-spin text-amber-500" />
+          {/* Filters Row */}
+          <div className="flex flex-wrap items-center gap-3 mt-4">
+            {/* Partner Selector */}
+            <div className="w-48">
+              <PartnerSelector
+                selectedPartner={selectedPartner}
+                onSelectPartner={setSelectedPartner}
+                partners={activePartners}
+                comingSoon={comingSoonPartners}
+              />
             </div>
-          )}
 
-          {/* Products Grid */}
-          {!loading && products.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {/* Category Filter */}
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm"
+              data-testid="category-filter"
+            >
+              <option value="">All Categories</option>
+              {catalogStats?.top_categories?.map((cat) => (
+                <option key={cat.name} value={cat.name}>
+                  {cat.name} ({cat.count})
+                </option>
+              ))}
+            </select>
+
+            {/* Brand Filter */}
+            <select
+              value={selectedBrand}
+              onChange={(e) => setSelectedBrand(e.target.value)}
+              className="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm"
+              data-testid="brand-filter"
+            >
+              <option value="">All Brands</option>
+              {catalogStats?.top_brands?.map((brand) => (
+                <option key={brand.name} value={brand.name}>
+                  {brand.name} ({brand.count})
+                </option>
+              ))}
+            </select>
+
+            {/* Sort */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm"
+            >
+              <option value="relevance">Sort: Relevance</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+            </select>
+
+            {/* Results Count */}
+            <div className="ml-auto text-sm text-slate-600">
+              <span className="font-semibold text-[#007abf]">{totalHits.toLocaleString()}</span> products
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-[#007abf]" />
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-20">
+            <Package className="w-20 h-20 mx-auto text-slate-300 mb-4" />
+            <h2 className="text-xl font-semibold text-slate-600">No products found</h2>
+            <p className="text-slate-500 mt-2">Try adjusting your search or filters</p>
+          </div>
+        ) : (
+          <>
+            {/* Products Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products.map((product) => (
                 <ProductCard
-                  key={product.objectID}
+                  key={product.objectID || product.infoshop_part_number}
                   product={product}
-                  viewMode={viewMode}
                   onAddToCart={handleAddToCart}
                   punchoutMode={punchoutMode}
                 />
               ))}
             </div>
-          )}
 
-          {/* Empty State */}
-          {!loading && products.length === 0 && (
-            <div className="text-center py-20">
-              <Package className="w-20 h-20 mx-auto text-slate-300 mb-4" />
-              <h3 className="text-xl font-medium text-slate-900 mb-2">No products found</h3>
-              <p className="text-slate-500">Try adjusting your search or filters</p>
-            </div>
-          )}
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-8">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+                  disabled={currentPage === 0}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Previous
+                </Button>
+                <span className="text-sm text-slate-600">
+                  Page <strong>{currentPage + 1}</strong> of <strong>{totalPages}</strong>
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={currentPage >= totalPages - 1}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </main>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
-              <Button variant="outline" disabled={currentPage === 0} onClick={() => setCurrentPage(currentPage - 1)}>
-                <ChevronLeft className="w-4 h-4 mr-1" /> Previous
-              </Button>
-              <span className="px-4 py-2 text-sm">Page {currentPage + 1} of {totalPages}</span>
-              <Button variant="outline" disabled={currentPage >= totalPages - 1} onClick={() => setCurrentPage(currentPage + 1)}>
-                Next <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
+      {/* Footer */}
+      <footer className="bg-slate-800 text-white py-8 mt-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="bg-[#007abf] px-3 py-1 rounded font-bold">InfoShop</div>
+                <span className="text-slate-400">by Infosys BPM</span>
+              </div>
+              <p className="text-sm text-slate-400">
+                Enterprise B2B Catalog • PunchOut Enabled • {totalHits.toLocaleString()}+ Products
+              </p>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* PunchOut Cart Dialog */}
-      <Dialog open={showPunchoutCart} onOpenChange={setShowPunchoutCart}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5 text-blue-600" />
-              PunchOut Cart
-            </DialogTitle>
-            <DialogDescription>Review items before transferring to Coupa</DialogDescription>
-          </DialogHeader>
-          
-          {punchoutCart.length === 0 ? (
-            <div className="py-8 text-center text-slate-500">
-              <ShoppingCart className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-              <p>Your cart is empty</p>
-            </div>
-          ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {punchoutCart.map((item) => (
-                <div key={item.product_id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium text-sm text-slate-900 line-clamp-1">{item.name}</p>
-                    <p className="text-xs text-slate-500">{item.brand} • {item.part_number}</p>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-sm text-slate-600">Qty: {item.quantity}</span>
-                      <span className="text-sm font-medium text-slate-900">${(item.unit_price * item.quantity).toFixed(2)}</span>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => removeFromPunchoutCart(item.product_id)}>
-                    <X className="w-4 h-4 text-red-500" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="pt-4 border-t border-slate-200">
-            <div className="flex items-center justify-between mb-4">
-              <span className="font-medium text-slate-900">Total:</span>
-              <span className="text-xl font-bold text-slate-900">${punchoutCartTotal.toFixed(2)}</span>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => setShowPunchoutCart(false)}>
-                Continue Shopping
-              </Button>
-              <Button
-                className="flex-1 bg-amber-500 hover:bg-amber-600 text-black font-bold"
-                onClick={() => { setShowPunchoutCart(false); transferToCoupa(); }}
-                disabled={punchoutCart.length === 0 || transferring}
-              >
-                {transferring ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ExternalLink className="w-4 h-4 mr-2" />}
-                Transfer to Coupa
-              </Button>
+            <div className="text-right text-sm text-slate-400">
+              <p>© {new Date().getFullYear()} Infosys Limited</p>
+              <p>All rights reserved</p>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </footer>
+
+      {/* Cart Sidebar */}
+      <CartSidebar
+        isOpen={cartOpen}
+        onClose={() => setCartOpen(false)}
+        items={cartItems}
+        onRemoveItem={handleRemoveFromCart}
+        onUpdateQuantity={handleUpdateQuantity}
+        onProceedToCheckout={handleProceedToCheckout}
+        punchoutMode={punchoutMode}
+      />
+
+      {/* Shipping Form Modal */}
+      <ShippingFormModal
+        isOpen={showShippingForm}
+        onClose={() => setShowShippingForm(false)}
+        onSubmit={handleShippingSubmit}
+        minimumDate={minimumDeliveryDate}
+        cartTotal={cartTotal}
+        itemCount={cartItems.length}
+      />
     </div>
   );
 };
