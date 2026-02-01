@@ -50,31 +50,39 @@ def init_algolia():
                 "manufacturer",
                 "part_number",
                 "oem_part_number",
+                "mfg_part_number",
+                "infoshop_part_number",
+                "partner_part_number",
                 "sku",
                 "description",
                 "short_description",
                 "category",
                 "breadcrumb",
                 "unspsc_code",
-                "specifications"
+                "specifications",
+                "vendor",
+                "supplier"
             ],
             "attributesForFaceting": [
                 "searchable(brand)",
                 "searchable(manufacturer)", 
                 "searchable(category)",
                 "searchable(supplier)",
+                "searchable(vendor)",
                 "searchable(country)",
                 "filterOnly(availability)",
                 "filterOnly(in_stock)",
+                "filterOnly(has_image)",
                 "price",
-                "selling_price"
+                "selling_price",
+                "danone_preferred_price"
             ],
             "customRanking": [
                 "desc(has_image)",
                 "desc(has_price)",
-                "asc(selling_price)",
-                "desc(in_stock)",
-                "desc(availability_score)"
+                "desc(customer_savings_percent)",
+                "asc(danone_preferred_price)",
+                "desc(in_stock)"
             ],
             "attributesToRetrieve": [
                 "objectID",
