@@ -680,6 +680,12 @@ def search_products(
         
         # Build filter string
         filter_parts = []
+        
+        # For default view (no query, first 3 pages), prioritize products with images
+        # This makes the catalog look richer
+        if not query and page < 3 and not (filters and any(filters.values())):
+            filter_parts.append("has_image:1")
+        
         if filters:
             if filters.get("category"):
                 filter_parts.append(f'category:"{filters["category"]}"')
@@ -687,14 +693,18 @@ def search_products(
                 filter_parts.append(f'brand:"{filters["brand"]}"')
             if filters.get("supplier"):
                 filter_parts.append(f'supplier:"{filters["supplier"]}"')
+            if filters.get("vendor"):
+                filter_parts.append(f'vendor:"{filters["vendor"]}"')
             if filters.get("country"):
                 filter_parts.append(f'country:"{filters["country"]}"')
             if filters.get("in_stock"):
                 filter_parts.append("in_stock:true")
+            if filters.get("has_image"):
+                filter_parts.append("has_image:1")
             if filters.get("price_min") is not None:
-                filter_parts.append(f'selling_price >= {filters["price_min"]}')
+                filter_parts.append(f'danone_preferred_price >= {filters["price_min"]}')
             if filters.get("price_max") is not None:
-                filter_parts.append(f'selling_price <= {filters["price_max"]}')
+                filter_parts.append(f'danone_preferred_price <= {filters["price_max"]}')
         
         filter_string = " AND ".join(filter_parts) if filter_parts else ""
         
@@ -706,8 +716,8 @@ def search_products(
                 "page": page,
                 "hitsPerPage": hits_per_page,
                 "filters": filter_string,
-                "facets": ["brand", "category", "supplier", "country", "in_stock"],
-                "attributesToHighlight": ["product_name", "brand", "description", "part_number"],
+                "facets": ["brand", "category", "supplier", "vendor", "country", "in_stock", "has_image"],
+                "attributesToHighlight": ["product_name", "brand", "description", "infoshop_part_number", "mfg_part_number"],
                 "getRankingInfo": True
             }
         )
