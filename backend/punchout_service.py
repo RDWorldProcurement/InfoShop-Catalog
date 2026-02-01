@@ -23,16 +23,19 @@ import urllib.parse
 
 logger = logging.getLogger(__name__)
 
-# PunchOut Configuration
+# PunchOut Configuration - Production Settings for Danone/Coupa
 PUNCHOUT_CONFIG = {
-    "shared_secret": os.environ.get("PUNCHOUT_SHARED_SECRET", "Infoshop@2026"),
-    "supplier_domain": "InfoShopNetwork",
-    "supplier_identity": "InfoShopSupplier",
+    "shared_secret": os.environ.get("PUNCHOUT_SHARED_SECRET", "OmniSup!y#2026$Coupa$8472"),
+    "supplier_domain": "infoshop.omnisupply.io",
+    "supplier_identity": "OMNISUPPLY_PUNCHOUT",
+    "coupa_domain": "118817359",
     "from_domain": "DUNS",
     "from_identity": "InfoShop",
-    "sender_domain": "InfoShopNetwork",
-    "sender_identity": "InfoShopSupplier",
-    "user_agent": "InfoShop PunchOut/1.0",
+    "sender_domain": "infoshop.omnisupply.io",
+    "sender_identity": "OMNISUPPLY_PUNCHOUT",
+    "user_agent": "InfoShop PunchOut/2.0",
+    "punchout_url": "https://infoshop.omnisupply.io/punchout/setup",
+    "catalog_url": "https://infoshop.omnisupply.io",
 }
 
 # Active PunchOut sessions (in production, use Redis/database)
