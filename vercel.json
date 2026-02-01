@@ -12,7 +12,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://infoshop-catalog.preview.emergentagent.com/api/$1"
+      "dest": "https://omnishop-catalog.preview.emergentagent.com/api/$1"
     },
     {
       "src": "/(.*)",
